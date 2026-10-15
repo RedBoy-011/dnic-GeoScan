@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.visualizer
+package com.denic.geoscan.ui.visualizer
 
 import android.annotation.SuppressLint
 import android.view.View
@@ -150,43 +150,53 @@ fun EChartsVisualizer(
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { context ->
-                    WebView(context).apply {
-                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                        setBackgroundColor(0x00000000)
-
-                        settings.apply {
-                            javaScriptEnabled = true
-                            domStorageEnabled = true
-                            allowFileAccess = true
-                            @Suppress("DEPRECATION")
-                            allowFileAccessFromFileURLs = true
-                            @Suppress("DEPRECATION")
-                            allowUniversalAccessFromFileURLs = true
-                            cacheMode = WebSettings.LOAD_NO_CACHE
-                        }
-
-                        addJavascriptInterface(
-                            object {
-                                @JavascriptInterface
-                                fun onChartReady() {
-                                    post {
-                                        isChartReady = true
-                                    }
-                                }
-                            },
-                            "AndroidBridge"
-                        )
-
-                        webChromeClient = WebChromeClient()
-                        webViewClient = object : WebViewClient() {
-                            override fun onPageFinished(view: WebView?, url: String?) {
-                                super.onPageFinished(view, url)
-                                isChartReady = true
+                    try {
+                        WebView(context).apply {
+                            try {
+                                setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                            } catch (_: Throwable) {
+                                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                             }
-                        }
+                            setBackgroundColor(0x00000000)
 
-                        loadUrl("file:///android_asset/echarts/index.html")
-                        webViewInstance = this
+                            settings.apply {
+                                javaScriptEnabled = true
+                                domStorageEnabled = true
+                                allowFileAccess = true
+                                @Suppress("DEPRECATION")
+                                allowFileAccessFromFileURLs = true
+                                @Suppress("DEPRECATION")
+                                allowUniversalAccessFromFileURLs = true
+                                cacheMode = WebSettings.LOAD_NO_CACHE
+                            }
+
+                            addJavascriptInterface(
+                                object {
+                                    @JavascriptInterface
+                                    fun onChartReady() {
+                                        post {
+                                            isChartReady = true
+                                        }
+                                    }
+                                },
+                                "AndroidBridge"
+                            )
+
+                            webChromeClient = WebChromeClient()
+                            webViewClient = object : WebViewClient() {
+                                override fun onPageFinished(view: WebView?, url: String?) {
+                                    super.onPageFinished(view, url)
+                                    isChartReady = true
+                                }
+                            }
+
+                            loadUrl("file:///android_asset/echarts/index.html")
+                            webViewInstance = this
+                        }
+                    } catch (_: Throwable) {
+                        View(context).apply {
+                            setBackgroundColor(0x00000000)
+                        }
                     }
                 },
                 update = { webView ->

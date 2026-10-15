@@ -29,6 +29,9 @@ jobs:
           sed -i 's/\r$//' gradlew
           chmod +x gradlew
 
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 

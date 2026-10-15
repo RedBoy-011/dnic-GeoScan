@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.data.bluetooth
+package com.denic.geoscan.data.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -86,6 +86,8 @@ class BluetoothService(
                 )
             }
         } catch (_: SecurityException) {
+            emptyList()
+        } catch (_: Throwable) {
             emptyList()
         }
     }
