@@ -100,7 +100,7 @@ private fun CrashDiagnosticScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "denic GeoScan - Diagnostic Report",
+                text = "Dnic-GeoScan - Diagnostic Report",
                 color = NeonRed,
                 fontSize = 18.sp
             )

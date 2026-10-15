@@ -113,7 +113,7 @@ private fun TopBrandingBar() {
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "denic GeoScan",
+                    text = "Dnic-GeoScan",
                     style = Typography.titleLarge,
                     color = TextPrimary
                 )

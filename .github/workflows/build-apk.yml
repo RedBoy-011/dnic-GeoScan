@@ -1,4 +1,4 @@
-name: Build denic GeoScan APK
+name: Build Dnic-GeoScan APK
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    name: Assemble Debug APK
+    name: Assemble Dnic-GeoScan APK
     runs-on: ubuntu-latest
 
     steps:
@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/denic-GeoScan-v1.0.0.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.0.1.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: denic-GeoScan-v1.0.0-apk
-          path: release/denic-GeoScan-v1.0.0.apk
+          name: Dnic-GeoScan-v1.0.1-apk
+          path: release/Dnic-GeoScan-v1.0.1.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,15 +52,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.0.0
-          name: "denic GeoScan v1.0.0 - Official Release"
+          tag_name: v1.0.1
+          name: "Dnic-GeoScan v1.0.1 - Official Release"
           body: |
-            ## 📱 denic GeoScan v1.0.0
+            ## 📱 Dnic-GeoScan v1.0.1
+
+            نسخه رسمی و تایید شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            نسخه رسمی و تایید شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **denic GeoScan**.
-            
+            ### ✨ تغییرات این نسخه:
+            - ارتقای نسخه به ۱.۰.۱ (versionCode 2) جهت بروزرسانی مستقیم روی نسخه قبلی بدون نیاز به حذف برنامه
+            - امضای دائمی با کلید اختصاصی پایدار (Persistent Release Keystore) جهت رفع خطای نصب و تداخل امضا
+            - یکپارچه‌سازی نام برنامه با نام پروژه: **Dnic-GeoScan**
+            - ایمن‌سازی کامل چرخه حیات و هندلینگ پیشرفته خطاها
+
             ### 📥 فایل نصبی مستقیم:
-            - **denic-GeoScan-v1.0.0.apk**
-          files: release/denic-GeoScan-v1.0.0.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.0.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.0.1/Dnic-GeoScan-v1.0.1.apk)**
+          files: release/Dnic-GeoScan-v1.0.1.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
