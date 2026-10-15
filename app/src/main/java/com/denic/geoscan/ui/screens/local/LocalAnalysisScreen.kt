@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.denic.geoscan.data.model.ScanStatistics
 import com.denic.geoscan.ui.components.GlassmorphicCard
+import com.denic.geoscan.ui.components.MagneticCrossSectionCard
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.DarkSurfaceElevated
@@ -148,6 +149,11 @@ fun LocalAnalysisScreen(
                             selectedFilter = selectedFilter,
                             onSelectFilter = { viewModel.setFilterType(it) }
                         )
+                        MagneticCrossSectionCard(
+                            points = visualizerPoints,
+                            gridWidth = data.statistics.gridWidth,
+                            gridHeight = data.statistics.gridHeight
+                        )
                     }
 
                     SpectrumPaletteCard()
@@ -194,6 +200,11 @@ fun LocalAnalysisScreen(
                     GeophysicalFiltersCard(
                         selectedFilter = selectedFilter,
                         onSelectFilter = { viewModel.setFilterType(it) }
+                    )
+                    MagneticCrossSectionCard(
+                        points = visualizerPoints,
+                        gridWidth = data.statistics.gridWidth,
+                        gridHeight = data.statistics.gridHeight
                     )
                 }
 

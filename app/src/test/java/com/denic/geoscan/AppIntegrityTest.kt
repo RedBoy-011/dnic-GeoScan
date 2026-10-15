@@ -69,4 +69,30 @@ class AppIntegrityTest {
         assertEquals(20, points[0].y)
         assertEquals(1050.5f, points[0].zValue, 0.001f)
     }
+
+    @Test
+    fun testMagneticCrossSectionExtraction() {
+        val grid = listOf(
+            ScanPoint(0, 0, 10f), ScanPoint(1, 0, 20f), ScanPoint(2, 0, 30f),
+            ScanPoint(0, 1, 40f), ScanPoint(1, 1, 95f), ScanPoint(2, 1, 50f),
+            ScanPoint(0, 2, 60f), ScanPoint(1, 2, 70f), ScanPoint(2, 2, 80f)
+        )
+        // Extract row Y=1 transect
+        val row1 = grid.filter { it.y == 1 }.sortedBy { it.x }
+        assertEquals(3, row1.size)
+        assertEquals(40f, row1[0].zValue, 0.001f)
+        assertEquals(95f, row1[1].zValue, 0.001f)
+        assertEquals(50f, row1[2].zValue, 0.001f)
+
+        // Peak anomaly along transect
+        val peak = row1.maxByOrNull { kotlin.math.abs(it.zValue) }?.zValue ?: 0f
+        assertEquals(95f, peak, 0.001f)
+
+        // Extract column X=1 transect
+        val col1 = grid.filter { it.x == 1 }.sortedBy { it.y }
+        assertEquals(3, col1.size)
+        assertEquals(20f, col1[0].zValue, 0.001f)
+        assertEquals(95f, col1[1].zValue, 0.001f)
+        assertEquals(70f, col1[2].zValue, 0.001f)
+    }
 }
