@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.2.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.3.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.3.2-apk
-          path: release/Dnic-GeoScan-v1.3.2.apk
+          name: Dnic-GeoScan-v1.3.3-apk
+          path: release/Dnic-GeoScan-v1.3.3.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,24 +52,24 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.3.2
-          name: "Dnic-GeoScan v1.3.2 - Official Release"
+          tag_name: v1.3.3
+          name: "Dnic-GeoScan v1.3.3 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.3.2 - Instant Android 12+ Splash Dismissal & Prominent Disconnected Banner
+            ## 📱 Dnic-GeoScan v1.3.3 - 5×5 Handheld Sensor Grid & Zero-Duration Instant Splash
 
-            نسخه رسمی ۱.۳.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۳.۳ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های اصلی این نسخه:
-            - **تضمین خروج آنی و بدون وقفه از Splash Screen در اندروید ۱۲ به بالا:**
-              - فراخوانی صریح `setKeepOnScreenCondition { false }` و مقداردهی مستقیم پوسته `Theme.DenicGeoScan` به منظور جلوگیری از هرگونه تعلیق لایه اسپلش سیستم بر روی رام‌های سفارشی (سامسونگ OneUI، شیائومی HyperOS/MIUI).
-            - **نمایش برجسته و حرفه‌ای وضعیت «عدم اتصال» (`STATUS: DISCONNECTED • NO HARDWARE CONNECTED`):**
-              - بازطراحی بنر وضعیت سخت‌افزار در هاب مأموریت و صفحه ریموت جهت نمایش صریح عدم وجود سنسور با رنگ نارنجی هشدار و متن استاندارد.
-            - **اولویت‌بخشی کامل به حالت Local Analysis:**
-              - اجرای فوری و بدون وابستگی به بلوتوث برای شبکه‌های ۱۰×۱۰، ۲۰×۲۰، ۳۰×۳۰ و فایل‌های ورودی CSV/TXT با نرمال‌سازی میانه (Median Ground Zero) و درون‌یابی دو مکعبی (Bicubic Spline).
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 18`.
+            - **حذف انیمیشن تاخیر اسپلش (`windowSplashScreenAnimationDuration = 0`):**
+              - صفر کردن مدت زمان انیمیشن خروج اسپلش جهت انتقال فوری میلی‌ثانیه‌ای به رابط کاربری بدون کوچک‌ترین مکث روی آیکون شش‌ضلعی نئونی.
+            - **پشتیبانی اختصاصی از سنسورهای آرایه‌ای کوچک دستی (5×5 Handheld Grid):**
+              - اضافه شدن دکمه‌های مستقیم پیش‌نمایش و بارگذاری شبکه ۵×۵ (`⚡ 5×5`) به کارت هاب مأموریت و صفحه تحلیل آفلاین، مناسب سنسورهای مگنتومتر و گرادیومتر دستی پرتابل.
+            - **تثبیت پایدار وضعیت عدم اتصال سخت‌افزار (`STATUS: DISCONNECTED • NO HARDWARE CONNECTED`):**
+              - نمایش شفاف عدم حضور حسگر بدون ایجاد وقفه در عملکرد نرم‌افزار با قابلیت سوییچ مستقیم به آنالیز محلی.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 19`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.3.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.2/Dnic-GeoScan-v1.3.2.apk)**
-          files: release/Dnic-GeoScan-v1.3.2.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.3.3.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.3/Dnic-GeoScan-v1.3.3.apk)**
+          files: release/Dnic-GeoScan-v1.3.3.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

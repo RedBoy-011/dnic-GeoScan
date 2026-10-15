@@ -475,8 +475,20 @@ private fun FileSourceCard(
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        OutlinedButton(
+                            onClick = { onLoadSampleGrid(5, 5) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = NeonCyan,
+                                containerColor = NeonCyan.copy(alpha = 0.08f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                        ) {
+                            Text(text = "⚡ 5×5", style = Typography.labelSmall)
+                        }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(10, 10) },
                             modifier = Modifier.weight(1f),
