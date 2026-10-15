@@ -23,6 +23,7 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,12 +38,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.denic.geoscan.data.analysis.GeophysicalDepthEstimator
 import com.denic.geoscan.data.model.ScanPoint
 import com.denic.geoscan.ui.theme.DarkBase
+import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.GlassBorder
 import com.denic.geoscan.ui.theme.NeonCyan
 import com.denic.geoscan.ui.theme.NeonGreen
+import com.denic.geoscan.ui.theme.NeonOrange
 import com.denic.geoscan.ui.theme.NeonRed
+import com.denic.geoscan.ui.theme.NeonYellow
 import com.denic.geoscan.ui.theme.TelemetryTextStyle
 import com.denic.geoscan.ui.theme.TextMuted
 import com.denic.geoscan.ui.theme.TextSecondary
@@ -60,6 +65,7 @@ fun MagneticCrossSectionCard(
 
     var isRowSlice by remember { mutableStateOf(true) }
     var sliceIndex by remember { mutableIntStateOf(gridHeight / 2) }
+    var stationSpacingMeters by remember { mutableFloatStateOf(1.0f) }
 
     // Clamp sliceIndex within valid boundaries
     val maxIndex = if (isRowSlice) (gridHeight - 1).coerceAtLeast(0) else (gridWidth - 1).coerceAtLeast(0)
@@ -78,6 +84,12 @@ fun MagneticCrossSectionCard(
     val maxZ = slicePoints.maxOf { it.zValue }
     val spanZ = (maxZ - minZ).coerceAtLeast(0.1f)
     val peakZ = slicePoints.maxByOrNull { abs(it.zValue) }?.zValue ?: 0f
+
+    // Geophysical Depth Estimation
+    val depthEstimator = remember { GeophysicalDepthEstimator() }
+    val depthResult = remember(slicePoints, stationSpacingMeters) {
+        depthEstimator.estimateDepth(slicePoints, stationSpacingMeters)
+    }
 
     GlassmorphicCard(
         modifier = modifier.fillMaxWidth(),
@@ -160,21 +172,26 @@ fun MagneticCrossSectionCard(
                 }
             }
 
-            // Profile Metrics
+            // Survey Station Spacing Selector
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Transect: ${slicePoints.size} sample stations",
+                    text = "Station Spacing (Δx):",
                     style = Typography.labelSmall,
                     color = TextMuted
                 )
-                Text(
-                    text = "Peak: ${String.format("%+.2f", peakZ)} µT",
-                    style = Typography.labelSmall,
-                    color = if (peakZ >= 0f) NeonRed else NeonCyan
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    listOf(0.5f to "0.5m", 1.0f to "1.0m", 2.0f to "2.0m").forEach { (spacing, label) ->
+                        SlicePill(
+                            text = label,
+                            isSelected = stationSpacingMeters == spacing,
+                            onClick = { stationSpacingMeters = spacing }
+                        )
+                    }
+                }
             }
 
             // High-Performance Native Compose Canvas Profile Graph
@@ -232,6 +249,54 @@ fun MagneticCrossSectionCard(
                         color = NeonCyan,
                         style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
                     )
+                }
+            }
+
+            // Geophysical Depth & Source Estimation Card
+            if (depthResult != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(DarkSurface)
+                        .border(1.dp, GlassBorder, RoundedCornerShape(8.dp))
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                text = "ESTIMATED DEPTH (HALF-WIDTH RULE)",
+                                style = Typography.labelSmall,
+                                color = NeonYellow,
+                                fontSize = 9.sp
+                            )
+                            Text(
+                                text = "~${String.format("%.2f", depthResult.estimatedDepthMeters)} meters",
+                                style = TelemetryTextStyle,
+                                color = NeonGreen,
+                                fontSize = 14.sp
+                            )
+                        }
+
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = if (depthResult.isCavity) "TARGET: VOID / CAVITY" else "TARGET: FERROUS / METAL",
+                                style = Typography.labelSmall,
+                                color = if (depthResult.isCavity) NeonCyan else NeonRed,
+                                fontSize = 10.sp
+                            )
+                            Text(
+                                text = "Peak: ${String.format("%+.1f", depthResult.peakValue)} µT (Conf: ${depthResult.confidence})",
+                                style = Typography.labelSmall,
+                                color = TextMuted,
+                                fontSize = 9.sp
+                            )
+                        }
+                    }
                 }
             }
         }

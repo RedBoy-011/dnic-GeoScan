@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.2.2.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.0.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.2.2-apk
-          path: release/Dnic-GeoScan-v1.2.2.apk
+          name: Dnic-GeoScan-v1.3.0-apk
+          path: release/Dnic-GeoScan-v1.3.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,23 +52,27 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.2.2
-          name: "Dnic-GeoScan v1.2.2 - Official Release"
+          tag_name: v1.3.0
+          name: "Dnic-GeoScan v1.3.0 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.2.2 - Instant Compose Launch & Zero-Lag Splash Lifecycle
+            ## 📱 Dnic-GeoScan v1.3.0 - Geophysical Depth Estimation Engine & 2D Profile
 
-            نسخه رسمی ۱.۲.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۳.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و بهینه‌سازی‌های این نسخه:
-            - **انتقال بدون وقفه و آنی از اسپلش به Compose:** حذف مانع `setOnExitAnimationListener` که بر روی برخی رام‌ها و دستگاه‌ها (نظیر شیائومی، سامسونگ و اندروید ۱۲ به بالا) مانع از دیسمیس خودکار ویندوز اسپلش می‌شد.
+            ### ✨ تغییرات و قابلیت‌های اصلی این نسخه:
+            - **موتور تخمین ژئوفیزیکی عمق هدف (Geophysical Depth Estimation Engine):**
+              - پیاده‌سازی قانون علمی نیم‌عرض ناهنجاری (Half-Width Rule - Telford & Breiner standard) جهت تخمین عمق دقیق دفن اهداف فلزی یا حفرات.
+              - امکان انتخاب فاصله فیزیکی ایستگاه‌های برداشت (Station Spacing: 0.5m, 1.0m, 2.0m).
+              - نمایش هوشمند عمق تخمینی به متر، نوع تارگت (Ferrous Metal vs Void/Cavity) و ضریب اطمینان (Confidence Score).
+            - **انتقال بدون وقفه و آنی از اسپلش به Compose:** رفع کامل مسدودی لایه اسپلش و اجرای سریع بر روی تمامی رام‌های اندروید ۱۲ به بالا.
             - **ورود مستقیم و پرسرعت به Mission Control Hub:** اولویت‌دهی به کار با فایل‌های محلی آفلاین با دکمه‌های مستقیم پیش‌نمایش شبکه‌های ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰.
-            - **نمایش شفاف و تعاملی بنر عدم اتصال سخت‌افزار (`STATUS: DISCONNECTED • NO HARDWARE CONNECTED`):** هدایت سریع به صفحه اسکن با کلیک روی بنر یا قرص‌های سوییچ فوری.
-            - **ماژول ترانسکت و مقطع دوبعدی عمق (2D Transect Cross-Section Engine):** اسلایدر متحرک پیمایش روی خطوط X و Y با خط مبنای ژئوفیزیکی Ground Zero.
+            - **نمایش شفاف و تعاملی بنر عدم اتصال سخت‌افزار (`STATUS: DISCONNECTED • NO HARDWARE CONNECTED`).**
+            - **ماژول ترانسکت و مقطع دوبعدی عمق (2D Transect Cross-Section Engine).**
             - **فیلترهای ژئوفیزیکی مشتق اول عمودی (1VD) و سیگنال تحلیلی (AS).**
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 15`.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 16`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.2.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.2.2/Dnic-GeoScan-v1.2.2.apk)**
-          files: release/Dnic-GeoScan-v1.2.2.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.3.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.0/Dnic-GeoScan-v1.3.0.apk)**
+          files: release/Dnic-GeoScan-v1.3.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
