@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">dnic GeoScan</string>
+    <string name="app_name">denic GeoScan</string>
     <string name="brand_subtitle">Digital Electronic 3D Visualizer</string>
     <string name="nav_remote_scan">Remote Scan</string>
     <string name="nav_local_analysis">Local Analysis</string>

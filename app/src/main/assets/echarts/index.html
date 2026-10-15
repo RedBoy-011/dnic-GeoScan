@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>dnic GeoScan 3D Visualizer</title>
+    <title>denic GeoScan 3D Visualizer</title>
     <style>
         * {
             margin: 0;
@@ -90,6 +90,9 @@
          * @param {number} baseline Ground Zero baseline value (median)
          */
         function renderScanData(pointsJson, is3D, baseline = 0) {
+            if (!myChart) {
+                initChart();
+            }
             const overlay = document.getElementById('empty-overlay');
             currentModeIs3D = is3D;
 

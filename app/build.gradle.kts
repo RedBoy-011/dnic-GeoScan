@@ -1,15 +1,15 @@
-plugins {
+﻿plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
 
 android {
-    namespace = "com.dnic.geoscan"
+    namespace = "com.denic.geoscan"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.dnic.geoscan"
+        applicationId = "com.denic.geoscan"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

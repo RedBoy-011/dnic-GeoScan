@@ -1,4 +1,4 @@
-name: Build dnic GeoScan APK
+name: Build denic GeoScan APK
 
 on:
   push:
@@ -27,9 +27,14 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
+      - name: Prepare Release APK
+        run: |
+          mkdir -p release
+          cp app/build/outputs/apk/debug/app-debug.apk release/denic-GeoScan-v1.0.0.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dnic-GeoScan-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 30
+          name: denic-GeoScan-v1.0.0-apk
+          path: release/denic-GeoScan-v1.0.0.apk
+          retention-days: 60

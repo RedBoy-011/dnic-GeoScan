@@ -1,4 +1,4 @@
-# dnic GeoScan (dnic Visualizer 3D)
+﻿# denic GeoScan (denic Visualizer 3D)
 
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![Language](https://img.shields.io/badge/Language-Kotlin%202.0-purple.svg)](https://kotlinlang.org)
@@ -6,11 +6,11 @@
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
 [![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
 
-> **dnic GeoScan** is a professional Android geophysical data logger and 3D visualizer app designed to replace legacy Windows software for magnetometer surface scanning.
+> **denic GeoScan** is a professional Android geophysical data logger and 3D visualizer app designed to replace legacy Windows software for magnetometer surface scanning.
 
 ---
 
-## 🧭 Brand Concept: "dnic" (Digital Electronic)
+## 🧭 Brand Concept: "denic" (Digital Electronic)
 * **Aesthetic**: Swiss Minimalist & Glassmorphism with deep space dark theme (`#070A12`) and responsive multi-pane layout for phones and fieldwork tablets.
 * **Visual Palette**: Magnetic spectrum neon accents:
   * 🟢 **Neon Green (`#00FF9D`)**: Nominal baseline magnetic field & sensor ground reference (Ground Zero).
@@ -25,7 +25,7 @@
 * **Coroutines & Flow**: Kotlin `SharedFlow` & `StateFlow` for zero-loss real-time telemetry streaming from hardware.
 * **Hardware Connectivity**: Bluetooth Classic (SPP - Serial Port Profile, UUID `00001101-0000-1000-8000-00805F9B34FB`) interfacing with HC-05 microcontrollers.
 * **Data Protocol**: Real-time delimited string packet: `$X,Y,Z#\n`.
-* **Storage Access**: Android Storage Access Framework (SAF) for offline dataset inspection (`.txt`, `.csv`) and MediaStore export to `Documents/dnic-GeoScan`.
+* **Storage Access**: Android Storage Access Framework (SAF) for offline dataset inspection (`.txt`, `.csv`) and MediaStore export to `Documents/denic-GeoScan`.
 * **3D Surface & Heatmap Engine**: Embedded, 100% offline Apache ECharts 5.5 + ECharts-GL 2.0.9 via hardware-accelerated WebView (`LAYER_TYPE_HARDWARE`).
 * **Mathematical Filtering**: Mathematical Bicubic Convolution Interpolation (Catmull-Rom spline, $a = -0.5$) for converting discrete sensor steps into smooth, continuous topographical 3D surfaces.
 
@@ -33,7 +33,7 @@
 
 ## 📁 Project Architecture
 ```
-dnic-GeoScan/
+denic-GeoScan/
 ├── app/
 │   ├── src/main/
 │   │   ├── AndroidManifest.xml          # Bluetooth SPP & SAF permissions configured
@@ -42,7 +42,7 @@ dnic-GeoScan/
 │   │   │       ├── echarts.min.js       # Offline Apache ECharts 5.5.0
 │   │   │       ├── echarts-gl.min.js    # Offline ECharts-GL 2.0.9
 │   │   │       └── index.html           # 3D Surface & 2D Heatmap renderer + JS Bridge
-│   │   ├── java/com/dnic/geoscan/
+│   │   ├── java/com/denic/geoscan/
 │   │   │   ├── MainActivity.kt          # Root edge-to-edge Compose activity
 │   │   │   ├── data/
 │   │   │   │   ├── analysis/
