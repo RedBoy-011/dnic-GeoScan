@@ -63,5 +63,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.coroutines.android)
 
+    testImplementation(libs.junit)
     debugImplementation(libs.androidx.ui.tooling)
 }
