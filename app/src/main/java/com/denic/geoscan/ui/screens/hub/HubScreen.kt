@@ -183,13 +183,13 @@ private fun HardwareStatusBanner(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "• NO SENSOR ATTACHED",
+                            text = "• NO HARDWARE CONNECTED",
                             style = Typography.labelSmall,
-                            color = TextMuted
+                            color = NeonOrange.copy(alpha = 0.85f)
                         )
                     }
                     Text(
-                        text = "SPP UUID 1101 Standby • Local mode fully operational",
+                        text = "Bluetooth Standby (SPP 1101) • Local Analysis Ready & Fully Operational",
                         style = Typography.labelSmall,
                         color = TextSecondary,
                         fontSize = 11.sp

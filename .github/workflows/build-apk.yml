@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.1.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.2.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.3.1-apk
-          path: release/Dnic-GeoScan-v1.3.1.apk
+          name: Dnic-GeoScan-v1.3.2-apk
+          path: release/Dnic-GeoScan-v1.3.2.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,24 +52,24 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.3.1
-          name: "Dnic-GeoScan v1.3.1 - Official Release"
+          tag_name: v1.3.2
+          name: "Dnic-GeoScan v1.3.2 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.3.1 - Offline CSV Export & Direct Local Switcher
+            ## 📱 Dnic-GeoScan v1.3.2 - Instant Android 12+ Splash Dismissal & Prominent Disconnected Banner
 
-            نسخه رسمی ۱.۳.۱ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۳.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های اصلی این نسخه:
-            - **خروجی گرفتن و ذخیره آفلاین داده‌ها با فیلترها (Processed CSV Export):**
-              - دکمه اختصاصی `Export CSV` در کارت منبع داده برای اکسپورت تمام داده‌های فیلترشده (نرمال‌شده، مشتق اول عمودی 1VD، سیگنال تحلیلی AS) در پوشه استاندارد Documents/denic-GeoScan.
-              - نمایش وضعیت بلادرنگ ذخیره‌سازی، اعلان سبز رنگ مسیر فایل و امکان بستن آسان پیام.
-            - **دسترسی سریع و میانبر آفلاین از صفحه اسکن ریموت (Direct Offline Switcher):**
-              - افزودن دکمه تعاملی سبز نئونی `Offline? Switch to Local Analysis Mode` به بخش وضعیت سخت‌افزار هنگام قطع اتصال، جهت هدایت فوری اپراتور به تحلیل فایل‌های محلی.
-            - **بهینه‌سازی کارت‌های ابزار و مقیاس‌پذیری تبلت و موبایل:** چیدمان فشرده‌تر دکمه‌های هموارسازی (Bicubic Smoothing) و ذخیره‌سازی داده.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 17`.
+            - **تضمین خروج آنی و بدون وقفه از Splash Screen در اندروید ۱۲ به بالا:**
+              - فراخوانی صریح `setKeepOnScreenCondition { false }` و مقداردهی مستقیم پوسته `Theme.DenicGeoScan` به منظور جلوگیری از هرگونه تعلیق لایه اسپلش سیستم بر روی رام‌های سفارشی (سامسونگ OneUI، شیائومی HyperOS/MIUI).
+            - **نمایش برجسته و حرفه‌ای وضعیت «عدم اتصال» (`STATUS: DISCONNECTED • NO HARDWARE CONNECTED`):**
+              - بازطراحی بنر وضعیت سخت‌افزار در هاب مأموریت و صفحه ریموت جهت نمایش صریح عدم وجود سنسور با رنگ نارنجی هشدار و متن استاندارد.
+            - **اولویت‌بخشی کامل به حالت Local Analysis:**
+              - اجرای فوری و بدون وابستگی به بلوتوث برای شبکه‌های ۱۰×۱۰، ۲۰×۲۰، ۳۰×۳۰ و فایل‌های ورودی CSV/TXT با نرمال‌سازی میانه (Median Ground Zero) و درون‌یابی دو مکعبی (Bicubic Spline).
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 18`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.3.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.1/Dnic-GeoScan-v1.3.1.apk)**
-          files: release/Dnic-GeoScan-v1.3.1.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.3.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.2/Dnic-GeoScan-v1.3.2.apk)**
+          files: release/Dnic-GeoScan-v1.3.2.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

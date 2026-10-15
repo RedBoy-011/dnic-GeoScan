@@ -16,8 +16,9 @@ class MainActivity : ComponentActivity() {
         // Calling installSplashScreen() before super.onCreate enables the Android 12+ WindowManager
         // to automatically and smoothly dismiss the splash screen as soon as the first Compose frame renders.
         // We do NOT register setOnExitAnimationListener without custom animations, as registering it disables
-        // the OS automatic removal and can freeze the splash screen on certain OEM ROMs.
         val splashScreen = installSplashScreen()
+        splashScreen.setKeepOnScreenCondition { false }
+        setTheme(R.style.Theme_DenicGeoScan)
         super.onCreate(savedInstanceState)
 
         // Global crash catcher: Immediately renders a native Android view if anything fails
