@@ -63,9 +63,21 @@ fun AppNavigation(
         containerColor = DarkBase,
         topBar = {
             TopBrandingBar(
+                currentRoute = currentRoute,
                 onLogoClick = {
                     if (currentRoute != Screen.Hub.route) {
                         navController.navigate(Screen.Hub.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                },
+                onNavigate = { screen ->
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -144,14 +156,16 @@ fun AppNavigation(
 
 @Composable
 private fun TopBrandingBar(
-    onLogoClick: (() -> Unit)? = null
+    currentRoute: String,
+    onLogoClick: (() -> Unit)? = null,
+    onNavigate: ((Screen) -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .background(DarkBase)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -162,7 +176,7 @@ private fun TopBrandingBar(
             modifier = clickModifier
         ) {
             DenicBrandLogo(modifier = Modifier.size(36.dp))
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(10.dp))
             Column {
                 Text(
                     text = "Dnic-GeoScan",
@@ -173,8 +187,61 @@ private fun TopBrandingBar(
                     text = "DIGITAL ELECTRONIC • 3D VISUALIZER",
                     style = Typography.labelSmall,
                     color = NeonGreen,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = 1.1.sp
                 )
+            }
+        }
+
+        // Quick Mode Switcher Pills (Direct 1-tap navigation between Local & Remote)
+        if (onNavigate != null) {
+            val isLocalActive = currentRoute.startsWith(Screen.LocalAnalysis.route)
+            val isRemoteActive = currentRoute.startsWith(Screen.RemoteScan.route)
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Local Switch Pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isLocalActive) NeonGreen.copy(alpha = 0.2f) else DarkSurface)
+                        .border(
+                            1.dp,
+                            if (isLocalActive) NeonGreen else GlassBorder,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable { onNavigate(Screen.LocalAnalysis) }
+                        .padding(horizontal = 8.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "LOCAL",
+                        style = Typography.labelSmall,
+                        color = if (isLocalActive) NeonGreen else TextSecondary,
+                        fontSize = 11.sp
+                    )
+                }
+
+                // Remote Switch Pill
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isRemoteActive) NeonCyan.copy(alpha = 0.2f) else DarkSurface)
+                        .border(
+                            1.dp,
+                            if (isRemoteActive) NeonCyan else GlassBorder,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable { onNavigate(Screen.RemoteScan) }
+                        .padding(horizontal = 8.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = "REMOTE",
+                        style = Typography.labelSmall,
+                        color = if (isRemoteActive) NeonCyan else TextSecondary,
+                        fontSize = 11.sp
+                    )
+                }
             }
         }
     }

@@ -208,8 +208,12 @@ fun EChartsVisualizer(
                             try {
                                 WebView(context).apply {
                                     try {
-                                        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                                    } catch (_: Throwable) {}
+                                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                                    } catch (_: Throwable) {
+                                        try {
+                                            setLayerType(View.LAYER_TYPE_NONE, null)
+                                        } catch (_: Throwable) {}
+                                    }
                                     setBackgroundColor(0x00000000)
 
                                     try { settings.javaScriptEnabled = true } catch (_: Throwable) {}

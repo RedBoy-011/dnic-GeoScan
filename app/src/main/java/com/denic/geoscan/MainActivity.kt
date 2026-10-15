@@ -15,6 +15,9 @@ class MainActivity : ComponentActivity() {
         // Official Android 12+ Splash Screen handler - guarantees clean exit to Compose
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { false }
+        splashScreen.setOnExitAnimationListener { splashScreenView ->
+            splashScreenView.remove()
+        }
         super.onCreate(savedInstanceState)
 
         // Global crash catcher: Immediately renders a native Android view if anything fails

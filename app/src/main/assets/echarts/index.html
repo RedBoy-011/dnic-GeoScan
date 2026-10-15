@@ -152,7 +152,17 @@
             cachedStats = { minZ, maxZ, minX, maxX, minY, maxY, baseline };
 
             if (is3D) {
-                render3DSurface(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
+                try {
+                    render3DSurface(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
+                } catch (glError) {
+                    console.warn("3D WebGL render failed, falling back to 2D heatmap", glError);
+                    render2DHeatmap(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
+                    const hud = document.getElementById('hud-status');
+                    if (hud) {
+                        hud.innerText = `POINTS: ${formattedData.length} • MODE: 2D (SAFE FALLBACK)`;
+                    }
+                    return;
+                }
             } else {
                 render2DHeatmap(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
             }
