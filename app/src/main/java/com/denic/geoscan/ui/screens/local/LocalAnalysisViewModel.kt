@@ -27,6 +27,7 @@ class LocalAnalysisViewModel(
     private val fileParser = LocalFileParser()
     private val normalizer = DatasetNormalizer()
     private val bicubicInterpolator = BicubicInterpolator(subdivisionFactor = 2)
+    private val gradientFilter = com.denic.geoscan.data.analysis.GeophysicalGradientFilter()
 
     private val _dataset = MutableStateFlow<ScanDataset?>(null)
     val dataset: StateFlow<ScanDataset?> = _dataset.asStateFlow()
@@ -34,18 +35,27 @@ class LocalAnalysisViewModel(
     private val _isSmoothingEnabled = MutableStateFlow(false)
     val isSmoothingEnabled: StateFlow<Boolean> = _isSmoothingEnabled.asStateFlow()
 
+    private val _selectedFilter = MutableStateFlow(com.denic.geoscan.data.analysis.GeophysicalFilterType.RAW_NORMALIZED)
+    val selectedFilter: StateFlow<com.denic.geoscan.data.analysis.GeophysicalFilterType> = _selectedFilter.asStateFlow()
+
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
-    // Smooth vs raw points computed dynamically for ECharts
+    // Smooth vs raw points computed dynamically for ECharts with gradient filters
     val visualizerPoints: StateFlow<List<ScanPoint>> = combine(
         _dataset,
-        _isSmoothingEnabled
-    ) { data, smoothing ->
-        val points = data?.points?.map { ScanPoint(it.x, it.y, it.normalizedZ) } ?: emptyList()
+        _isSmoothingEnabled,
+        _selectedFilter
+    ) { data, smoothing, filter ->
+        var points = data?.points?.map { ScanPoint(it.x, it.y, it.normalizedZ) } ?: emptyList()
+        if (points.isNotEmpty() && filter != com.denic.geoscan.data.analysis.GeophysicalFilterType.RAW_NORMALIZED) {
+            withContext(Dispatchers.Default) {
+                points = gradientFilter.applyFilter(points, filter)
+            }
+        }
         if (smoothing && points.size >= 4) {
             withContext(Dispatchers.Default) {
                 bicubicInterpolator.interpolate(points)
@@ -58,6 +68,10 @@ class LocalAnalysisViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    fun setFilterType(filter: com.denic.geoscan.data.analysis.GeophysicalFilterType) {
+        _selectedFilter.value = filter
+    }
 
     init {
         // Pre-load a baseline 10x10 geophysical reference grid on launch

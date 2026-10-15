@@ -81,6 +81,7 @@ fun LocalAnalysisScreen(
     val dataset by viewModel.dataset.collectAsState()
     val visualizerPoints by viewModel.visualizerPoints.collectAsState()
     val isSmoothingEnabled by viewModel.isSmoothingEnabled.collectAsState()
+    val selectedFilter by viewModel.selectedFilter.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
@@ -143,6 +144,10 @@ fun LocalAnalysisScreen(
 
                     dataset?.let { data ->
                         GroundZeroBaselineCard(stats = data.statistics)
+                        GeophysicalFiltersCard(
+                            selectedFilter = selectedFilter,
+                            onSelectFilter = { viewModel.setFilterType(it) }
+                        )
                     }
 
                     SpectrumPaletteCard()
@@ -186,6 +191,10 @@ fun LocalAnalysisScreen(
 
                 dataset?.let { data ->
                     GroundZeroBaselineCard(stats = data.statistics)
+                    GeophysicalFiltersCard(
+                        selectedFilter = selectedFilter,
+                        onSelectFilter = { viewModel.setFilterType(it) }
+                    )
                 }
 
                 SpectrumPaletteCard()
@@ -625,6 +634,66 @@ private fun AnomalyStatBadge(
             Spacer(modifier = Modifier.height(2.dp))
             Text(text = "$count", style = TelemetryTextStyle, color = TextPrimary, fontSize = 15.sp)
             Text(text = "$percentage%", style = Typography.labelSmall, color = TextMuted, fontSize = 10.sp)
+        }
+    }
+}
+
+@Composable
+private fun GeophysicalFiltersCard(
+    selectedFilter: com.denic.geoscan.data.analysis.GeophysicalFilterType,
+    onSelectFilter: (com.denic.geoscan.data.analysis.GeophysicalFilterType) -> Unit
+) {
+    GlassmorphicCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = NeonCyan.copy(alpha = 0.5f)
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "GEOPHYSICAL GRADIENT FILTER",
+                    style = Typography.labelLarge,
+                    color = NeonCyan
+                )
+                Text(
+                    text = "DERIVATIVE ANALYSIS",
+                    style = Typography.labelSmall,
+                    color = TextMuted,
+                    fontSize = 9.sp
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                com.denic.geoscan.data.analysis.GeophysicalFilterType.values().forEach { filter ->
+                    val isSelected = selectedFilter == filter
+                    val label = when (filter) {
+                        com.denic.geoscan.data.analysis.GeophysicalFilterType.RAW_NORMALIZED -> "Standard"
+                        com.denic.geoscan.data.analysis.GeophysicalFilterType.FIRST_VERTICAL_DERIVATIVE -> "1VD (Edges)"
+                        com.denic.geoscan.data.analysis.GeophysicalFilterType.ANALYTIC_SIGNAL -> "Analytic (Center)"
+                    }
+                    OutlinedButton(
+                        onClick = { onSelectFilter(filter) },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (isSelected) NeonCyan else TextSecondary,
+                            containerColor = if (isSelected) NeonCyan.copy(alpha = 0.15f) else Color.Transparent
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isSelected) NeonCyan else GlassBorder
+                        )
+                    ) {
+                        Text(text = label, style = Typography.labelSmall, fontSize = 9.sp, maxLines = 1)
+                    }
+                }
+            }
         }
     }
 }
