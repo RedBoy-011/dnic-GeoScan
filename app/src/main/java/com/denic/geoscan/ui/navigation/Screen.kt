@@ -1,7 +1,8 @@
-﻿package com.denic.geoscan.ui.navigation
+package com.denic.geoscan.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bluetooth
+import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -10,10 +11,10 @@ sealed class Screen(
     val title: String,
     val icon: ImageVector
 ) {
-    object RemoteScan : Screen(
-        route = "remote_scan",
-        title = "Remote Scan",
-        icon = Icons.Outlined.Bluetooth
+    object Hub : Screen(
+        route = "hub",
+        title = "Hub",
+        icon = Icons.Outlined.Dashboard
     )
 
     object LocalAnalysis : Screen(
@@ -22,7 +23,13 @@ sealed class Screen(
         icon = Icons.Outlined.FolderOpen
     )
 
+    object RemoteScan : Screen(
+        route = "remote_scan",
+        title = "Remote Scan",
+        icon = Icons.Outlined.Bluetooth
+    )
+
     companion object {
-        val items = listOf(RemoteScan, LocalAnalysis)
+        val items = listOf(Hub, LocalAnalysis, RemoteScan)
     }
 }

@@ -37,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.denic.geoscan.R
+import com.denic.geoscan.ui.screens.hub.HubScreen
 import com.denic.geoscan.ui.screens.local.LocalAnalysisScreen
 import com.denic.geoscan.ui.screens.remote.RemoteScanScreen
 import com.denic.geoscan.ui.theme.DarkBase
@@ -56,12 +57,24 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.RemoteScan.route
+    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Hub.route
 
     Scaffold(
         containerColor = DarkBase,
         topBar = {
-            TopBrandingBar()
+            TopBrandingBar(
+                onLogoClick = {
+                    if (currentRoute != Screen.Hub.route) {
+                        navController.navigate(Screen.Hub.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                }
+            )
         },
         bottomBar = {
             GlassmorphicBottomNavBar(
@@ -82,23 +95,38 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.RemoteScan.route,
+            startDestination = Screen.Hub.route,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            composable(Screen.RemoteScan.route) {
-                RemoteScanScreen()
+            composable(Screen.Hub.route) {
+                HubScreen(
+                    onNavigateTo = { targetScreen ->
+                        navController.navigate(targetScreen.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
             composable(Screen.LocalAnalysis.route) {
                 LocalAnalysisScreen()
+            }
+            composable(Screen.RemoteScan.route) {
+                RemoteScanScreen()
             }
         }
     }
 }
 
 @Composable
-private fun TopBrandingBar() {
+private fun TopBrandingBar(
+    onLogoClick: (() -> Unit)? = null
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -108,7 +136,12 @@ private fun TopBrandingBar() {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        val clickModifier = if (onLogoClick != null) Modifier.clickable(onClick = onLogoClick) else Modifier
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = clickModifier
+        ) {
             DenicBrandLogo(modifier = Modifier.size(36.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Column {
@@ -137,7 +170,7 @@ private fun GlassmorphicBottomNavBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         val shape = RoundedCornerShape(24.dp)
         Row(
@@ -163,19 +196,23 @@ private fun GlassmorphicBottomNavBar(
                         )
                     )
                 )
-                .padding(vertical = 8.dp, horizontal = 12.dp),
+                .padding(vertical = 6.dp, horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Screen.items.forEach { screen ->
                 val isSelected = currentRoute == screen.route
-                val activeColor = if (screen == Screen.RemoteScan) NeonGreen else NeonCyan
+                val activeColor = when (screen) {
+                    Screen.Hub -> NeonCyan
+                    Screen.LocalAnalysis -> NeonGreen
+                    Screen.RemoteScan -> NeonCyan
+                }
 
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .clickable { onNavigate(screen) }
-                        .padding(horizontal = 20.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -186,14 +223,14 @@ private fun GlassmorphicBottomNavBar(
                             imageVector = screen.icon,
                             contentDescription = screen.title,
                             tint = if (isSelected) activeColor else TextMuted,
-                            modifier = Modifier.size(22.dp)
+                            modifier = Modifier.size(20.dp)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = screen.title,
                             style = Typography.labelLarge,
                             color = if (isSelected) TextPrimary else TextMuted,
-                            fontSize = 11.sp
+                            fontSize = 10.sp
                         )
                     }
                 }

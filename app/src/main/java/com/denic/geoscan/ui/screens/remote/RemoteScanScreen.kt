@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.screens.remote
+package com.denic.geoscan.ui.screens.remote
 
 import android.Manifest
 import android.os.Build
@@ -143,7 +143,7 @@ fun RemoteScanScreen(
             is BluetoothConnectionState.Connected -> if (isScanning) StatusScanning else StatusConnected
             is BluetoothConnectionState.Connecting -> NeonYellow
             is BluetoothConnectionState.Error -> NeonRed
-            is BluetoothConnectionState.Disconnected -> StatusDisconnected
+            is BluetoothConnectionState.Disconnected -> com.denic.geoscan.ui.theme.NeonOrange
         },
         label = "statusColor"
     )
@@ -416,8 +416,8 @@ private fun HardwareStatusCard(
                         text = when (connectionState) {
                             is BluetoothConnectionState.Connected -> "CONNECTED: ${connectionState.deviceName}"
                             is BluetoothConnectionState.Connecting -> "CONNECTING..."
-                            is BluetoothConnectionState.Error -> "ERROR"
-                            is BluetoothConnectionState.Disconnected -> "RECEIVER DISCONNECTED"
+                            is BluetoothConnectionState.Error -> "ERROR: ${connectionState.message}"
+                            is BluetoothConnectionState.Disconnected -> "DISCONNECTED • NO HARDWARE CONNECTED"
                         },
                         style = Typography.labelLarge,
                         color = statusColor
@@ -436,7 +436,7 @@ private fun HardwareStatusCard(
                     val addressText = when (connectionState) {
                         is BluetoothConnectionState.Connected -> connectionState.deviceAddress
                         is BluetoothConnectionState.Connecting -> connectionState.deviceAddress
-                        else -> "No HC-05 Connected"
+                        else -> "No HC-05 Connected (Standby)"
                     }
                     Text(text = addressText, style = Typography.bodyLarge, color = TextPrimary)
                 }

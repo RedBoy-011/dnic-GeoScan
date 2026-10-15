@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.0.2.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.0.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.0.2-apk
-          path: release/Dnic-GeoScan-v1.0.2.apk
+          name: Dnic-GeoScan-v1.1.0-apk
+          path: release/Dnic-GeoScan-v1.1.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,21 +52,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.0.2
-          name: "Dnic-GeoScan v1.0.2 - Official Release"
+          tag_name: v1.1.0
+          name: "Dnic-GeoScan v1.1.0 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.0.2
+            ## 📱 Dnic-GeoScan v1.1.0 - Major Navigation & Offline Analysis Release
 
-            نسخه رسمی و بهینه‌سازی‌شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۱.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و اصلاحات این نسخه:
-            - **حل قطعی توقف روی لوگو (Fix Splash Screen Hang):** لود غیرهمزمان و تاخیری ماژول ۳ بعدی WebView به همراه نمایش آنی و بدون بلاک رابط کاربری اصلی.
-            - **مدیریت استثناهای بومی (Native Error Fallback):** حذف خطای بلاک شدن فرآیند اجرای سیستم‌عامل و نمایش فوری گزارش تشخیصی در صورت بروز هرگونه خطای نادر.
-            - **سازگاری ۱۰۰٪ با تبلت‌ها و گوشی‌های سامسونگ:** تصحیح لایه‌بندی GPU و رندر ایمن بدون وابستگی سخت‌افزاری به شتاب‌دهنده گرافیکی ناسازگار.
-            - **ارتقای یکپارچه درون‌برنامه‌ای:** امکان نصب و بروزرسانی مستقیم بدون نیاز به حذف برنامه قبلی (Signed with persistent key, versionCode 3).
+            ### ✨ تغییرات و قابلیت‌های این نسخه:
+            - **صفحه فرود و هاب عملیاتی (Landing Mission Hub):** طراحی رابط کاربری دوکارته مدرن برای انتخاب سریع حالت و شروع آنی عملیات.
+            - **اولویت ویژه حالت تحلیل محلی (Local Analysis First):** باز کردن و آنالیز مستقیم شبکه‌های ۱۰×۱۰، ۲۰×۲۰ و سفارشی (CSV/TXT) کاملاً آفلاین و ۱۰۰٪ مستقل از بلوتوث.
+            - **حل قطعی اسپلش‌اسکرین (Official Android 12+ SplashScreen API):** پیاده‌سازی کتابخانه رسمی `androidx.core:core-splashscreen` جهت انتقال بدون وقفه و صفر میلی‌ثانیه‌ای به Compose.
+            - **نمایش شفاف وضعیت عدم اتصال:** برچسب واضح و حرفه‌ای `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه راهنمای وضعیت آماده‌باش.
+            - **ارتقای یکپارچه و مستقیم:** امضا با کلید اختصاصی دائم و افزایش به `versionCode = 4` جهت آپدیت درجا روی نسخه‌های قبل بدون نیاز به حذف برنامه.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.0.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.0.2/Dnic-GeoScan-v1.0.2.apk)**
-          files: release/Dnic-GeoScan-v1.0.2.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.1.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.0/Dnic-GeoScan-v1.1.0.apk)**
+          files: release/Dnic-GeoScan-v1.1.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
