@@ -148,7 +148,17 @@ fun AppNavigation(
                 LocalAnalysisScreen(initialGridSize = gridArg)
             }
             composable(Screen.RemoteScan.route) {
-                RemoteScanScreen()
+                RemoteScanScreen(
+                    onNavigateToLocal = {
+                        navController.navigate(Screen.LocalAnalysis.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     }

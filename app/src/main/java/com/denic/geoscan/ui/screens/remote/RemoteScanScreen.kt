@@ -45,6 +45,7 @@ import androidx.compose.material.icons.outlined.BluetoothSearching
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.ButtonDefaults
@@ -93,6 +94,7 @@ import com.denic.geoscan.ui.visualizer.VisualizerViewMode
 @Composable
 fun RemoteScanScreen(
     modifier: Modifier = Modifier,
+    onNavigateToLocal: (() -> Unit)? = null,
     viewModel: RemoteScanViewModel = viewModel()
 ) {
     val connectionState by viewModel.connectionState.collectAsState()
@@ -197,7 +199,8 @@ fun RemoteScanScreen(
                         isScanning = isScanning,
                         onConnectClick = requestPermissionsAndOpenPicker,
                         onDisconnectClick = { viewModel.disconnectDevice() },
-                        onToggleScan = { viewModel.toggleScan() }
+                        onToggleScan = { viewModel.toggleScan() },
+                        onNavigateToLocal = onNavigateToLocal
                     )
 
                     LiveStreamCard(
@@ -253,7 +256,8 @@ fun RemoteScanScreen(
                     isScanning = isScanning,
                     onConnectClick = requestPermissionsAndOpenPicker,
                     onDisconnectClick = { viewModel.disconnectDevice() },
-                    onToggleScan = { viewModel.toggleScan() }
+                    onToggleScan = { viewModel.toggleScan() },
+                    onNavigateToLocal = onNavigateToLocal
                 )
 
                 LiveStreamCard(
@@ -388,7 +392,8 @@ private fun HardwareStatusCard(
     isScanning: Boolean,
     onConnectClick: () -> Unit,
     onDisconnectClick: () -> Unit,
-    onToggleScan: () -> Unit
+    onToggleScan: () -> Unit,
+    onNavigateToLocal: (() -> Unit)? = null
 ) {
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
@@ -499,6 +504,27 @@ private fun HardwareStatusCard(
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (isScanning) "Stop Scan" else "Start Scan",
+                        style = Typography.labelLarge
+                    )
+                }
+            }
+
+            if (!isConnected && onNavigateToLocal != null) {
+                OutlinedButton(
+                    onClick = onNavigateToLocal,
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonGreen),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.FolderOpen,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Offline? Switch to Local Analysis Mode",
                         style = Typography.labelLarge
                     )
                 }

@@ -23,11 +23,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.FileUpload
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,6 +87,8 @@ fun LocalAnalysisScreen(
     val selectedFilter by viewModel.selectedFilter.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val exportStatusMessage by viewModel.exportStatusMessage.collectAsState()
+    val isExporting by viewModel.isExporting.collectAsState()
 
     // SAF File Picker
     val filePickerLauncher = rememberLauncherForActivityResult(
@@ -131,16 +135,23 @@ fun LocalAnalysisScreen(
                 ) {
                     ScreenHeader()
 
+                    ExportNotificationBanner(
+                        message = exportStatusMessage,
+                        onDismiss = { viewModel.clearExportMessage() }
+                    )
+
                     ErrorBanner(errorMessage = errorMessage)
 
                     FileSourceCard(
                         dataset = dataset,
                         isLoading = isLoading,
                         isSmoothingEnabled = isSmoothingEnabled,
+                        isExporting = isExporting,
                         onOpenPicker = openPicker,
                         onClearDataset = { viewModel.clearDataset() },
                         onToggleSmoothing = { viewModel.toggleSmoothing() },
-                        onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) }
+                        onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
+                        onExportProcessed = { viewModel.exportProcessedDataset() }
                     )
 
                     dataset?.let { data ->
@@ -183,16 +194,23 @@ fun LocalAnalysisScreen(
             ) {
                 ScreenHeader()
 
+                ExportNotificationBanner(
+                    message = exportStatusMessage,
+                    onDismiss = { viewModel.clearExportMessage() }
+                )
+
                 ErrorBanner(errorMessage = errorMessage)
 
                 FileSourceCard(
                     dataset = dataset,
                     isLoading = isLoading,
                     isSmoothingEnabled = isSmoothingEnabled,
+                    isExporting = isExporting,
                     onOpenPicker = openPicker,
                     onClearDataset = { viewModel.clearDataset() },
                     onToggleSmoothing = { viewModel.toggleSmoothing() },
-                    onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) }
+                    onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
+                    onExportProcessed = { viewModel.exportProcessedDataset() }
                 )
 
                 dataset?.let { data ->
@@ -271,14 +289,60 @@ private fun ErrorBanner(errorMessage: String?) {
 }
 
 @Composable
+private fun ExportNotificationBanner(
+    message: String?,
+    onDismiss: () -> Unit
+) {
+    AnimatedVisibility(visible = message != null) {
+        message?.let { msg ->
+            val isError = msg.startsWith("Export failed")
+            val borderColor = if (isError) NeonRed else NeonGreen
+            GlassmorphicCard(
+                modifier = Modifier.fillMaxWidth(),
+                borderColor = borderColor
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = if (isError) Icons.Outlined.ErrorOutline else Icons.Outlined.CheckCircle,
+                        contentDescription = "Export Status",
+                        tint = borderColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = msg,
+                        style = Typography.bodyMedium,
+                        color = borderColor,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IconButton(onClick = onDismiss, modifier = Modifier.size(28.dp)) {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = "Dismiss",
+                            tint = TextMuted,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FileSourceCard(
     dataset: com.denic.geoscan.data.model.ScanDataset?,
     isLoading: Boolean,
     isSmoothingEnabled: Boolean,
+    isExporting: Boolean,
     onOpenPicker: () -> Unit,
     onClearDataset: () -> Unit,
     onToggleSmoothing: () -> Unit,
-    onLoadSampleGrid: (Int, Int) -> Unit
+    onLoadSampleGrid: (Int, Int) -> Unit,
+    onExportProcessed: () -> Unit
 ) {
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
@@ -453,32 +517,68 @@ private fun FileSourceCard(
                 }
             }
 
-            // Bicubic Smoothing Filter Toggle (when dataset is loaded)
+            // Export CSV & Bicubic Smoothing Filter (when dataset is loaded)
             if (dataset != null) {
-                OutlinedButton(
-                    onClick = onToggleSmoothing,
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = if (isSmoothingEnabled) NeonGreen else TextSecondary,
-                        containerColor = if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.12f) else Color.Transparent
-                    ),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.7f) else GlassBorder
-                    )
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = if (isSmoothingEnabled) NeonGreen else TextMuted
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (isSmoothingEnabled) "Bicubic Smoothing Active (2x Mesh)" else "Enable Bicubic Smoothing Filter",
-                        style = Typography.labelLarge
-                    )
+                    OutlinedButton(
+                        onClick = onExportProcessed,
+                        enabled = !isExporting,
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = NeonCyan,
+                            containerColor = NeonCyan.copy(alpha = 0.08f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.6f))
+                    ) {
+                        if (isExporting) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = NeonCyan,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(text = "Exporting...", style = Typography.labelSmall)
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.FileDownload,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = NeonCyan
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(text = "Export CSV", style = Typography.labelSmall)
+                        }
+                    }
+
+                    OutlinedButton(
+                        onClick = onToggleSmoothing,
+                        modifier = Modifier.weight(1.3f),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = if (isSmoothingEnabled) NeonGreen else TextSecondary,
+                            containerColor = if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.12f) else Color.Transparent
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.7f) else GlassBorder
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = if (isSmoothingEnabled) NeonGreen else TextMuted
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (isSmoothingEnabled) "Smoothing ON" else "Smoothing OFF",
+                            style = Typography.labelSmall
+                        )
+                    }
                 }
             }
         }

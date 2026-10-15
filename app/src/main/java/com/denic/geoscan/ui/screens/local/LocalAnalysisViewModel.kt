@@ -28,6 +28,7 @@ class LocalAnalysisViewModel(
     private val normalizer = DatasetNormalizer()
     private val bicubicInterpolator = BicubicInterpolator(subdivisionFactor = 2)
     private val gradientFilter = com.denic.geoscan.data.analysis.GeophysicalGradientFilter()
+    private val sessionExporter = com.denic.geoscan.data.storage.SessionExporter(application.applicationContext)
 
     private val _dataset = MutableStateFlow<ScanDataset?>(null)
     val dataset: StateFlow<ScanDataset?> = _dataset.asStateFlow()
@@ -43,6 +44,12 @@ class LocalAnalysisViewModel(
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    private val _exportStatusMessage = MutableStateFlow<String?>(null)
+    val exportStatusMessage: StateFlow<String?> = _exportStatusMessage.asStateFlow()
+
+    private val _isExporting = MutableStateFlow(false)
+    val isExporting: StateFlow<Boolean> = _isExporting.asStateFlow()
 
     // Smooth vs raw points computed dynamically for ECharts with gradient filters
     val visualizerPoints: StateFlow<List<ScanPoint>> = combine(
@@ -185,6 +192,33 @@ class LocalAnalysisViewModel(
                 _isLoading.value = false
             }
         }
+    }
+
+    fun exportProcessedDataset() {
+        val points = visualizerPoints.value
+        if (points.isEmpty()) {
+            _exportStatusMessage.value = "Cannot export an empty dataset."
+            return
+        }
+        viewModelScope.launch {
+            _isExporting.value = true
+            val filterTag = when (_selectedFilter.value) {
+                com.denic.geoscan.data.analysis.GeophysicalFilterType.RAW_NORMALIZED -> "norm"
+                com.denic.geoscan.data.analysis.GeophysicalFilterType.FIRST_VERTICAL_DERIVATIVE -> "1vd"
+                com.denic.geoscan.data.analysis.GeophysicalFilterType.ANALYTIC_SIGNAL -> "as"
+            }
+            val result = sessionExporter.exportToCsv(points, "local_${filterTag}")
+            result.onSuccess { path ->
+                _exportStatusMessage.value = "Exported to Documents/denic-GeoScan: $path"
+            }.onFailure { err ->
+                _exportStatusMessage.value = "Export failed: ${err.message}"
+            }
+            _isExporting.value = false
+        }
+    }
+
+    fun clearExportMessage() {
+        _exportStatusMessage.value = null
     }
 
     private fun formatFileSize(bytes: Long): String {
