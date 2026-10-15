@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.navigation
+package com.denic.geoscan.ui.navigation
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
@@ -108,12 +108,7 @@ private fun TopBrandingBar() {
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_denic_logo),
-                contentDescription = "denic Logo",
-                tint = androidx.compose.ui.graphics.Color.Unspecified,
-                modifier = Modifier.size(36.dp)
-            )
+            DenicBrandLogo(modifier = Modifier.size(36.dp))
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
@@ -205,3 +200,55 @@ private fun GlassmorphicBottomNavBar(
         }
     }
 }
+
+@Composable
+fun DenicBrandLogo(modifier: Modifier = Modifier) {
+    androidx.compose.foundation.Canvas(modifier = modifier) {
+        val w = size.width
+        val h = size.height
+
+        val path = androidx.compose.ui.graphics.Path().apply {
+            moveTo(w * 0.5f, h * 0.08f)
+            lineTo(w * 0.85f, h * 0.27f)
+            lineTo(w * 0.85f, h * 0.73f)
+            lineTo(w * 0.5f, h * 0.92f)
+            lineTo(w * 0.15f, h * 0.73f)
+            lineTo(w * 0.15f, h * 0.27f)
+            close()
+        }
+        drawPath(
+            path = path,
+            color = NeonCyan.copy(alpha = 0.35f),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.5.dp.toPx())
+        )
+
+        drawLine(
+            color = NeonRed,
+            start = androidx.compose.ui.geometry.Offset(w * 0.25f, h * 0.42f),
+            end = androidx.compose.ui.geometry.Offset(w * 0.75f, h * 0.42f),
+            strokeWidth = 1.8.dp.toPx(),
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        drawLine(
+            color = NeonCyan,
+            start = androidx.compose.ui.geometry.Offset(w * 0.22f, h * 0.54f),
+            end = androidx.compose.ui.geometry.Offset(w * 0.78f, h * 0.54f),
+            strokeWidth = 2.2.dp.toPx(),
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+        drawLine(
+            color = NeonGreen,
+            start = androidx.compose.ui.geometry.Offset(w * 0.20f, h * 0.66f),
+            end = androidx.compose.ui.geometry.Offset(w * 0.80f, h * 0.66f),
+            strokeWidth = 2.6.dp.toPx(),
+            cap = androidx.compose.ui.graphics.StrokeCap.Round
+        )
+
+        drawCircle(
+            color = androidx.compose.ui.graphics.Color.White,
+            radius = 2.dp.toPx(),
+            center = androidx.compose.ui.geometry.Offset(w * 0.5f, h * 0.54f)
+        )
+    }
+}
+

@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.theme
+package com.denic.geoscan.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -41,13 +41,15 @@ fun DenicGeoScanTheme(
 
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as? Activity)?.window
-            if (window != null) {
-                window.statusBarColor = DarkBase.toArgb()
-                window.navigationBarColor = DarkBase.toArgb()
-                val insetsController = WindowCompat.getInsetsController(window, view)
-                insetsController.isAppearanceLightStatusBars = false
-                insetsController.isAppearanceLightNavigationBars = false
+            try {
+                val window = (view.context as? Activity)?.window
+                if (window != null) {
+                    val insetsController = WindowCompat.getInsetsController(window, view)
+                    insetsController.isAppearanceLightStatusBars = false
+                    insetsController.isAppearanceLightNavigationBars = false
+                }
+            } catch (_: Throwable) {
+                // Safely ignored on devices with custom or strict window decors
             }
         }
     }

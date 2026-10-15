@@ -159,16 +159,18 @@ fun EChartsVisualizer(
                             }
                             setBackgroundColor(0x00000000)
 
-                            settings.apply {
-                                javaScriptEnabled = true
-                                domStorageEnabled = true
-                                allowFileAccess = true
+                            try { settings.javaScriptEnabled = true } catch (_: Throwable) {}
+                            try { settings.domStorageEnabled = true } catch (_: Throwable) {}
+                            try { settings.allowFileAccess = true } catch (_: Throwable) {}
+                            try {
                                 @Suppress("DEPRECATION")
-                                allowFileAccessFromFileURLs = true
+                                settings.allowFileAccessFromFileURLs = true
+                            } catch (_: Throwable) {}
+                            try {
                                 @Suppress("DEPRECATION")
-                                allowUniversalAccessFromFileURLs = true
-                                cacheMode = WebSettings.LOAD_NO_CACHE
-                            }
+                                settings.allowUniversalAccessFromFileURLs = true
+                            } catch (_: Throwable) {}
+                            try { settings.cacheMode = WebSettings.LOAD_NO_CACHE } catch (_: Throwable) {}
 
                             addJavascriptInterface(
                                 object {

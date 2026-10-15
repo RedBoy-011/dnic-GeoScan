@@ -43,10 +43,18 @@ class BluetoothService(
         private const val BUFFER_SIZE = 1024
     }
 
-    private val bluetoothManager: BluetoothManager? =
+    private val bluetoothManager: BluetoothManager? = try {
         context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    } catch (_: Throwable) {
+        null
+    }
+
     private val bluetoothAdapter: BluetoothAdapter?
-        get() = bluetoothManager?.adapter
+        get() = try {
+            bluetoothManager?.adapter ?: @Suppress("DEPRECATION") BluetoothAdapter.getDefaultAdapter()
+        } catch (_: Throwable) {
+            null
+        }
 
     private val _connectionState = MutableStateFlow<BluetoothConnectionState>(BluetoothConnectionState.Disconnected)
     val connectionState: StateFlow<BluetoothConnectionState> = _connectionState.asStateFlow()
