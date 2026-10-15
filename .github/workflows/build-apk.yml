@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.5.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.6.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.1.5-apk
-          path: release/Dnic-GeoScan-v1.1.5.apk
+          name: Dnic-GeoScan-v1.1.6-apk
+          path: release/Dnic-GeoScan-v1.1.6.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,22 +52,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.1.5
-          name: "Dnic-GeoScan v1.1.5 - Official Release"
+          tag_name: v1.1.6
+          name: "Dnic-GeoScan v1.1.6 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.1.5 - Multi-Density Grid Survey (10x10, 20x20, 30x30) Release
+            ## 📱 Dnic-GeoScan v1.1.6 - Hardened Geophysical Telemetry & Instant Survey Release
 
-            نسخه رسمی ۱.۱.۵ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۱.۶ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های این نسخه:
-            - **پشتیبانی از سه سطح تراکم شبکه (۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰):** اضافه شدن تست فوری شبکه‌های متراکم ۳۰×۳۰ با ۹۰۰ نقطه اسکن و بیش از ۳۶۰۰ گره هموارسازی دو مکعبی در کنار شبکه‌های استاندارد ۱۰×۱۰ و ۲۰×۲۰.
-            - **ناوبری هوشمند یکپارچه بین هاب و تحلیل آفلاین:** با یک کلیک در هاب اصلی، شبکه مورد نظر مستقیماً بارگذاری شده و سطح سه‌بعدی و خط مبنای میانه به نمایش درمی‌آید.
+            - **تقویت معماری ژئوفیزیک و استقلال ۱۰۰٪ آفلاین:** بهینه‌سازی کامل لایه ذخیره‌سازی، پردازش میانه (Median Ground Zero) و فیلتر هموارسازی دو مکعبی (Bicubic Spline Interpolation) بدون نیاز به سخت‌افزار یا اتصال شبکه.
+            - **تست و بارگذاری سریع سه تراکم شبکه‌ای (۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰):** دسترسی مستقیم از هاب به شبکه‌های متنوع میدانی با ناوبری هوشمند یکپارچه.
             - **تضمین قطعی خروج از اسپلش‌اسکرین (`setKeepOnScreenCondition { false }`):** خروج صفر میلی‌ثانیه‌ای و روان بدون کوچک‌ترین گیر روی لوگو.
             - **نمایش شفاف وضعیت عدم اتصال:** برچسب استاندارد `STATUS: DISCONNECTED • NO HARDWARE CONNECTED`.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 9` جهت آپدیت روی نسخه‌های قبل.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 10` جهت آپدیت روی نسخه‌های قبل.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.1.5.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.5/Dnic-GeoScan-v1.1.5.apk)**
-          files: release/Dnic-GeoScan-v1.1.5.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.1.6.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.6/Dnic-GeoScan-v1.1.6.apk)**
+          files: release/Dnic-GeoScan-v1.1.6.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
