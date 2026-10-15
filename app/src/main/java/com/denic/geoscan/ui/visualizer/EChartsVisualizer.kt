@@ -199,8 +199,8 @@ fun EChartsVisualizer(
                         }
                     }
                 },
-                update = { webView ->
-                    webViewInstance = webView
+                update = { view ->
+                    webViewInstance = view as? WebView
                 }
             )
         }
