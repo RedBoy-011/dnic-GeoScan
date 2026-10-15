@@ -12,12 +12,12 @@ import com.denic.geoscan.ui.theme.DenicGeoScanTheme
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Official Android 12+ Splash Screen handler - guarantees clean exit to Compose
+        // Official Android 12+ Splash Screen handler:
+        // Calling installSplashScreen() before super.onCreate enables the Android 12+ WindowManager
+        // to automatically and smoothly dismiss the splash screen as soon as the first Compose frame renders.
+        // We do NOT register setOnExitAnimationListener without custom animations, as registering it disables
+        // the OS automatic removal and can freeze the splash screen on certain OEM ROMs.
         val splashScreen = installSplashScreen()
-        splashScreen.setKeepOnScreenCondition { false }
-        splashScreen.setOnExitAnimationListener { splashScreenView ->
-            splashScreenView.remove()
-        }
         super.onCreate(savedInstanceState)
 
         // Global crash catcher: Immediately renders a native Android view if anything fails

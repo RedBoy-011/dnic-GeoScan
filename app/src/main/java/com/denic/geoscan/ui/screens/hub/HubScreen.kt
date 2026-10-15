@@ -102,7 +102,10 @@ fun HubScreen(
         HubHeader()
 
         // Prominent Hardware Status Banner: Explicit Disconnected State
-        HardwareStatusBanner(pulseAlpha = pulseAlpha)
+        HardwareStatusBanner(
+            pulseAlpha = pulseAlpha,
+            onClick = { onNavigateTo(Screen.RemoteScan) }
+        )
 
         // Hero Card 1: Local Analysis (Primary & Recommended for Offline Survey Files)
         LocalAnalysisHeroCard(
@@ -143,9 +146,13 @@ private fun HubHeader() {
 }
 
 @Composable
-private fun HardwareStatusBanner(pulseAlpha: Float) {
+private fun HardwareStatusBanner(
+    pulseAlpha: Float,
+    onClick: (() -> Unit)? = null
+) {
+    val clickModifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
     GlassmorphicCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().then(clickModifier),
         borderColor = NeonOrange.copy(alpha = 0.5f),
         backgroundColor = DarkSurface
     ) {
