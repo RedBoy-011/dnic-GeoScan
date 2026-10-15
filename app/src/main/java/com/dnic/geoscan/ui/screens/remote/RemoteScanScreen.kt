@@ -63,6 +63,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dnic.geoscan.data.bluetooth.BluetoothConnectionState
 import com.dnic.geoscan.data.bluetooth.BluetoothDeviceModel
 import com.dnic.geoscan.ui.components.GlassmorphicCard
+import com.dnic.geoscan.ui.visualizer.EChartsVisualizer
+import com.dnic.geoscan.ui.visualizer.VisualizerViewMode
 import com.dnic.geoscan.ui.theme.DarkBase
 import com.dnic.geoscan.ui.theme.DarkSurface
 import com.dnic.geoscan.ui.theme.DarkSurfaceElevated
@@ -389,38 +391,15 @@ fun RemoteScanScreen(
             }
         }
 
-        // 3D Visualizer Surface Viewport Placeholder
-        GlassmorphicCard(
+        // 3D Visualizer Surface & 2D Heatmap Engine (Apache ECharts 3D)
+        EChartsVisualizer(
+            points = scannedPoints,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp),
-            borderColor = GlassBorderHighlighted
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.ViewInAr,
-                    contentDescription = "3D Visualizer Placeholder",
-                    tint = NeonGreen.copy(alpha = 0.7f),
-                    modifier = Modifier.size(52.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = if (scannedPoints.isNotEmpty()) "${scannedPoints.size} SPATIAL POINTS LOGGED" else "3D SURFACE READY",
-                    style = Typography.titleLarge,
-                    color = TextPrimary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (isScanning) "Streaming real-time coordinates to ECharts 3D (Phase 3)..." else "Connect and click Start Scan to plot data",
-                    style = Typography.bodyMedium,
-                    color = TextSecondary
-                )
-            }
-        }
+                .height(340.dp),
+            initialMode = VisualizerViewMode.SURFACE_3D,
+            baseline = 0f
+        )
     }
 
     // Bluetooth Paired Devices Selection Dialog

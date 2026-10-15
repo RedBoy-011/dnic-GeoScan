@@ -45,10 +45,14 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dnic.geoscan.data.model.ScanDataset
+import com.dnic.geoscan.data.model.ScanPoint
 import com.dnic.geoscan.data.model.ScanStatistics
 import com.dnic.geoscan.ui.components.GlassmorphicCard
+import com.dnic.geoscan.ui.visualizer.EChartsVisualizer
+import com.dnic.geoscan.ui.visualizer.VisualizerViewMode
 import com.dnic.geoscan.ui.theme.DarkBase
 import com.dnic.geoscan.ui.theme.DarkSurface
 import com.dnic.geoscan.ui.theme.DarkSurfaceElevated
@@ -328,46 +332,18 @@ fun LocalAnalysisScreen(
             }
         }
 
-        // Offline 3D Surface Viewport Placeholder
-        GlassmorphicCard(
+        // 3D Visualizer Surface & 2D Heatmap Engine (Apache ECharts 3D)
+        val visualizerPoints = remember(dataset) {
+            dataset?.points?.map { ScanPoint(it.x, it.y, it.normalizedZ) } ?: emptyList()
+        }
+        EChartsVisualizer(
+            points = visualizerPoints,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(260.dp),
-            borderColor = if (dataset != null) GlassBorderCyan else GlassBorder
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Layers,
-                    contentDescription = "Offline 3D Viewport Placeholder",
-                    tint = if (dataset != null) NeonCyan else NeonCyan.copy(alpha = 0.5f),
-                    modifier = Modifier.size(52.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = if (dataset != null) {
-                        "${dataset!!.points.size} NORMALIZED POINTS READY FOR 3D"
-                    } else {
-                        "OFFLINE 3D VISUALIZATION CANVAS"
-                    },
-                    style = Typography.titleLarge,
-                    color = TextPrimary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = if (dataset != null) {
-                        "Median baseline calculated (${String.format("%.1f", dataset!!.statistics.groundZeroMedian)} µT). Ready for ECharts 3D."
-                    } else {
-                        "Open a CSV/TXT file to calculate Ground Zero and render 3D surface"
-                    },
-                    style = Typography.bodyMedium,
-                    color = TextSecondary
-                )
-            }
-        }
+                .height(340.dp),
+            initialMode = VisualizerViewMode.SURFACE_3D,
+            baseline = 0f
+        )
     }
 }
 

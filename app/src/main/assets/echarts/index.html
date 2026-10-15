@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>dnic GeoScan 3D Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #070A12;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+        }
+        #chart-container {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 50%, #0E1626 0%, #070A12 100%);
+        }
+        #empty-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #64748B;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-align: center;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .hud-label {
+            position: absolute;
+            bottom: 8px;
+            left: 12px;
+            font-size: 10px;
+            color: #00FF9D;
+            letter-spacing: 0.5px;
+            font-family: monospace;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+    </style>
+    <!-- Load local offline bundled Apache ECharts & ECharts-GL -->
+    <script src="echarts.min.js"></script>
+    <script src="echarts-gl.min.js"></script>
+</head>
+<body>
+    <div id="chart-container"></div>
+    <div id="empty-overlay">
+        <span>AWAITING SPATIAL SCAN DATA...</span>
+    </div>
+    <div class="hud-label" id="hud-status">ENGINE: ECHARTS 3D • GL_READY</div>
+
+    <script>
+        let myChart = null;
+        let currentModeIs3D = true;
+        let cachedData = [];
+        let cachedStats = null;
+
+        // Initialize ECharts instance
+        function initChart() {
+            const container = document.getElementById('chart-container');
+            myChart = echarts.init(container, 'dark', { renderer: 'canvas' });
+
+            window.addEventListener('resize', () => {
+                if (myChart) myChart.resize();
+            });
+
+            // Notify Android that chart container is ready
+            if (window.AndroidBridge && window.AndroidBridge.onChartReady) {
+                window.AndroidBridge.onChartReady();
+            }
+        }
+
+        /**
+         * Renders or updates scan data.
+         * @param {string|Array} pointsJson JSON array of [x, y, z] or [{x, y, zValue}]
+         * @param {boolean} is3D True for 3D Surface View, False for 2D Heatmap View
+         * @param {number} baseline Ground Zero baseline value (median)
+         */
+        function renderScanData(pointsJson, is3D, baseline = 0) {
+            const overlay = document.getElementById('empty-overlay');
+            currentModeIs3D = is3D;
+
+            let points = [];
+            if (typeof pointsJson === 'string') {
+                try {
+                    points = JSON.parse(pointsJson);
+                } catch (e) {
+                    console.error("Failed to parse points JSON", e);
+                    return;
+                }
+            } else {
+                points = pointsJson;
+            }
+
+            if (!points || points.length === 0) {
+                if (overlay) overlay.style.display = 'flex';
+                if (myChart) myChart.clear();
+                return;
+            }
+
+            if (overlay) overlay.style.display = 'none';
+
+            // Normalize points to standard format [x, y, z]
+            let formattedData = [];
+            let minZ = Infinity;
+            let maxZ = -Infinity;
+            let minX = Infinity, maxX = -Infinity;
+            let minY = Infinity, maxY = -Infinity;
+
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i];
+                let x, y, z;
+                if (Array.isArray(p)) {
+                    x = p[0]; y = p[1]; z = p[2];
+                } else {
+                    x = p.x; y = p.y;
+                    z = (p.normalizedZ !== undefined) ? p.normalizedZ : (p.zValue !== undefined ? p.zValue : (p.z !== undefined ? p.z : 0));
+                }
+
+                if (z < minZ) minZ = z;
+                if (z > maxZ) maxZ = z;
+                if (x < minX) minX = x;
+                if (x > maxX) maxX = x;
+                if (y < minY) minY = y;
+                if (y > maxY) maxY = y;
+
+                formattedData.push([x, y, z]);
+            }
+
+            if (minZ === maxZ) {
+                minZ -= 1;
+                maxZ += 1;
+            }
+
+            cachedData = formattedData;
+            cachedStats = { minZ, maxZ, minX, maxX, minY, maxY, baseline };
+
+            if (is3D) {
+                render3DSurface(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
+            } else {
+                render2DHeatmap(formattedData, minZ, maxZ, baseline, minX, maxX, minY, maxY);
+            }
+
+            const hud = document.getElementById('hud-status');
+            if (hud) {
+                hud.innerText = `POINTS: ${formattedData.length} • MODE: ${is3D ? "3D SURFACE" : "2D HEATMAP"}`;
+            }
+        }
+
+        /**
+         * Render 3D Surface / Bar3D Plot
+         */
+        function render3DSurface(data, minZ, maxZ, baseline, minX, maxX, minY, maxY) {
+            // Spectrum colors: Blue/Cyan (Negative Anomaly/Cavity) -> Green (Nominal Baseline) -> Red (Positive Metal)
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    formatter: function (params) {
+                        return `<b>X:</b> ${params.value[0]} | <b>Y:</b> ${params.value[1]}<br/><b>Z:</b> ${params.value[2].toFixed(2)} µT`;
+                    }
+                },
+                visualMap: {
+                    show: true,
+                    min: minZ,
+                    max: maxZ,
+                    dimension: 2,
+                    inRange: {
+                        color: ['#00E5FF', '#0077FF', '#00FF9D', '#FFD600', '#FF2A55']
+                    },
+                    textStyle: {
+                        color: '#94A3B8',
+                        fontFamily: 'monospace',
+                        fontSize: 10
+                    },
+                    bottom: 24,
+                    right: 8,
+                    itemWidth: 10,
+                    itemHeight: 70
+                },
+                xAxis3D: {
+                    type: 'value',
+                    name: 'X',
+                    min: minX,
+                    max: maxX,
+                    axisLabel: { textStyle: { color: '#64748B', fontSize: 9 } },
+                    axisLine: { lineStyle: { color: '#334155' } },
+                    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                },
+                yAxis3D: {
+                    type: 'value',
+                    name: 'Y',
+                    min: minY,
+                    max: maxY,
+                    axisLabel: { textStyle: { color: '#64748B', fontSize: 9 } },
+                    axisLine: { lineStyle: { color: '#334155' } },
+                    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                },
+                zAxis3D: {
+                    type: 'value',
+                    name: 'Z (µT)',
+                    axisLabel: { textStyle: { color: '#00FF9D', fontSize: 9 } },
+                    axisLine: { lineStyle: { color: '#334155' } },
+                    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                },
+                grid3D: {
+                    boxWidth: 100,
+                    boxDepth: (maxY - minY + 1) / Math.max(1, maxX - minX + 1) * 100,
+                    boxHeight: 40,
+                    axisPointer: {
+                        lineStyle: { color: '#00E5FF' }
+                    },
+                    viewControl: {
+                        projection: 'perspective',
+                        autoRotate: false,
+                        beta: 40,
+                        alpha: 30,
+                        distance: 210,
+                        minDistance: 80,
+                        maxDistance: 400
+                    },
+                    light: {
+                        main: {
+                            intensity: 1.4,
+                            shadow: false
+                        },
+                        ambient: {
+                            intensity: 0.6
+                        }
+                    }
+                },
+                series: [{
+                    type: 'surface',
+                    wireframe: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(0, 229, 255, 0.2)',
+                            width: 0.8
+                        }
+                    },
+                    shading: 'lambert',
+                    data: data
+                }]
+            };
+
+            myChart.setOption(option, true);
+        }
+
+        /**
+         * Render 2D Top-Down Heatmap
+         */
+        function render2DHeatmap(data, minZ, maxZ, baseline, minX, maxX, minY, maxY) {
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    position: 'top',
+                    formatter: function (params) {
+                        return `<b>X:</b> ${params.value[0]} | <b>Y:</b> ${params.value[1]}<br/><b>Z:</b> ${params.value[2].toFixed(2)} µT`;
+                    }
+                },
+                grid: {
+                    top: 24,
+                    bottom: 40,
+                    left: 40,
+                    right: 48
+                },
+                xAxis: {
+                    type: 'value',
+                    min: minX,
+                    max: maxX,
+                    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+                    axisLine: { lineStyle: { color: '#334155' } },
+                    axisLabel: { color: '#94A3B8', fontSize: 10 }
+                },
+                yAxis: {
+                    type: 'value',
+                    min: minY,
+                    max: maxY,
+                    inverse: false,
+                    splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+                    axisLine: { lineStyle: { color: '#334155' } },
+                    axisLabel: { color: '#94A3B8', fontSize: 10 }
+                },
+                visualMap: {
+                    show: true,
+                    min: minZ,
+                    max: maxZ,
+                    inRange: {
+                        color: ['#00E5FF', '#0077FF', '#00FF9D', '#FFD600', '#FF2A55']
+                    },
+                    textStyle: {
+                        color: '#94A3B8',
+                        fontFamily: 'monospace',
+                        fontSize: 10
+                    },
+                    right: 4,
+                    top: 'center',
+                    itemWidth: 10,
+                    itemHeight: 120
+                },
+                series: [{
+                    name: 'Magnetic Heatmap',
+                    type: 'heatmap',
+                    data: data,
+                    progressive: 1000,
+                    animation: false
+                }]
+            };
+
+            myChart.setOption(option, true);
+        }
+
+        /**
+         * Switch between 3D and 2D mode with existing cached data
+         */
+        function toggleViewMode(is3D) {
+            currentModeIs3D = is3D;
+            if (cachedData && cachedData.length > 0 && cachedStats) {
+                renderScanData(cachedData, is3D, cachedStats.baseline);
+            }
+        }
+
+        // Initialize when window finishes loading
+        window.onload = initChart;
+    </script>
+</body>
+</html>
