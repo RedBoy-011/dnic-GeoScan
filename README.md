@@ -15,8 +15,9 @@
 
 برای دریافت آخرین نسخه رسمی و تایید شده برنامه (**Version 1.0.0**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
 
-* **[⬇️ دانلود مستقیم نسخه رسمی از بخش GitHub Releases](https://github.com/RedBoy-011/dnic-GeoScan/releases/latest)**
-* **[📦 دانلود فایل APK از آرتیفکت‌های GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)** (با نام `denic-GeoScan-v1.0.0-apk`)
+* **[🚀 دانلود مستقیم فایل نصبی رسمی denic-GeoScan-v1.0.0.apk (حجم ۱۶.۷ مگابایت)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.0.0/denic-GeoScan-v1.0.0.apk)**
+* **[🏷️ صفحه رسمی انتشار نسخه در گیت‌هاب (GitHub Releases v1.0.0)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.0.0)**
+* **[📦 دانلود از آرتیفکت‌های پایپ‌لاین تایید شده GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions/runs/38775325907)** (آرتیفکت `denic-GeoScan-v1.0.0-apk`)
 * **مسیر فایل محلی (Local APK Path):**
   ```text
   release/denic-GeoScan-v1.0.0.apk
