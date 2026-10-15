@@ -59,6 +59,12 @@ class LocalAnalysisViewModel(
         initialValue = emptyList()
     )
 
+    init {
+        // Pre-load a baseline 10x10 geophysical reference grid on launch
+        // Ensures Local Analysis is immediately functional, interactive and stable
+        loadSampleGrid(10, 10)
+    }
+
     fun toggleSmoothing() {
         _isSmoothingEnabled.value = !_isSmoothingEnabled.value
     }

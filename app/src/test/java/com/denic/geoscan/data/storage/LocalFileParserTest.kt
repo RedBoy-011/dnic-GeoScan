@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.data.storage
+package com.denic.geoscan.data.storage
 
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -60,5 +60,17 @@ class LocalFileParserTest {
         // Point at (2, 1)
         val p21 = points.first { it.x == 2 && it.y == 1 }
         assertEquals(120f, p21.zValue, 0.001f)
+    }
+
+    @Test
+    fun parseLines_spaceDelimitedGrid_extractsPoints() {
+        val lines = listOf(
+            "100.5 105.2 110.8",
+            "102.1 108.7 120.3"
+        )
+        val points = parser.parseLines(lines)
+        assertEquals(6, points.size)
+        assertEquals(100.5f, points[0].zValue, 0.001f)
+        assertEquals(120.3f, points[5].zValue, 0.001f)
     }
 }

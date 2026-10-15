@@ -76,7 +76,7 @@ class LocalFileParser {
         if (clean.endsWith("#")) clean = clean.substring(0, clean.length - 1)
 
         // Split by comma, semicolon, tab, or whitespace sequence
-        return clean.split(Regex("[,;\\t]+")).map { it.trim() }.filter { it.isNotEmpty() }
+        return clean.split(Regex("[,;\\t\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
     }
 
     private fun parseTripletLines(lines: List<String>): List<ScanPoint> {

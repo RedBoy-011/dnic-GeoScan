@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.7.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.8.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.1.7-apk
-          path: release/Dnic-GeoScan-v1.1.7.apk
+          name: Dnic-GeoScan-v1.1.8-apk
+          path: release/Dnic-GeoScan-v1.1.8.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,23 +52,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.1.7
-          name: "Dnic-GeoScan v1.1.7 - Official Release"
+          tag_name: v1.1.8
+          name: "Dnic-GeoScan v1.1.8 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.1.7 - Zero-Lag Splash, Direct Mode Switch & WebGL Safe Fallback
+            ## 📱 Dnic-GeoScan v1.1.8 - Universal Delimiter Parser & Preloaded Geophysical Baseline
 
-            نسخه رسمی ۱.۱.۷ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۱.۸ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های این نسخه:
-            - **حذف قطعی انیمیشن لنگر انداختن اسپلش (`setOnExitAnimationListener { it.remove() }`):** خروج بدون وقفه از Splash Screen و انتقال آنی به فریم‌های Jetpack Compose.
-            - **سوییچر دسترسی سریع هدر (Persistent Quick-Switch Mode Pills):** دکمه‌های ناوبری فوری یک‌لمسی `LOCAL` و `REMOTE` در بالای تمام صفحات برای جابه‌جایی آنی میان تحلیل آفلاین و اسکن آنلاین.
-            - **شتاب‌دهنده سخت‌افزاری و فال‌بک امن WebGL (Safe 2D Fallback):** بازگشت خودکار به هیت‌مپ دوبعدی در صورت بروز هرگونه ناسازگاری یا محدودیت در شیدرهای سه‌بعدی WebGL.
-            - **اولویت کامل به تحلیل آفلاین (Local Analysis):** پردازش مستقل شبکه‌های ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰، نرمال‌سازی میانه (Median Ground Zero) و درونیابی دو مکعبی.
-            - **نمایش شفاف عدم اتصال سخت‌افزار:** نمایش غیراختلالی وضعیت `STATUS: DISCONNECTED • NO HARDWARE CONNECTED`.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با کلید یکتا و دائمی با `versionCode = 11`.
+            - **پیش‌بارگذاری آنی داده‌های مرجع ژئوفیزیکی در ورود به آنالیز محلی:** بارگذاری پیش‌فرض شبکه استاندارد ۱۰×۱۰ در شروع به کار جهت تضمین پایداری، تست بدون نیاز به فایل و محاسبه بلادرنگ خط مبنای زمین (Ground Zero Median).
+            - **پشتیبانی سراسری از جداکننده‌های فاصله‌ای (Space-delimited Matrix & Triplet):** ارتقای پارسر محلی برای خواندن فایل‌های متنی خروجی Surfer و مگنتومترهای تجاری که از Space یا Tab به عنوان جداکننده استفاده می‌کنند.
+            - **تنظیم قطعی مدت زمان اسپلش در تم سیستمی (`windowSplashScreenAnimationDuration = 100`):** اطلاع‌رسانی صریح به WindowManager جهت عدم توقف روی انیمیشن‌های سیستم‌عامل.
+            - **ناوبری ارگونومیک با سوییچرهای بالایی `LOCAL` و `REMOTE`:** جابه‌جایی فوری بدون نیاز به بازگشت به منوها.
+            - **نمایش شفاف وضعیت عدم اتصال سخت‌افزار:** برچسب استاندارد `STATUS: DISCONNECTED • NO HARDWARE CONNECTED`.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با کلید دائم معتبر با `versionCode = 12`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.1.7.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.7/Dnic-GeoScan-v1.1.7.apk)**
-          files: release/Dnic-GeoScan-v1.1.7.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.1.8.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.8/Dnic-GeoScan-v1.1.8.apk)**
+          files: release/Dnic-GeoScan-v1.1.8.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
