@@ -54,9 +54,10 @@ class AppIntegrityTest {
             ScanPoint(2, 0, 500f)
         )
         val dataset = normalizer.normalize(rawPoints, "test.csv", "1 KB")
-        assertEquals(200f, dataset.statistics.groundZeroMedian, 0.001f)
-        assertEquals(1, dataset.statistics.cavityCount) // 100 is below 200 - threshold
-        assertEquals(1, dataset.statistics.metalCount)  // 500 is above 200 + threshold
+        assertEquals(300f, dataset.statistics.groundZeroMedian, 0.001f)
+        assertEquals(2, dataset.statistics.cavityCount) // 100, 200 below 300
+        assertEquals(2, dataset.statistics.metalCount)  // 400, 500 above 300
+        assertEquals(1, dataset.statistics.neutralCount) // 300 at baseline
     }
 
     @Test
