@@ -45,6 +45,7 @@ import com.denic.geoscan.ui.theme.GlassBackground
 import com.denic.geoscan.ui.theme.GlassBorder
 import com.denic.geoscan.ui.theme.NeonCyan
 import com.denic.geoscan.ui.theme.NeonGreen
+import com.denic.geoscan.ui.theme.NeonRed
 import com.denic.geoscan.ui.theme.TextMuted
 import com.denic.geoscan.ui.theme.TextPrimary
 import com.denic.geoscan.ui.theme.TextSecondary
