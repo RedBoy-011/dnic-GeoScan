@@ -104,7 +104,8 @@ fun HubScreen(
         // Prominent Hardware Status Banner: Explicit Disconnected State
         HardwareStatusBanner(
             pulseAlpha = pulseAlpha,
-            onClick = { onNavigateTo(Screen.RemoteScan) }
+            onNavigateToLocal = { onNavigateTo(Screen.LocalAnalysis) },
+            onConnectHardware = { onNavigateTo(Screen.RemoteScan) }
         )
 
         // Hero Card 1: Local Analysis (Primary & Recommended for Offline Survey Files)
@@ -148,61 +149,99 @@ private fun HubHeader() {
 @Composable
 private fun HardwareStatusBanner(
     pulseAlpha: Float,
-    onClick: (() -> Unit)? = null
+    onNavigateToLocal: () -> Unit,
+    onConnectHardware: () -> Unit
 ) {
-    val clickModifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
     GlassmorphicCard(
-        modifier = Modifier.fillMaxWidth().then(clickModifier),
-        borderColor = NeonOrange.copy(alpha = 0.5f),
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = NeonOrange.copy(alpha = 0.6f),
         backgroundColor = DarkSurface
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(12.dp)
-                        .clip(CircleShape)
-                        .alpha(pulseAlpha)
-                        .background(NeonOrange)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Column {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .alpha(pulseAlpha)
+                            .background(NeonOrange)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "STATUS: DISCONNECTED",
+                                style = Typography.labelLarge,
+                                color = NeonOrange,
+                                letterSpacing = 0.5.sp
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                text = "• NO HARDWARE CONNECTED",
+                                style = Typography.labelSmall,
+                                color = NeonOrange.copy(alpha = 0.85f)
+                            )
+                        }
                         Text(
-                            text = "STATUS: DISCONNECTED",
-                            style = Typography.labelLarge,
-                            color = NeonOrange,
-                            letterSpacing = 0.5.sp
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "• NO HARDWARE CONNECTED",
+                            text = "Bluetooth Standby (SPP 1101) • Offline mode 100% active",
                             style = Typography.labelSmall,
-                            color = NeonOrange.copy(alpha = 0.85f)
+                            color = TextSecondary,
+                            fontSize = 11.sp
                         )
                     }
-                    Text(
-                        text = "Bluetooth Standby (SPP 1101) • Local Analysis Ready & Fully Operational",
-                        style = Typography.labelSmall,
-                        color = TextSecondary,
-                        fontSize = 11.sp
-                    )
                 }
+
+                Icon(
+                    imageVector = Icons.Outlined.BluetoothDisabled,
+                    contentDescription = null,
+                    tint = NeonOrange.copy(alpha = 0.8f),
+                    modifier = Modifier.size(22.dp)
+                )
             }
 
-            Icon(
-                imageVector = Icons.Outlined.BluetoothDisabled,
-                contentDescription = null,
-                tint = NeonOrange.copy(alpha = 0.8f),
-                modifier = Modifier.size(22.dp)
-            )
+            // Direct 1-tap quick actions
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onNavigateToLocal,
+                    modifier = Modifier.weight(1.2f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonGreen,
+                        containerColor = NeonGreen.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                ) {
+                    Icon(imageVector = Icons.Outlined.FolderOpen, contentDescription = null, modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "Use Local Mode", style = Typography.labelSmall)
+                }
+
+                OutlinedButton(
+                    onClick = onConnectHardware,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonCyan,
+                        containerColor = NeonCyan.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                ) {
+                    Icon(imageVector = Icons.Outlined.Sensors, contentDescription = null, modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(text = "Connect Sensor", style = Typography.labelSmall)
+                }
+            }
         }
     }
 }
