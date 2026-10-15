@@ -76,6 +76,7 @@ import com.denic.geoscan.ui.theme.Typography
 @Composable
 fun HubScreen(
     onNavigateTo: (Screen) -> Unit,
+    onNavigateToGridDemo: ((Int) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -105,7 +106,8 @@ fun HubScreen(
 
         // Hero Card 1: Local Analysis (Primary & Recommended for Offline Survey Files)
         LocalAnalysisHeroCard(
-            onClick = { onNavigateTo(Screen.LocalAnalysis) }
+            onClick = { onNavigateTo(Screen.LocalAnalysis) },
+            onGridDemoClick = onNavigateToGridDemo
         )
 
         // Hero Card 2: Remote Scan (Real-time SPP Bluetooth Stream)
@@ -199,7 +201,10 @@ private fun HardwareStatusBanner(pulseAlpha: Float) {
 }
 
 @Composable
-private fun LocalAnalysisHeroCard(onClick: () -> Unit) {
+private fun LocalAnalysisHeroCard(
+    onClick: () -> Unit,
+    onGridDemoClick: ((Int) -> Unit)? = null
+) {
     val cardShape = RoundedCornerShape(20.dp)
     Box(
         modifier = Modifier
@@ -299,7 +304,9 @@ private fun LocalAnalysisHeroCard(onClick: () -> Unit) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 OutlinedButton(
-                    onClick = onClick,
+                    onClick = {
+                        if (onGridDemoClick != null) onGridDemoClick(10) else onClick()
+                    },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -311,7 +318,9 @@ private fun LocalAnalysisHeroCard(onClick: () -> Unit) {
                     Text(text = "⚡ 10×10 Grid Demo", style = Typography.labelSmall)
                 }
                 OutlinedButton(
-                    onClick = onClick,
+                    onClick = {
+                        if (onGridDemoClick != null) onGridDemoClick(20) else onClick()
+                    },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.outlinedButtonColors(

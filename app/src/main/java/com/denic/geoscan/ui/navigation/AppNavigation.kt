@@ -110,11 +110,30 @@ fun AppNavigation(
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    onNavigateToGridDemo = { size ->
+                        navController.navigate("local_analysis?grid=$size") {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
-            composable(Screen.LocalAnalysis.route) {
-                LocalAnalysisScreen()
+            composable(
+                route = "local_analysis?grid={grid}",
+                arguments = listOf(
+                    androidx.navigation.navArgument("grid") {
+                        type = androidx.navigation.NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    }
+                )
+            ) { backStackEntry ->
+                val gridArg = backStackEntry.arguments?.getString("grid")?.toIntOrNull()
+                LocalAnalysisScreen(initialGridSize = gridArg)
             }
             composable(Screen.RemoteScan.route) {
                 RemoteScanScreen()
@@ -201,7 +220,7 @@ private fun GlassmorphicBottomNavBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Screen.items.forEach { screen ->
-                val isSelected = currentRoute == screen.route
+                val isSelected = currentRoute == screen.route || currentRoute.startsWith("${screen.route}?")
                 val activeColor = when (screen) {
                     Screen.Hub -> NeonCyan
                     Screen.LocalAnalysis -> NeonGreen

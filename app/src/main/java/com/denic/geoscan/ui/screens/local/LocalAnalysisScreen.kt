@@ -69,9 +69,15 @@ import com.denic.geoscan.ui.visualizer.VisualizerViewMode
 
 @Composable
 fun LocalAnalysisScreen(
+    initialGridSize: Int? = null,
     modifier: Modifier = Modifier,
     viewModel: LocalAnalysisViewModel = viewModel()
 ) {
+    androidx.compose.runtime.LaunchedEffect(initialGridSize) {
+        if (initialGridSize != null) {
+            viewModel.loadSampleGrid(initialGridSize, initialGridSize)
+        }
+    }
     val dataset by viewModel.dataset.collectAsState()
     val visualizerPoints by viewModel.visualizerPoints.collectAsState()
     val isSmoothingEnabled by viewModel.isSmoothingEnabled.collectAsState()
