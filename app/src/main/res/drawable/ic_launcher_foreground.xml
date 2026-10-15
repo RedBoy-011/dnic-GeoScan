@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Glassmorphic Hexagonal Shield Outline -->
+    <path
+        android:strokeColor="#3300FF9D"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M54,20 L80,35 L80,73 L54,88 L28,73 L28,35 Z" />
+
+    <!-- 3D Perspective Ground Grid (Magnetic Undulation & Depth) -->
+    <!-- Grid Horizon & Elevation Waves -->
+    <path
+        android:strokeColor="#FF2A55"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:pathData="M32,48 Q44,40 54,44 T76,46" />
+
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:pathData="M30,58 Q42,50 54,55 T78,56" />
+
+    <path
+        android:strokeColor="#00FF9D"
+        android:strokeWidth="2.0"
+        android:strokeLineCap="round"
+        android:pathData="M28,68 Q40,62 54,67 T80,66" />
+
+    <!-- 3D Perspective Longitudinal Transversal Lines -->
+    <path
+        android:strokeColor="#4000E5FF"
+        android:strokeWidth="1.2"
+        android:pathData="M36,46 L32,69 M44,42 L42,67 M54,44 L54,67 M64,44 L66,66 M72,46 L76,66" />
+
+    <!-- PCB Digital Electronic Traces (dnic Identity) -->
+    <!-- Top PCB Traces -->
+    <path
+        android:strokeColor="#00FF9D"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M54,22 L54,32 L46,38" />
+
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M40,26 L48,32 L48,38" />
+
+    <path
+        android:strokeColor="#FF2A55"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M68,26 L60,32 L60,38" />
+
+    <!-- Bottom PCB Traces exiting into substrate -->
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M42,67 L38,78 L34,78" />
+
+    <path
+        android:strokeColor="#00FF9D"
+        android:strokeWidth="1.4"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M54,67 L54,82" />
+
+    <path
+        android:strokeColor="#FF2A55"
+        android:strokeWidth="1.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M66,66 L70,78 L74,78" />
+
+    <!-- PCB Pads & Sensor Vias (Digital Electronic Nodes) -->
+    <path
+        android:fillColor="#00FF9D"
+        android:pathData="M54,22m-2,0a2,2 0 1,1 4,0a2,2 0 1,1 -4,0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M40,26m-1.5,0a1.5,1.5 0 1,1 3,0a1.5,1.5 0 1,1 -3,0" />
+    <path
+        android:fillColor="#FF2A55"
+        android:pathData="M68,26m-1.5,0a1.5,1.5 0 1,1 3,0a1.5,1.5 0 1,1 -3,0" />
+
+    <!-- Sensor focal center (Magnetic peak detection spot) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,55m-2.2,0a2.2,2.2 0 1,1 4.4,0a2.2,2.2 0 1,1 -4.4,0" />
+    <path
+        android:strokeColor="#00E5FF"
+        android:strokeWidth="0.8"
+        android:pathData="M54,55m-4,0a4,4 0 1,1 8,0a4,4 0 1,1 -8,0" />
+
+    <!-- Bottom Via Pads -->
+    <path
+        android:fillColor="#00FF9D"
+        android:pathData="M54,82m-1.8,0a1.8,1.8 0 1,1 3.6,0a1.8,1.8 0 1,1 -3.6,0" />
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M34,78m-1.5,0a1.5,1.5 0 1,1 3,0a1.5,1.5 0 1,1 -3,0" />
+    <path
+        android:fillColor="#FF2A55"
+        android:pathData="M74,78m-1.5,0a1.5,1.5 0 1,1 3,0a1.5,1.5 0 1,1 -3,0" />
+</vector>
