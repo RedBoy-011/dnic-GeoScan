@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.screens.local
+package com.denic.geoscan.ui.screens.local
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -131,7 +131,8 @@ fun LocalAnalysisScreen(
                         isSmoothingEnabled = isSmoothingEnabled,
                         onOpenPicker = openPicker,
                         onClearDataset = { viewModel.clearDataset() },
-                        onToggleSmoothing = { viewModel.toggleSmoothing() }
+                        onToggleSmoothing = { viewModel.toggleSmoothing() },
+                        onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) }
                     )
 
                     dataset?.let { data ->
@@ -173,7 +174,8 @@ fun LocalAnalysisScreen(
                     isSmoothingEnabled = isSmoothingEnabled,
                     onOpenPicker = openPicker,
                     onClearDataset = { viewModel.clearDataset() },
-                    onToggleSmoothing = { viewModel.toggleSmoothing() }
+                    onToggleSmoothing = { viewModel.toggleSmoothing() },
+                    onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) }
                 )
 
                 dataset?.let { data ->
@@ -249,7 +251,8 @@ private fun FileSourceCard(
     isSmoothingEnabled: Boolean,
     onOpenPicker: () -> Unit,
     onClearDataset: () -> Unit,
-    onToggleSmoothing: () -> Unit
+    onToggleSmoothing: () -> Unit,
+    onLoadSampleGrid: (Int, Int) -> Unit
 ) {
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
@@ -366,6 +369,47 @@ private fun FileSourceCard(
                                     modifier = Modifier.size(16.dp)
                                 )
                             }
+                        }
+                    }
+                }
+            }
+
+            // Quick Demo Survey Grid (Offline test without external files)
+            if (dataset == null && !isLoading) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = "QUICK OFFLINE SURVEY DEMO (TAP TO TEST)",
+                        style = Typography.labelSmall,
+                        color = TextMuted,
+                        letterSpacing = 0.8.sp
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { onLoadSampleGrid(10, 10) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = NeonCyan,
+                                containerColor = NeonCyan.copy(alpha = 0.08f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                        ) {
+                            Text(text = "⚡ 10×10 Grid", style = Typography.labelSmall)
+                        }
+                        OutlinedButton(
+                            onClick = { onLoadSampleGrid(20, 20) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = NeonYellow,
+                                containerColor = NeonYellow.copy(alpha = 0.08f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
+                        ) {
+                            Text(text = "⚡ 20×20 Grid", style = Typography.labelSmall)
                         }
                     }
                 }

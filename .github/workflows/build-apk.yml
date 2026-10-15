@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.0.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.1.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.1.0-apk
-          path: release/Dnic-GeoScan-v1.1.0.apk
+          name: Dnic-GeoScan-v1.1.1-apk
+          path: release/Dnic-GeoScan-v1.1.1.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,22 +52,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.1.0
-          name: "Dnic-GeoScan v1.1.0 - Official Release"
+          tag_name: v1.1.1
+          name: "Dnic-GeoScan v1.1.1 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.1.0 - Major Navigation & Offline Analysis Release
+            ## 📱 Dnic-GeoScan v1.1.1 - Offline Grids & Instant Inspection Release
 
-            نسخه رسمی ۱.۱.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۱.۱ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های این نسخه:
-            - **صفحه فرود و هاب عملیاتی (Landing Mission Hub):** طراحی رابط کاربری دوکارته مدرن برای انتخاب سریع حالت و شروع آنی عملیات.
-            - **اولویت ویژه حالت تحلیل محلی (Local Analysis First):** باز کردن و آنالیز مستقیم شبکه‌های ۱۰×۱۰، ۲۰×۲۰ و سفارشی (CSV/TXT) کاملاً آفلاین و ۱۰۰٪ مستقل از بلوتوث.
-            - **حل قطعی اسپلش‌اسکرین (Official Android 12+ SplashScreen API):** پیاده‌سازی کتابخانه رسمی `androidx.core:core-splashscreen` جهت انتقال بدون وقفه و صفر میلی‌ثانیه‌ای به Compose.
-            - **نمایش شفاف وضعیت عدم اتصال:** برچسب واضح و حرفه‌ای `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه راهنمای وضعیت آماده‌باش.
-            - **ارتقای یکپارچه و مستقیم:** امضا با کلید اختصاصی دائم و افزایش به `versionCode = 4` جهت آپدیت درجا روی نسخه‌های قبل بدون نیاز به حذف برنامه.
+            - **شبیه‌ساز آفلاین فوری شبکه‌های ۱۰×۱۰ و ۲۰×۲۰:** اضافه شدن دکمه‌های تست سریع `⚡ 10×10 Grid` و `⚡ 20×20 Grid` جهت ارزیابی آنی گرادیان مغناطیسی، نرمال‌سازی میانه (Median Ground Zero)، و رندر سه‌بعدی سطحی بدون نیاز به فایل خارجی یا اتصال سخت‌افزار.
+            - **رفع قطعی گیر کردن روی اسپلش (Official Android 12+ SplashScreen API):** انتقال روان و بدون وقفه با کتابخانه استاندارد `androidx.core:core-splashscreen:1.0.1`.
+            - **صفحه فرود هاب عملیاتی (Landing Mission Hub):** طراحی مدرن کارت‌های دسترسی با اولویت تام حالت Local Analysis (آفلاین ۱۰۰٪).
+            - **نمایش شفاف وضعیت عدم اتصال:** برچسب واضح و غیرمسدودکننده `STATUS: DISCONNECTED • NO HARDWARE CONNECTED`.
+            - **ارتقای یکپارچه درجا (In-place Update):** امضا با کلید اختصاصی دائمی با `versionCode = 5` بدون نیاز به لغو نصب نسخه‌های قبل.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.1.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.0/Dnic-GeoScan-v1.1.0.apk)**
-          files: release/Dnic-GeoScan-v1.1.0.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.1.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.1/Dnic-GeoScan-v1.1.1.apk)**
+          files: release/Dnic-GeoScan-v1.1.1.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

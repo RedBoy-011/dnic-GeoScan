@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.screens.local
+package com.denic.geoscan.ui.screens.local
 
 import android.app.Application
 import android.net.Uri
@@ -122,6 +122,49 @@ class LocalAnalysisViewModel(
     fun clearDataset() {
         _dataset.value = null
         _errorMessage.value = null
+    }
+
+    /**
+     * Instantly synthesizes a realistic 10x10 or 20x20 geophysical survey grid for offline testing.
+     * Features background geomagnetic field, a positive ferromagnetic anomaly peak, and a negative void/cavity.
+     */
+    fun loadSampleGrid(width: Int = 10, height: Int = 10) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val points = mutableListOf<ScanPoint>()
+                val baseField = 48.5f // Nominal microtesla (µT)
+                for (y in 0 until height) {
+                    for (x in 0 until width) {
+                        val dxMetal = x - width * 0.35f
+                        val dyMetal = y - height * 0.35f
+                        val distMetal = kotlin.math.sqrt(dxMetal * dxMetal + dyMetal * dyMetal)
+
+                        val dxCavity = x - width * 0.70f
+                        val dyCavity = y - height * 0.70f
+                        val distCavity = kotlin.math.sqrt(dxCavity * dxCavity + dyCavity * dyCavity)
+
+                        val metalPeak = 16.5f * kotlin.math.exp(-distMetal / 1.4f)
+                        val cavityDip = -12.0f * kotlin.math.exp(-distCavity / 1.4f)
+                        val noise = ((x * 13 + y * 29) % 7 - 3) * 0.12f
+
+                        val z = baseField + metalPeak + cavityDip + noise
+                        points.add(ScanPoint(x = x, y = y, zValue = z))
+                    }
+                }
+                val normalizedData = normalizer.normalize(
+                    rawPoints = points,
+                    fileName = "demo_survey_${width}x${height}.csv",
+                    fileSizeFormatted = "${points.size * 18} B"
+                )
+                _dataset.value = normalizedData
+            } catch (e: Exception) {
+                _errorMessage.value = e.localizedMessage ?: "Failed to generate sample grid"
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     private fun formatFileSize(bytes: Long): String {
