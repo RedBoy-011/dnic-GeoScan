@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.0.1.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.0.2.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.0.1-apk
-          path: release/Dnic-GeoScan-v1.0.1.apk
+          name: Dnic-GeoScan-v1.0.2-apk
+          path: release/Dnic-GeoScan-v1.0.2.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,21 +52,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.0.1
-          name: "Dnic-GeoScan v1.0.1 - Official Release"
+          tag_name: v1.0.2
+          name: "Dnic-GeoScan v1.0.2 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.0.1
+            ## 📱 Dnic-GeoScan v1.0.2
 
-            نسخه رسمی و تایید شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی و بهینه‌سازی‌شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات این نسخه:
-            - ارتقای نسخه به ۱.۰.۱ (versionCode 2) جهت بروزرسانی مستقیم روی نسخه قبلی بدون نیاز به حذف برنامه
-            - امضای دائمی با کلید اختصاصی پایدار (Persistent Release Keystore) جهت رفع خطای نصب و تداخل امضا
-            - یکپارچه‌سازی نام برنامه با نام پروژه: **Dnic-GeoScan**
-            - ایمن‌سازی کامل چرخه حیات و هندلینگ پیشرفته خطاها
+            ### ✨ تغییرات و اصلاحات این نسخه:
+            - **حل قطعی توقف روی لوگو (Fix Splash Screen Hang):** لود غیرهمزمان و تاخیری ماژول ۳ بعدی WebView به همراه نمایش آنی و بدون بلاک رابط کاربری اصلی.
+            - **مدیریت استثناهای بومی (Native Error Fallback):** حذف خطای بلاک شدن فرآیند اجرای سیستم‌عامل و نمایش فوری گزارش تشخیصی در صورت بروز هرگونه خطای نادر.
+            - **سازگاری ۱۰۰٪ با تبلت‌ها و گوشی‌های سامسونگ:** تصحیح لایه‌بندی GPU و رندر ایمن بدون وابستگی سخت‌افزاری به شتاب‌دهنده گرافیکی ناسازگار.
+            - **ارتقای یکپارچه درون‌برنامه‌ای:** امکان نصب و بروزرسانی مستقیم بدون نیاز به حذف برنامه قبلی (Signed with persistent key, versionCode 3).
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.0.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.0.1/Dnic-GeoScan-v1.0.1.apk)**
-          files: release/Dnic-GeoScan-v1.0.1.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.0.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.0.2/Dnic-GeoScan-v1.0.2.apk)**
+          files: release/Dnic-GeoScan-v1.0.2.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

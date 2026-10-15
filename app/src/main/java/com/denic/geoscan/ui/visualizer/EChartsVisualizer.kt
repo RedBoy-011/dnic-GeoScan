@@ -69,21 +69,33 @@ fun EChartsVisualizer(
     var viewMode by remember { mutableStateOf(initialMode) }
     var webViewInstance by remember { mutableStateOf<WebView?>(null) }
     var isChartReady by remember { mutableStateOf(false) }
+    var isEngineMounted by remember { mutableStateOf(false) }
+    var engineError by remember { mutableStateOf<String?>(null) }
+
+    // Deferred mounting: Let Compose draw its first frame instantly to dismiss Android OS splash screen
+    LaunchedEffect(Unit) {
+        kotlinx.coroutines.delay(250)
+        isEngineMounted = true
+    }
 
     // Update WebView whenever points or projection view mode changes
-    LaunchedEffect(points, viewMode, isChartReady) {
+    LaunchedEffect(points, viewMode, isChartReady, isEngineMounted) {
         val webView = webViewInstance
-        if (webView != null && isChartReady) {
-            val jsonBuilder = StringBuilder("[")
-            points.forEachIndexed { index, p ->
-                jsonBuilder.append("[${p.x},${p.y},${p.zValue}]")
-                if (index < points.size - 1) jsonBuilder.append(",")
-            }
-            jsonBuilder.append("]")
+        if (webView != null && isChartReady && isEngineMounted) {
+            try {
+                val jsonBuilder = StringBuilder("[")
+                points.forEachIndexed { index, p ->
+                    jsonBuilder.append("[${p.x},${p.y},${p.zValue}]")
+                    if (index < points.size - 1) jsonBuilder.append(",")
+                }
+                jsonBuilder.append("]")
 
-            val is3D = viewMode == VisualizerViewMode.SURFACE_3D
-            val script = "renderScanData($jsonBuilder, $is3D, $baseline);"
-            webView.evaluateJavascript(script, null)
+                val is3D = viewMode == VisualizerViewMode.SURFACE_3D
+                val script = "renderScanData($jsonBuilder, $is3D, $baseline);"
+                webView.evaluateJavascript(script, null)
+            } catch (e: Throwable) {
+                android.util.Log.w("EChartsVisualizer", "evaluateJavascript error", e)
+            }
         }
     }
 
@@ -141,70 +153,125 @@ fun EChartsVisualizer(
             }
         }
 
-        // WebView ECharts Canvas
+        // WebView ECharts Canvas with Deferred Non-Blocking Engine Mount
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .weight(1f),
+            contentAlignment = Alignment.Center
         ) {
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = { context ->
-                    try {
-                        WebView(context).apply {
+            when {
+                engineError != null -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        Text(
+                            text = "Visualizer Engine Safe Mode",
+                            style = Typography.titleMedium,
+                            color = NeonCyan
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = engineError ?: "Hardware acceleration limited",
+                            style = Typography.bodyMedium,
+                            color = TextMuted,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+                !isEngineMounted -> {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = NeonCyan,
+                            strokeWidth = 2.dp
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Text(
+                            text = "INITIALIZING 3D ENGINE...",
+                            style = Typography.labelSmall,
+                            color = TextMuted,
+                            letterSpacing = 1.sp
+                        )
+                    }
+                }
+                else -> {
+                    AndroidView(
+                        modifier = Modifier.fillMaxSize(),
+                        factory = { context ->
                             try {
-                                setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                            } catch (_: Throwable) {
-                                setLayerType(View.LAYER_TYPE_SOFTWARE, null)
-                            }
-                            setBackgroundColor(0x00000000)
+                                WebView(context).apply {
+                                    try {
+                                        setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+                                    } catch (_: Throwable) {}
+                                    setBackgroundColor(0x00000000)
 
-                            try { settings.javaScriptEnabled = true } catch (_: Throwable) {}
-                            try { settings.domStorageEnabled = true } catch (_: Throwable) {}
-                            try { settings.allowFileAccess = true } catch (_: Throwable) {}
-                            try {
-                                @Suppress("DEPRECATION")
-                                settings.allowFileAccessFromFileURLs = true
-                            } catch (_: Throwable) {}
-                            try {
-                                @Suppress("DEPRECATION")
-                                settings.allowUniversalAccessFromFileURLs = true
-                            } catch (_: Throwable) {}
-                            try { settings.cacheMode = WebSettings.LOAD_NO_CACHE } catch (_: Throwable) {}
+                                    try { settings.javaScriptEnabled = true } catch (_: Throwable) {}
+                                    try { settings.domStorageEnabled = true } catch (_: Throwable) {}
+                                    try { settings.allowFileAccess = true } catch (_: Throwable) {}
+                                    try {
+                                        @Suppress("DEPRECATION")
+                                        settings.allowFileAccessFromFileURLs = true
+                                    } catch (_: Throwable) {}
+                                    try {
+                                        @Suppress("DEPRECATION")
+                                        settings.allowUniversalAccessFromFileURLs = true
+                                    } catch (_: Throwable) {}
+                                    try { settings.cacheMode = WebSettings.LOAD_NO_CACHE } catch (_: Throwable) {}
 
-                            addJavascriptInterface(
-                                object {
-                                    @JavascriptInterface
-                                    fun onChartReady() {
-                                        post {
+                                    addJavascriptInterface(
+                                        object {
+                                            @JavascriptInterface
+                                            fun onChartReady() {
+                                                post {
+                                                    isChartReady = true
+                                                }
+                                            }
+                                        },
+                                        "AndroidBridge"
+                                    )
+
+                                    webChromeClient = WebChromeClient()
+                                    webViewClient = object : WebViewClient() {
+                                        override fun onPageFinished(view: WebView?, url: String?) {
+                                            super.onPageFinished(view, url)
                                             isChartReady = true
                                         }
-                                    }
-                                },
-                                "AndroidBridge"
-                            )
 
-                            webChromeClient = WebChromeClient()
-                            webViewClient = object : WebViewClient() {
-                                override fun onPageFinished(view: WebView?, url: String?) {
-                                    super.onPageFinished(view, url)
-                                    isChartReady = true
+                                        override fun onReceivedError(
+                                            view: WebView?,
+                                            errorCode: Int,
+                                            description: String?,
+                                            failingUrl: String?
+                                        ) {
+                                            super.onReceivedError(view, errorCode, description, failingUrl)
+                                            android.util.Log.w("EChartsVisualizer", "WebView error: $description")
+                                        }
+                                    }
+
+                                    loadUrl("file:///android_asset/echarts/index.html")
+                                    webViewInstance = this
+                                }
+                            } catch (e: Throwable) {
+                                android.util.Log.e("EChartsVisualizer", "Failed to create WebView", e)
+                                engineError = e.localizedMessage ?: "WebView initialization error"
+                                View(context).apply {
+                                    setBackgroundColor(0x00000000)
                                 }
                             }
-
-                            loadUrl("file:///android_asset/echarts/index.html")
-                            webViewInstance = this
+                        },
+                        update = { view ->
+                            webViewInstance = view as? WebView
                         }
-                    } catch (_: Throwable) {
-                        View(context).apply {
-                            setBackgroundColor(0x00000000)
-                        }
-                    }
-                },
-                update = { view ->
-                    webViewInstance = view as? WebView
+                    )
                 }
-            )
+            }
         }
     }
 }

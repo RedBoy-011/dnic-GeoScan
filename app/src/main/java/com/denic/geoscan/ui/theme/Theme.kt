@@ -42,7 +42,7 @@ fun DenicGeoScanTheme(
     if (!view.isInEditMode) {
         SideEffect {
             try {
-                val window = (view.context as? Activity)?.window
+                val window = view.context.findActivity()?.window
                 if (window != null) {
                     val insetsController = WindowCompat.getInsetsController(window, view)
                     insetsController.isAppearanceLightStatusBars = false
@@ -59,4 +59,13 @@ fun DenicGeoScanTheme(
         typography = Typography,
         content = content
     )
+}
+
+private fun android.content.Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is android.content.ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
 }
