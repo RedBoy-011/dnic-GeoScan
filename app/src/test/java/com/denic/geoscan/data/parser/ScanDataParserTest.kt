@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.data.parser
+package com.denic.geoscan.data.parser
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -73,7 +73,7 @@ class ScanDataParserTest {
 
     @Test
     fun parseChunk_noisyAndMalformedMixed_dropsCorruptedOnly() {
-        val chunk = "garbage$corrupt#extra$3,4,500#\n"
+        val chunk = "garbage\$corrupt#extra\$3,4,500#\n"
         val points = parser.parseChunk(chunk)
         assertEquals(1, points.size)
         assertEquals(3, points[0].x)
