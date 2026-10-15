@@ -5,7 +5,7 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20(Material%203)-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
 [![Build Status](https://img.shields.io/badge/GitHub%20Actions-Passing-brightgreen.svg)](https://github.com/RedBoy-011/dnic-GeoScan/actions)
-[![Release](https://img.shields.io/badge/Release-v1.1.4-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.1.4)
+[![Release](https://img.shields.io/badge/Release-v1.1.5-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.1.5)
 
 > **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز بوده و به صورت زنده یا آفلاین، داده‌های سطحی و زیرسطحی را اسکن و آنالیز می‌کند.
 
@@ -13,14 +13,14 @@
 
 ## 📥 لینک‌های دانلود آخرین نسخه تایید شده (Download Links)
 
-برای دریافت آخرین نسخه رسمی و تایید شده برنامه (**Version 1.1.4**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
+برای دریافت آخرین نسخه رسمی و تایید شده برنامه (**Version 1.1.5**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
 
-* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v1.1.4.apk (حجم ۱۶.۷ مگابایت)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.4/Dnic-GeoScan-v1.1.4.apk)**
-* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v1.1.4)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.1.4)**
+* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v1.1.5.apk (حجم ۱۶.۷ مگابایت)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.5/Dnic-GeoScan-v1.1.5.apk)**
+* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v1.1.5)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.1.5)**
 * **[📦 دانلود از آرتیفکت‌های پایپ‌لاین تایید شده GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)**
 * **مسیر فایل محلی (Local APK Path):**
   ```text
-  release/Dnic-GeoScan-v1.1.4.apk
+  release/Dnic-GeoScan-v1.1.5.apk
   app/build/outputs/apk/debug/app-debug.apk
   ```
 

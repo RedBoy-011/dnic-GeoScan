@@ -391,7 +391,7 @@ private fun FileSourceCard(
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(10, 10) },
@@ -403,7 +403,7 @@ private fun FileSourceCard(
                             ),
                             border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
                         ) {
-                            Text(text = "⚡ 10×10 Grid", style = Typography.labelSmall)
+                            Text(text = "⚡ 10×10", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(20, 20) },
@@ -415,7 +415,19 @@ private fun FileSourceCard(
                             ),
                             border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
                         ) {
-                            Text(text = "⚡ 20×20 Grid", style = Typography.labelSmall)
+                            Text(text = "⚡ 20×20", style = Typography.labelSmall)
+                        }
+                        OutlinedButton(
+                            onClick = { onLoadSampleGrid(30, 30) },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(
+                                contentColor = NeonGreen,
+                                containerColor = NeonGreen.copy(alpha = 0.08f)
+                            ),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                        ) {
+                            Text(text = "⚡ 30×30", style = Typography.labelSmall)
                         }
                     }
                 }

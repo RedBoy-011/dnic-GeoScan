@@ -301,7 +301,7 @@ private fun LocalAnalysisHeroCard(
             // Quick Demo Shortcuts
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 OutlinedButton(
                     onClick = {
@@ -315,7 +315,7 @@ private fun LocalAnalysisHeroCard(
                     ),
                     border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
                 ) {
-                    Text(text = "⚡ 10×10 Grid Demo", style = Typography.labelSmall)
+                    Text(text = "⚡ 10×10", style = Typography.labelSmall)
                 }
                 OutlinedButton(
                     onClick = {
@@ -329,7 +329,21 @@ private fun LocalAnalysisHeroCard(
                     ),
                     border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
                 ) {
-                    Text(text = "⚡ 20×20 Grid Demo", style = Typography.labelSmall)
+                    Text(text = "⚡ 20×20", style = Typography.labelSmall)
+                }
+                OutlinedButton(
+                    onClick = {
+                        if (onGridDemoClick != null) onGridDemoClick(30) else onClick()
+                    },
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonGreen,
+                        containerColor = NeonGreen.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                ) {
+                    Text(text = "⚡ 30×30", style = Typography.labelSmall)
                 }
             }
 
