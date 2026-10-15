@@ -5,6 +5,9 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Assemble Debug APK
@@ -22,7 +25,9 @@ jobs:
           cache: 'gradle'
 
       - name: Grant Execute Permission for Gradlew
-        run: chmod +x gradlew
+        run: |
+          sed -i 's/\r$//' gradlew
+          chmod +x gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
@@ -38,3 +43,21 @@ jobs:
           name: denic-GeoScan-v1.0.0-apk
           path: release/denic-GeoScan-v1.0.0.apk
           retention-days: 60
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
+        with:
+          tag_name: v1.0.0
+          name: "denic GeoScan v1.0.0 - Official Release"
+          body: |
+            ## 📱 denic GeoScan v1.0.0
+            
+            نسخه رسمی و تایید شده اپلیکیشن اسکنر ژئوفیزیک و تحلیل داده‌های مغناطیس‌سنج **denic GeoScan**.
+            
+            ### 📥 فایل نصبی مستقیم:
+            - **denic-GeoScan-v1.0.0.apk**
+          files: release/denic-GeoScan-v1.0.0.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

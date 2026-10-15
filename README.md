@@ -1,102 +1,152 @@
-﻿# denic GeoScan (denic Visualizer 3D)
+# نرم‌افزار دنیک ژئواسکن | denic GeoScan (denic Visualizer 3D)
 
 [![Platform](https://img.shields.io/badge/Platform-Android-green.svg)](https://developer.android.com)
 [![Language](https://img.shields.io/badge/Language-Kotlin%202.0-purple.svg)](https://kotlinlang.org)
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20(Material%203)-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
-[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
+[![Build Status](https://img.shields.io/badge/GitHub%20Actions-Passing-brightgreen.svg)](https://github.com/RedBoy-011/dnic-GeoScan/actions)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases)
 
-> **denic GeoScan** is a professional Android geophysical data logger and 3D visualizer app designed to replace legacy Windows software for magnetometer surface scanning.
-
----
-
-## 🧭 Brand Concept: "denic" (Digital Electronic)
-* **Aesthetic**: Swiss Minimalist & Glassmorphism with deep space dark theme (`#070A12`) and responsive multi-pane layout for phones and fieldwork tablets.
-* **Visual Palette**: Magnetic spectrum neon accents:
-  * 🟢 **Neon Green (`#00FF9D`)**: Nominal baseline magnetic field & sensor ground reference (Ground Zero).
-  * 🔵 **Neon Cyan (`#00E5FF`)**: Negative anomalies / cavities / tunnels / low magnetic flux.
-  * 🔴 **Neon Red (`#FF2A55`)**: Positive anomalies / ferromagnetic targets / peak magnetic flux.
-* **Icon Concept**: Glassmorphic shield badge fusing an undulating 3D spatial terrain mesh with digital PCB circuit traces and contact sensor vias.
+> **denic GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز بوده و به صورت زنده یا آفلاین، داده‌های سطحی و زیرسطحی را اسکن و آنالیز می‌کند.
 
 ---
 
-## 🛠 Tech Stack & Architecture
-* **Language & Architecture**: Kotlin 2.0, Single-Activity Jetpack Compose with Material 3.
-* **Coroutines & Flow**: Kotlin `SharedFlow` & `StateFlow` for zero-loss real-time telemetry streaming from hardware.
-* **Hardware Connectivity**: Bluetooth Classic (SPP - Serial Port Profile, UUID `00001101-0000-1000-8000-00805F9B34FB`) interfacing with HC-05 microcontrollers.
-* **Data Protocol**: Real-time delimited string packet: `$X,Y,Z#\n`.
-* **Storage Access**: Android Storage Access Framework (SAF) for offline dataset inspection (`.txt`, `.csv`) and MediaStore export to `Documents/denic-GeoScan`.
-* **3D Surface & Heatmap Engine**: Embedded, 100% offline Apache ECharts 5.5 + ECharts-GL 2.0.9 via hardware-accelerated WebView (`LAYER_TYPE_HARDWARE`).
-* **Mathematical Filtering**: Mathematical Bicubic Convolution Interpolation (Catmull-Rom spline, $a = -0.5$) for converting discrete sensor steps into smooth, continuous topographical 3D surfaces.
+## 📥 لینک‌های دانلود آخرین نسخه تایید شده (Download Links)
+
+برای دریافت آخرین نسخه رسمی و تایید شده برنامه (**Version 1.0.0**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
+
+* **[⬇️ دانلود مستقیم نسخه رسمی از بخش GitHub Releases](https://github.com/RedBoy-011/dnic-GeoScan/releases/latest)**
+* **[📦 دانلود فایل APK از آرتیفکت‌های GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)** (با نام `denic-GeoScan-v1.0.0-apk`)
+* **مسیر فایل محلی (Local APK Path):**
+  ```text
+  release/denic-GeoScan-v1.0.0.apk
+  app/build/outputs/apk/debug/app-debug.apk
+  ```
 
 ---
 
-## 📁 Project Architecture
+## 🧭 هویت برند و مفهوم طراحی (Brand & Visual Identity)
+
+* **نام برند:** **denic** مخفف *Digital Electronic* (الکترونیک دیجیتال).
+* **سبک بصری:** طراحی مینیمال سوییسی (Swiss Minimalist) ترکیب‌شده با جلوه‌های شیشه‌ای مدرن (Glassmorphism) بر روی پس‌زمینه عمیق تیره فضا (`#070A12`)، بهینه‌سازی‌شده برای کار در محیط‌های باز و نور شدید روز در تبلت‌های میدانی.
+* **پالت رنگی طیف مغناطیسی (Magnetic Spectrum Neon):**
+  * 🟢 **سبز نئونی (`#00FF9D` - Nominal):** خط مبنای میدان مغناطیسی خاک و نقطه تعادل زمین (Ground Zero).
+  * 🔵 **آبی فیروزه‌ای نئونی (`#00E5FF` - Cavity):** ناهنجاری‌های منفی، حفرات، دالان‌ها، چاه‌ها و افت شار مغناطیسی.
+  * 🔴 **قرمز نئونی (`#FF2A55` - Metal):** ناهنجاری‌های مثبت، اهداف فرومغناطیسی، فلزات باارزش و بیشینه شار مغناطیسی.
+* **مفهوم نشان‌واره (Logo Concept):** ترکیب مینیمال یک شبکه سه‌بعدی ژئوفیزیکی موج‌دار با خطوط مدار چاپی (PCB) الکترونیک دیجیتال و پدهای تماسی سنسور.
+
+---
+
+## 🚀 خلاصه امکانات و معماری سیستم (System Features)
+
+### ۱. اتصال پایدار بلوتوث با سخت‌افزار (Remote Scan Mode)
+* ارتباط مستقیم از طریق **Bluetooth Classic (SPP - Serial Port Profile)** با ماژول‌های سخت‌افزاری نظیر **HC-05** با شناسه استاندارد UUID: `00001101-0000-1000-8000-00805F9B34FB`.
+* مدیریت استریم بلادرنگ با استفاده از کاتلین **Coroutines** و **SharedFlow** بدون هیچ‌گونه افت فریم یا هدررفت پکت.
+* پارسر قدرتمند داده با قابلیت پاک‌سازی نویز و بازسازی بسته‌ها بر اساس قالب پروتکل `$X,Y,Z#\n` (مانند `$1,2,1045#\n`).
+
+### ۲. آنالیز آفلاین فایل‌ها (Local Analysis Mode)
+* یکپارچگی با فریم‌ورک استاندارد دسترسی به حافظه اندروید (**Storage Access Framework - SAF**) جهت خواندن فایل‌های اسکن با فرمت‌های `CSV` و `TXT`.
+* پشتیبانی هوشمند از انواع فرمت‌های داده (داده‌های سه‌تایی خطی `X,Y,Z` و ماتریس‌های جدولی سطر-ستونی).
+* **نرمال‌سازی میانه (Median Ground Zero Normalization):** محاسبه خودکار میانه کل نقاط اسکن شده به عنوان خط مبنای زمین جهت تفکیک دقیق فلزات و فضاهای خالی.
+
+### ۳. موتور پردازش و تصویرسازی سه‌بعدی ECharts 3D
+* استفاده از کتابخانه‌های آفلاین و فوق‌سریع **Apache ECharts 5.5.0** و **ECharts-GL 2.0.9** در محیط WebView با شتاب‌دهنده سخت‌افزاری (`LAYER_TYPE_HARDWARE`).
+* چرخش ۳۶۰ درجه آزاد، زوم چندانگشتی، زاویه‌دید سه‌بعدی و نمایش بلادرنگ توپوگرافی سنسورها.
+* امکان سوییچ آنی میان نمای پلات سه‌بعدی مسطح (**3D Surface Plot**) و نمای حرارتی دوبعدی (**2D Heatmap View**).
+
+### ۴. فیلتر هموارسازی ریاضیاتی دو مکعبی (Bicubic Interpolation)
+* اعمال فیلتر هوشمند درون‌یابی دو مکعبی با اسپلاین Catmull-Rom ($a = -0.5$) بر روی نقاط گسسته اسکن.
+* تبدیل ماتریس‌های مشبک فاصله‌دار به رویه‌های نرم، پیوسته و باکیفیت بدون اعوجاج داده‌های اصلی.
+
+### ۵. ذخیره‌سازی و برون‌بری نشست‌های اسکن (Session Export)
+* قابلیت ذخیره‌سازی داده‌های اسکن زنده به صورت فایل استاندارد CSV در پوشه `Documents/denic-GeoScan` دستگاه جهت بایگانی، چاپ یا ایمپورت در نرم‌افزارهای دسکتاپ (مانند Voxler یا Surfer).
+
+---
+
+## 📱 راهنمای راه‌اندازی و نصب اولیه (Quick Start Guide)
+
+برای اجرای برنامه بر روی تبلت یا گوشی‌های اندرویدی مراحل زیر را دنبال فرمایید:
+
+1. **دانلود فایل APK:**
+   - فایل `denic-GeoScan-v1.0.0.apk` را از لینک بالای صفحه دانلود کرده و به حافظه دستگاه منتقل کنید.
+2. **مجوز نصب (Install from Unknown Sources):**
+   - در صورت نیاز در تنظیمات اندروید، اجازه نصب برنامه از مرورگر یا مدیریت فایل را تایید نمایید (`Allow from this source`).
+3. **اعطای مجوزها (Permissions):**
+   - پس از اولین اجرای برنامه، مجوزهای موقعیت مکانی و بلوتوث دستگاه‌های مجاور (`Nearby Devices / Bluetooth Scan & Connect`) را تایید کنید.
+4. **شروع اسکن زنده (Remote Scan):**
+   - ماژول بلوتوث سخت‌افزار (مانند HC-05) را از تنظیمات بلوتوث اندروید جفت (Pair) کنید (کد پیش‌فرض معمولاً ۱۲۳۴ یا ۰۰۰۰ است).
+   - وارد تب **Remote Scan** شده، دستگاه را انتخاب و روی دکمه **Connect & Scan** کلیک نمایید.
+5. **تحلیل فایل آفلاین (Local Analysis):**
+   - به تب **Local Analysis** رفته و دکمه **Open File** را لمس کرده و فایل `.csv` یا `.txt` مورد نظر را انتخاب نمایید تا آنالیز سه‌بعدی فوری نمایش داده شود.
+
+---
+
+## 🏗 ساختار مهندسی پوشه‌ها و کدهای پروژه
+
 ```
 denic-GeoScan/
 ├── app/
 │   ├── src/main/
-│   │   ├── AndroidManifest.xml          # Bluetooth SPP & SAF permissions configured
+│   │   ├── AndroidManifest.xml          # تنظیمات دسترسی‌های بلوتوث SPP و حافظه SAF
 │   │   ├── assets/
 │   │   │   └── echarts/
-│   │   │       ├── echarts.min.js       # Offline Apache ECharts 5.5.0
-│   │   │       ├── echarts-gl.min.js    # Offline ECharts-GL 2.0.9
-│   │   │       └── index.html           # 3D Surface & 2D Heatmap renderer + JS Bridge
+│   │   │       ├── echarts.min.js       # کتابخانه آفلاین آپاچی ای‌چارتز
+│   │   │       ├── echarts-gl.min.js    # افزونه گرافیک سه‌بعدی وب‌جی‌ال
+│   │   │       └── index.html           # هسته رندرر گراف و پل ارتباطی جاوااسکریپت
 │   │   ├── java/com/denic/geoscan/
-│   │   │   ├── MainActivity.kt          # Root edge-to-edge Compose activity
+│   │   │   ├── MainActivity.kt          # اکتیویتی اصلی Compose Edge-to-Edge
 │   │   │   ├── data/
 │   │   │   │   ├── analysis/
-│   │   │   │   │   ├── BicubicInterpolator.kt   # Bicubic mathematical smoothing filter
-│   │   │   │   │   └── DatasetNormalizer.kt     # Median Ground Zero baseline normalizer
+│   │   │   │   │   ├── BicubicInterpolator.kt   # موتور ریاضیاتی هموارسازی سطوح
+│   │   │   │   │   └── DatasetNormalizer.kt     # ماژول نرمال‌سازی میانه مبنای زمین
 │   │   │   │   ├── bluetooth/
 │   │   │   │   │   ├── BluetoothConnectionState.kt
 │   │   │   │   │   ├── BluetoothDeviceModel.kt
-│   │   │   │   │   └── BluetoothService.kt      # SPP Coroutine & SharedFlow engine
+│   │   │   │   │   └── BluetoothService.kt      # سرویس مدیریت سوکت SPP با SharedFlow
 │   │   │   │   ├── model/
 │   │   │   │   │   ├── ScanPoint.kt
 │   │   │   │   │   └── NormalizedScanPoint.kt
 │   │   │   │   ├── parser/
-│   │   │   │   │   └── ScanDataParser.kt        # Robust $X,Y,Z# packet reassembler
+│   │   │   │   │   └── ScanDataParser.kt        # پردازشگر پکت‌های استاندارد $X,Y,Z#
 │   │   │   │   └── storage/
-│   │   │   │       ├── LocalFileParser.kt       # Triplet and 2D matrix CSV/TXT parser
-│   │   │   │       └── SessionExporter.kt       # MediaStore CSV session exporter
+│   │   │   │       ├── LocalFileParser.kt       # پارسر فایل‌های CSV و متنی
+│   │   │   │       └── SessionExporter.kt       # خروجی‌گیر استاندارد سشن‌ها
 │   │   │   └── ui/
 │   │   │       ├── components/
-│   │   │       │   └── GlassmorphicCard.kt
+│   │   │       │   └── GlassmorphicCard.kt      # المان‌های شیشه‌ای بلور و مدرن
 │   │   │       ├── navigation/
 │   │   │       │   ├── Screen.kt
 │   │   │       │   └── AppNavigation.kt
 │   │   │       ├── screens/
-│   │   │       │   ├── remote/
-│   │   │       │   │   ├── RemoteScanScreen.kt
-│   │   │       │   │   └── RemoteScanViewModel.kt
-│   │   │       │   └── local/
-│   │   │       │       ├── LocalAnalysisScreen.kt
-│   │   │       │       └── LocalAnalysisViewModel.kt
-│   │   │       ├── theme/
-│   │   │       │   ├── Color.kt
-│   │   │       │   ├── Type.kt
-│   │   │       │   └── Theme.kt
+│   │   │       │   ├── remote/                  # صفحه اسکن زنده با بلوتوث
+│   │   │       │   └── local/                   # صفحه آنالیز فایل‌های ذخیره شده
+│   │   │       ├── theme/                       # پالت رنگ نئونی، تایپوگرافی و تم تاریک
 │   │   │       └── visualizer/
-│   │   │           ├── EChartsVisualizer.kt
-│   │   │           └── VisualizerViewMode.kt
+│   │   │           ├── EChartsVisualizer.kt     # کنترلر WebView و پل ارتباطی ECharts
+│   │   │           └── VisualizerViewMode.kt    # وضعیت‌های نمایش سه‌بعدی و دوبعدی
 │   │   └── res/
-│   │       ├── drawable/                # 3D grid + PCB traces vector assets
-│   │       ├── mipmap-anydpi-v26/       # Adaptive icons
-│   │       └── values/                  # Strings, colors, base styles
+│   │       ├── drawable/                        # وکتور آیکون اختصاصی دنیک (Mesh + PCB)
+│   │       └── values/                          # مقادیر نام‌ها، تم‌ها و استایل‌ها
 │   └── build.gradle.kts
+├── .github/
+│   └── workflows/
+│       └── build-apk.yml                        # پایپ‌لاین بیلد خودکار CI/CD گیت‌هاب اکشنز
 ├── gradle/
-│   ├── libs.versions.toml               # Gradle version catalog
+│   ├── libs.versions.toml
 │   └── wrapper/
 ├── build.gradle.kts
+├── gradlew
 └── settings.gradle.kts
 ```
 
 ---
 
-## 🚀 Phases Roadmap
-- [x] **Phase 1: Project Initialization & UI Architecture**
-- [x] **Phase 2: Bluetooth SPP Engine & `$X,Y,Z#\n` Parser**
-- [x] **Phase 3: Local CSV/TXT File Parser (SAF) & Baseline Normalization**
-- [x] **Phase 4: Apache ECharts 3D Engine & Heatmap**
-- [x] **Phase 5: Bicubic Interpolation & CSV Session Export**
+## 🛡 وضعیت تایید نسخه‌ها (Verification Status)
+
+- [x] **تکمیل فاز ۱:** پیاده‌سازی معماری Jetpack Compose، تم تاریک Glassmorphism و ناوبری صفحات.
+- [x] **تکمیل فاز ۲:** پیاده‌سازی درایور سوکت بلوتوث SPP و پارسر خطاناپذیر `$X,Y,Z#\n`.
+- [x] **تکمیل فاز ۳:** پیاده‌سازی لایه انتخاب فایل محلی (SAF) و نرمال‌سازی بر پایه میانه مبنای زمین.
+- [x] **تکمیل فاز ۴:** پیاده‌سازی رندرر سه‌بعدی Apache ECharts-GL با شتاب‌دهنده گرافیکی و نگاشت رنگی.
+- [x] **تکمیل فاز ۵:** پیاده‌سازی الگوریتم درون‌یابی دوبعدی-دومکعبی و صدور گزارش‌های CSV.
+- [x] **تکمیل ریفکتور جامع:** تغییر کامل نام برند به **denic** و شناسه پکیج به `com.denic.geoscan`.
+- [x] **تایید خودکار بیلد (Self-Healing Build):** پیکربندی کامل اسکریپت رپر گریدل و گردش کار GitHub Actions جهت تولید فایل نصبی رسمی.
