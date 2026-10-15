@@ -3,10 +3,13 @@ package com.dnic.geoscan.ui.screens.remote
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnic.geoscan.data.analysis.BicubicInterpolator
 import com.dnic.geoscan.data.bluetooth.BluetoothConnectionState
 import com.dnic.geoscan.data.bluetooth.BluetoothDeviceModel
 import com.dnic.geoscan.data.bluetooth.BluetoothService
 import com.dnic.geoscan.data.model.ScanPoint
+import com.dnic.geoscan.data.storage.SessionExporter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +17,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RemoteScanViewModel(
     application: Application
 ) : AndroidViewModel(application) {
 
     val bluetoothService = BluetoothService(application.applicationContext)
+    private val sessionExporter = SessionExporter(application.applicationContext)
+    private val bicubicInterpolator = BicubicInterpolator(subdivisionFactor = 2)
 
     val connectionState: StateFlow<BluetoothConnectionState> = bluetoothService.connectionState
 
@@ -40,6 +46,35 @@ class RemoteScanViewModel(
 
     private val _rawPacketPreview = MutableStateFlow("Awaiting packet stream...")
     val rawPacketPreview: StateFlow<String> = _rawPacketPreview.asStateFlow()
+
+    // Mathematical Bicubic Smoothing state
+    private val _isSmoothingEnabled = MutableStateFlow(false)
+    val isSmoothingEnabled: StateFlow<Boolean> = _isSmoothingEnabled.asStateFlow()
+
+    // CSV Session Export state
+    private val _exportStatusMessage = MutableStateFlow<String?>(null)
+    val exportStatusMessage: StateFlow<String?> = _exportStatusMessage.asStateFlow()
+
+    private val _isExporting = MutableStateFlow(false)
+    val isExporting: StateFlow<Boolean> = _isExporting.asStateFlow()
+
+    // Points dispatched to ECharts (either raw or bicubic-interpolated)
+    val visualizerPoints: StateFlow<List<ScanPoint>> = combine(
+        _scannedPoints,
+        _isSmoothingEnabled
+    ) { points, smoothing ->
+        if (smoothing && points.size >= 4) {
+            withContext(Dispatchers.Default) {
+                bicubicInterpolator.interpolate(points)
+            }
+        } else {
+            points
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     init {
         // Collect raw packet strings for live monitor
@@ -93,6 +128,36 @@ class RemoteScanViewModel(
         } else {
             startScan()
         }
+    }
+
+    fun toggleSmoothing() {
+        _isSmoothingEnabled.value = !_isSmoothingEnabled.value
+    }
+
+    fun exportSession() {
+        val points = _scannedPoints.value
+        if (points.isEmpty()) {
+            _exportStatusMessage.value = "Cannot export: scan session is empty."
+            return
+        }
+
+        viewModelScope.launch {
+            _isExporting.value = true
+            val result = sessionExporter.exportToCsv(points)
+            result.fold(
+                onSuccess = { path ->
+                    _exportStatusMessage.value = "Session exported to: $path"
+                },
+                onFailure = { error ->
+                    _exportStatusMessage.value = "Export failed: ${error.localizedMessage}"
+                }
+            )
+            _isExporting.value = false
+        }
+    }
+
+    fun clearExportMessage() {
+        _exportStatusMessage.value = null
     }
 
     private fun startScan() {

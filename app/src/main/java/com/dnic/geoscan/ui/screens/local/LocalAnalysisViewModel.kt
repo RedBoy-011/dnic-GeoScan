@@ -5,13 +5,18 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dnic.geoscan.data.analysis.BicubicInterpolator
 import com.dnic.geoscan.data.analysis.DatasetNormalizer
 import com.dnic.geoscan.data.model.ScanDataset
+import com.dnic.geoscan.data.model.ScanPoint
 import com.dnic.geoscan.data.storage.LocalFileParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -21,15 +26,42 @@ class LocalAnalysisViewModel(
 
     private val fileParser = LocalFileParser()
     private val normalizer = DatasetNormalizer()
+    private val bicubicInterpolator = BicubicInterpolator(subdivisionFactor = 2)
 
     private val _dataset = MutableStateFlow<ScanDataset?>(null)
     val dataset: StateFlow<ScanDataset?> = _dataset.asStateFlow()
+
+    private val _isSmoothingEnabled = MutableStateFlow(false)
+    val isSmoothingEnabled: StateFlow<Boolean> = _isSmoothingEnabled.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
+
+    // Smooth vs raw points computed dynamically for ECharts
+    val visualizerPoints: StateFlow<List<ScanPoint>> = combine(
+        _dataset,
+        _isSmoothingEnabled
+    ) { data, smoothing ->
+        val points = data?.points?.map { ScanPoint(it.x, it.y, it.normalizedZ) } ?: emptyList()
+        if (smoothing && points.size >= 4) {
+            withContext(Dispatchers.Default) {
+                bicubicInterpolator.interpolate(points)
+            }
+        } else {
+            points
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    fun toggleSmoothing() {
+        _isSmoothingEnabled.value = !_isSmoothingEnabled.value
+    }
 
     /**
      * Ingests, parses, and normalizes a magnetometer file chosen via Storage Access Framework (SAF).

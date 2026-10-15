@@ -7,9 +7,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,14 +22,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.outlined.Analytics
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.FileUpload
-import androidx.compose.material.icons.outlined.Grid4x4
-import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -45,14 +46,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dnic.geoscan.data.model.ScanDataset
-import com.dnic.geoscan.data.model.ScanPoint
 import com.dnic.geoscan.data.model.ScanStatistics
 import com.dnic.geoscan.ui.components.GlassmorphicCard
-import com.dnic.geoscan.ui.visualizer.EChartsVisualizer
-import com.dnic.geoscan.ui.visualizer.VisualizerViewMode
 import com.dnic.geoscan.ui.theme.DarkBase
 import com.dnic.geoscan.ui.theme.DarkSurface
 import com.dnic.geoscan.ui.theme.DarkSurfaceElevated
@@ -68,6 +64,8 @@ import com.dnic.geoscan.ui.theme.TextMuted
 import com.dnic.geoscan.ui.theme.TextPrimary
 import com.dnic.geoscan.ui.theme.TextSecondary
 import com.dnic.geoscan.ui.theme.Typography
+import com.dnic.geoscan.ui.visualizer.EChartsVisualizer
+import com.dnic.geoscan.ui.visualizer.VisualizerViewMode
 
 @Composable
 fun LocalAnalysisScreen(
@@ -75,10 +73,12 @@ fun LocalAnalysisScreen(
     viewModel: LocalAnalysisViewModel = viewModel()
 ) {
     val dataset by viewModel.dataset.collectAsState()
+    val visualizerPoints by viewModel.visualizerPoints.collectAsState()
+    val isSmoothingEnabled by viewModel.isSmoothingEnabled.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
 
-    // Storage Access Framework (SAF) document picker launcher
+    // SAF File Picker
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
@@ -99,251 +99,307 @@ fun LocalAnalysisScreen(
         )
     }
 
-    val scrollState = rememberScrollState()
-
-    Column(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBase)
-            .verticalScroll(scrollState)
-            .padding(horizontal = 16.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp, vertical = 16.dp)
     ) {
-        // Screen Header
-        Column {
-            Text(
-                text = "LOCAL ANALYSIS",
-                style = Typography.displayMedium,
-                color = TextPrimary
-            )
-            Text(
-                text = "Geophysical Dataset Offline Inspector (SAF)",
-                style = Typography.titleMedium,
-                color = TextSecondary
-            )
-        }
+        val isTabletLandscape = maxWidth >= 720.dp
 
-        // Error message banner
-        AnimatedVisibility(visible = errorMessage != null) {
-            errorMessage?.let { error ->
-                GlassmorphicCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    borderColor = NeonRed
+        if (isTabletLandscape) {
+            // Adaptive Two-Column Layout for Tablets
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Left Column: Controls & Metrics
+                Column(
+                    modifier = Modifier
+                        .width(360.dp)
+                        .fillMaxHeight()
+                        .verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Outlined.ErrorOutline,
-                            contentDescription = "Error",
-                            tint = NeonRed,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = error,
-                            style = Typography.bodyMedium,
-                            color = NeonRed,
-                            modifier = Modifier.weight(1f)
-                        )
+                    ScreenHeader()
+
+                    ErrorBanner(errorMessage = errorMessage)
+
+                    FileSourceCard(
+                        dataset = dataset,
+                        isLoading = isLoading,
+                        isSmoothingEnabled = isSmoothingEnabled,
+                        onOpenPicker = openPicker,
+                        onClearDataset = { viewModel.clearDataset() },
+                        onToggleSmoothing = { viewModel.toggleSmoothing() }
+                    )
+
+                    dataset?.let { data ->
+                        GroundZeroBaselineCard(stats = data.statistics)
                     }
+
+                    SpectrumPaletteCard()
+                }
+
+                // Right Column: Full-Height 3D Visualizer Canvas
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                ) {
+                    EChartsVisualizer(
+                        points = visualizerPoints,
+                        modifier = Modifier.fillMaxSize(),
+                        initialMode = VisualizerViewMode.SURFACE_3D,
+                        baseline = 0f
+                    )
+                }
+            }
+        } else {
+            // Standard Single-Column Stack for Mobile Screens
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                ScreenHeader()
+
+                ErrorBanner(errorMessage = errorMessage)
+
+                FileSourceCard(
+                    dataset = dataset,
+                    isLoading = isLoading,
+                    isSmoothingEnabled = isSmoothingEnabled,
+                    onOpenPicker = openPicker,
+                    onClearDataset = { viewModel.clearDataset() },
+                    onToggleSmoothing = { viewModel.toggleSmoothing() }
+                )
+
+                dataset?.let { data ->
+                    GroundZeroBaselineCard(stats = data.statistics)
+                }
+
+                SpectrumPaletteCard()
+
+                EChartsVisualizer(
+                    points = visualizerPoints,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(350.dp),
+                    initialMode = VisualizerViewMode.SURFACE_3D,
+                    baseline = 0f
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ScreenHeader() {
+    Column {
+        Text(
+            text = "LOCAL ANALYSIS",
+            style = Typography.displayMedium,
+            color = TextPrimary
+        )
+        Text(
+            text = "Geophysical Dataset Offline Inspector (SAF)",
+            style = Typography.titleMedium,
+            color = TextSecondary
+        )
+    }
+}
+
+@Composable
+private fun ErrorBanner(errorMessage: String?) {
+    AnimatedVisibility(visible = errorMessage != null) {
+        errorMessage?.let { error ->
+            GlassmorphicCard(
+                modifier = Modifier.fillMaxWidth(),
+                borderColor = NeonRed
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.ErrorOutline,
+                        contentDescription = "Error",
+                        tint = NeonRed,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = error,
+                        style = Typography.bodyMedium,
+                        color = NeonRed,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }
+    }
+}
 
-        // File Selector & Import Card
-        GlassmorphicCard(
-            modifier = Modifier.fillMaxWidth(),
-            borderColor = if (dataset != null) GlassBorderHighlighted else GlassBorderCyan
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+@Composable
+private fun FileSourceCard(
+    dataset: com.dnic.geoscan.data.model.ScanDataset?,
+    isLoading: Boolean,
+    isSmoothingEnabled: Boolean,
+    onOpenPicker: () -> Unit,
+    onClearDataset: () -> Unit,
+    onToggleSmoothing: () -> Unit
+) {
+    GlassmorphicCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = if (dataset != null) GlassBorderHighlighted else GlassBorderCyan
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Outlined.Description,
+                        contentDescription = "File Ingestion",
+                        tint = NeonCyan,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "DATASET SOURCE",
+                        style = Typography.labelLarge,
+                        color = NeonCyan
+                    )
+                }
+
+                if (dataset != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Outlined.CheckCircle,
+                            contentDescription = "Loaded",
+                            tint = NeonGreen,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "PARSED & NORMALIZED",
+                            style = Typography.labelSmall,
+                            color = NeonGreen
+                        )
+                    }
+                } else {
+                    Text(text = "TXT / CSV", style = Typography.labelSmall, color = TextMuted)
+                }
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(DarkSurface)
+                    .padding(12.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Outlined.Description,
-                            contentDescription = "File Ingestion",
-                            tint = NeonCyan,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(text = "Active File", style = Typography.labelSmall, color = TextMuted)
                         Text(
-                            text = "DATASET SOURCE",
-                            style = Typography.labelLarge,
-                            color = NeonCyan
+                            text = dataset?.fileName ?: "No scan loaded",
+                            style = Typography.bodyLarge,
+                            color = TextPrimary
                         )
-                    }
-
-                    if (dataset != null) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = "Loaded",
-                                tint = NeonGreen,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = "PARSED & NORMALIZED",
-                                style = Typography.labelSmall,
-                                color = NeonGreen
-                            )
-                        }
-                    } else {
                         Text(
-                            text = "TXT / CSV",
+                            text = if (dataset != null) {
+                                "${dataset.fileSizeFormatted} • ${dataset.statistics.totalPoints} pts • ${dataset.statistics.gridWidth}×${dataset.statistics.gridHeight}"
+                            } else {
+                                "Expected format: X,Y,Z triplets or 2D matrix"
+                            },
                             style = Typography.labelSmall,
                             color = TextMuted
                         )
                     }
-                }
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(DarkSurface)
-                        .padding(14.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = "Active File",
-                                style = Typography.labelSmall,
-                                color = TextMuted
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    if (isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = NeonCyan,
+                            strokeWidth = 2.dp
+                        )
+                    } else if (dataset == null) {
+                        ElevatedButton(
+                            onClick = onOpenPicker,
+                            shape = RoundedCornerShape(10.dp),
+                            colors = ButtonDefaults.elevatedButtonColors(
+                                containerColor = NeonCyan,
+                                contentColor = DarkBase
                             )
-                            Text(
-                                text = dataset?.fileName ?: "No scan loaded",
-                                style = Typography.bodyLarge,
-                                color = TextPrimary
-                            )
-                            Text(
-                                text = if (dataset != null) {
-                                    "${dataset!!.fileSizeFormatted} • ${dataset!!.statistics.totalPoints} points • Grid: ${dataset!!.statistics.gridWidth}×${dataset!!.statistics.gridHeight}"
-                                } else {
-                                    "Expected format: X,Y,Z triplets or 2D value matrix"
-                                },
-                                style = Typography.labelSmall,
-                                color = TextMuted
-                            )
+                        ) {
+                            Icon(imageVector = Icons.Outlined.FileUpload, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text(text = "Open File", style = Typography.labelLarge)
                         }
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        if (isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(28.dp),
-                                color = NeonCyan,
-                                strokeWidth = 2.dp
-                            )
-                        } else if (dataset == null) {
-                            ElevatedButton(
-                                onClick = openPicker,
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            OutlinedButton(
+                                onClick = onOpenPicker,
                                 shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.elevatedButtonColors(
-                                    containerColor = NeonCyan,
-                                    contentColor = DarkBase
-                                )
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f))
                             ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.FileUpload,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(text = "Open File", style = Typography.labelLarge)
+                                Text(text = "Change", style = Typography.labelSmall)
                             }
-                        } else {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                OutlinedButton(
-                                    onClick = openPicker,
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
-                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f))
-                                ) {
-                                    Text(text = "Change", style = Typography.labelSmall)
-                                }
-                                Spacer(modifier = Modifier.width(6.dp))
-                                IconButton(
-                                    onClick = { viewModel.clearDataset() },
-                                    modifier = Modifier.size(32.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Close,
-                                        contentDescription = "Clear",
-                                        tint = TextMuted,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            IconButton(onClick = onClearDataset, modifier = Modifier.size(30.dp)) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = "Clear",
+                                    tint = TextMuted,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                         }
                     }
                 }
             }
-        }
 
-        // Baseline Normalization & Anomaly Metrics Card (Visible when dataset is loaded)
-        if (dataset != null) {
-            val stats = dataset!!.statistics
-            GroundZeroBaselineCard(stats = stats)
-        }
-
-        // Magnetic Spectrum Gradient Scale Bar
-        GlassmorphicCard(
-            modifier = Modifier.fillMaxWidth(),
-            borderColor = GlassBorder
-        ) {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    text = "MAGNETIC SPECTRUM PALETTE",
-                    style = Typography.labelLarge,
-                    color = TextPrimary
-                )
-
-                // Neon Magnetic Color Gradient
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(10.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(NeonCyan, NeonGreen, NeonYellow, NeonRed)
-                            )
-                        )
-                )
-
-                Row(
+            // Bicubic Smoothing Filter Toggle (when dataset is loaded)
+            if (dataset != null) {
+                OutlinedButton(
+                    onClick = onToggleSmoothing,
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = if (isSmoothingEnabled) NeonGreen else TextSecondary,
+                        containerColor = if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.12f) else Color.Transparent
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        if (isSmoothingEnabled) NeonGreen.copy(alpha = 0.7f) else GlassBorder
+                    )
                 ) {
-                    Text(text = "-LOW (Cavity / Void)", style = Typography.labelSmall, color = NeonCyan)
-                    Text(text = "0 (Ground Zero)", style = Typography.labelSmall, color = NeonGreen)
-                    Text(text = "+HIGH (Ferrous Metal)", style = Typography.labelSmall, color = NeonRed)
+                    Icon(
+                        imageVector = Icons.Default.AutoAwesome,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSmoothingEnabled) NeonGreen else TextMuted
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = if (isSmoothingEnabled) "Bicubic Smoothing Active (2x Mesh)" else "Enable Bicubic Smoothing Filter",
+                        style = Typography.labelLarge
+                    )
                 }
             }
         }
-
-        // 3D Visualizer Surface & 2D Heatmap Engine (Apache ECharts 3D)
-        val visualizerPoints = remember(dataset) {
-            dataset?.points?.map { ScanPoint(it.x, it.y, it.normalizedZ) } ?: emptyList()
-        }
-        EChartsVisualizer(
-            points = visualizerPoints,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(340.dp),
-            initialMode = VisualizerViewMode.SURFACE_3D,
-            baseline = 0f
-        )
     }
 }
 
@@ -353,7 +409,7 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
         modifier = Modifier.fillMaxWidth(),
         borderColor = GlassBorderHighlighted
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -364,7 +420,7 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                         imageVector = Icons.Outlined.Analytics,
                         contentDescription = "Ground Zero",
                         tint = NeonGreen,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
@@ -374,7 +430,6 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                     )
                 }
 
-                // Median Highlight Badge
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
@@ -386,12 +441,11 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                         text = "${String.format("%.1f", stats.groundZeroMedian)} µT",
                         style = TelemetryTextStyle,
                         color = NeonGreen,
-                        fontSize = 14.sp
+                        fontSize = 13.sp
                     )
                 }
             }
 
-            // Anomaly Classification Breakdown
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -419,13 +473,12 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                 )
             }
 
-            // High/Low Extremes Breakdown
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(DarkSurface)
-                    .padding(12.dp)
+                    .padding(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -437,7 +490,7 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                             text = "+${String.format("%.1f", stats.maxNormalized)} µT",
                             style = TelemetryTextStyle,
                             color = NeonRed,
-                            fontSize = 15.sp
+                            fontSize = 14.sp
                         )
                     }
                     Column(horizontalAlignment = Alignment.End) {
@@ -446,10 +499,43 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                             text = "${String.format("%.1f", stats.minNormalized)} µT",
                             style = TelemetryTextStyle,
                             color = NeonCyan,
-                            fontSize = 15.sp
+                            fontSize = 14.sp
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SpectrumPaletteCard() {
+    GlassmorphicCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = GlassBorder
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = "MAGNETIC SPECTRUM PALETTE", style = Typography.labelLarge, color = TextPrimary)
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(NeonCyan, NeonGreen, NeonYellow, NeonRed)
+                        )
+                    )
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "-LOW (Cavity)", style = Typography.labelSmall, color = NeonCyan)
+                Text(text = "0 (Ground Zero)", style = Typography.labelSmall, color = NeonGreen)
+                Text(text = "+HIGH (Metal)", style = Typography.labelSmall, color = NeonRed)
             }
         }
     }
@@ -475,7 +561,7 @@ private fun AnomalyStatBadge(
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             Text(text = label, style = Typography.labelSmall, color = color, fontSize = 9.sp)
             Spacer(modifier = Modifier.height(2.dp))
-            Text(text = "$count", style = TelemetryTextStyle, color = TextPrimary, fontSize = 16.sp)
+            Text(text = "$count", style = TelemetryTextStyle, color = TextPrimary, fontSize = 15.sp)
             Text(text = "$percentage%", style = Typography.labelSmall, color = TextMuted, fontSize = 10.sp)
         }
     }
