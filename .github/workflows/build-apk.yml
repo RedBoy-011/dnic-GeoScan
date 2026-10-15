@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.2.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.1.3.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.1.2-apk
-          path: release/Dnic-GeoScan-v1.1.2.apk
+          name: Dnic-GeoScan-v1.1.3-apk
+          path: release/Dnic-GeoScan-v1.1.3.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,22 +52,22 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.1.2
-          name: "Dnic-GeoScan v1.1.2 - Official Release"
+          tag_name: v1.1.3
+          name: "Dnic-GeoScan v1.1.3 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.1.2 - Instant Launch & Hardened Offline Survey Release
+            ## 📱 Dnic-GeoScan v1.1.3 - Direct Grid Shortcuts & Polished Navigation Release
 
-            نسخه رسمی ۱.۱.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۱.۳ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و قابلیت‌های این نسخه:
-            - **تضمین قطعی و آنی بسته‌شدن اسپلش‌اسکرین (`setKeepOnScreenCondition { false }`):** اعمال دستور قطعی خروج از اسپلش به Window Manager در اندروید ۱۲+ بدون کوچک‌ترین تاخیر یا گیر کردن روی لوگو حتی در رام‌های سفارشی تبلت‌ها.
-            - **شبیه‌ساز و تست فوری شبکه‌های ۱۰×۱۰ و ۲۰×۲۰:** دسترسی سریع به تولید گرادیان‌های مغناطیسی با اهداف فرومغناطیسی و حفرات در حالت آفلاین.
-            - **صفحه فرود هاب عملیاتی (Landing Mission Hub):** تفکیک کامل و سریع بین تحلیل محلی بدون سخت‌افزار (Local Analysis) و مانیتورینگ بلادرنگ (Remote Scan).
-            - **اعلام شفاف و غیرمسدودکننده وضعیت قطعی سخت‌افزار:** نمایش `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه وضعیت آماده‌باش SPP.
-            - **بروزرسانی مستقیم و درجا (In-place Upgrade):** امضا با کلید اختصاصی دائمی با `versionCode = 6` بدون نیاز به حذف نسخه‌های قبل.
+            - **میانبرهای مستقیم شبکه‌های ۱۰×۱۰ و ۲۰×۲۰ در هاب اصلی:** دسترسی بلادرنگ از کارت Local Analysis به تست‌های سریع و شبیه‌سازی گرادیان‌های مغناطیسی با یک کلیک.
+            - **تضمین قطعی خروج از اسپلش‌اسکرین (`setKeepOnScreenCondition { false }`):** خروج صفر میلی‌ثانیه‌ای و روان به رابط کاربری اصلی.
+            - **تفکیک کامل و سریع بین حالت‌های مأموریت:** حرکت بدون مکث بین هاب عملیاتی، آنالیز آفلاین، و مانیتورینگ بلوتوث.
+            - **نمایش شفاف وضعیت عدم اتصال:** برچسب استاندارد `STATUS: DISCONNECTED • NO HARDWARE CONNECTED`.
+            - **ارتقای درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 7` جهت نصب و آپدیت بدون نقص.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.1.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.2/Dnic-GeoScan-v1.1.2.apk)**
-          files: release/Dnic-GeoScan-v1.1.2.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.1.3.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.1.3/Dnic-GeoScan-v1.1.3.apk)**
+          files: release/Dnic-GeoScan-v1.1.3.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

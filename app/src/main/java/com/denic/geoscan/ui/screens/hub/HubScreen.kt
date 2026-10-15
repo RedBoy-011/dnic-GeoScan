@@ -293,6 +293,37 @@ private fun LocalAnalysisHeroCard(onClick: () -> Unit) {
                 FeaturePill(text = "Bicubic Spline", color = TextPrimary)
             }
 
+            // Quick Demo Shortcuts
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onClick,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonCyan,
+                        containerColor = NeonCyan.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                ) {
+                    Text(text = "⚡ 10×10 Grid Demo", style = Typography.labelSmall)
+                }
+                OutlinedButton(
+                    onClick = onClick,
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonYellow,
+                        containerColor = NeonYellow.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
+                ) {
+                    Text(text = "⚡ 20×20 Grid Demo", style = Typography.labelSmall)
+                }
+            }
+
             // Launch Action Button
             ElevatedButton(
                 onClick = onClick,
