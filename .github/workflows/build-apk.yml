@@ -44,13 +44,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.6.0.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.7.0.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.6.0.apk
-          test -f release/Dnic-GeoScan-v1.6.0.apk
+          ls -lh release/Dnic-GeoScan-v1.7.0.apk
+          test -f release/Dnic-GeoScan-v1.7.0.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -64,7 +64,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.6.0.apk
+            adb install -r release/Dnic-GeoScan-v1.7.0.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -101,8 +101,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.6.0-apk
-          path: release/Dnic-GeoScan-v1.6.0.apk
+          name: Dnic-GeoScan-v1.7.0-apk
+          path: release/Dnic-GeoScan-v1.7.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -110,29 +110,31 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.6.0
-          name: "Dnic-GeoScan v1.6.0 - Exit Confirmation & Bluetooth Auto-Save / Sharing"
+          tag_name: v1.7.0
+          name: "Dnic-GeoScan v1.7.0 - Bilingual Support (English 🇬🇧 & Persian 🇮🇷) & Dynamic RTL UI"
           body: |
-            ## 📱 Dnic-GeoScan v1.6.0 - Exit Confirmation & Bluetooth Auto-Save / Sharing
-            
-            نسخه رسمی ۱.۶.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            ## 🌐 Dnic-GeoScan v1.7.0 - Bilingual Support (English 🇬🇧 & Persian 🇮🇷) & Dynamic RTL UI
+
+            نسخه رسمی ۱.۷.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و گرادیومتر مغناطیسی **Dnic-GeoScan**.
             
             ### ✨ قابلیت‌های جدید و کلیدی این نسخه:
-            - **دیالوگ مدرن شیشه‌ای تایید خروج (Exit Confirmation Dialog):**
-              - مدیریت هوشمند کلید بازگشت (BackHandler): فشردن دکمه برگشت در صفحات آنالیز یا اسکن ابتدا کاربر را به صفحه اصلی (Hub) هدایت کرده و در صفحه اصلی دیالوگ تایید خروج را به نمایش می‌گذارد.
-              - جلوگیری از خروج ناخواسته با دو گزینه صریح «انصراف» و «خروج از برنامه».
-            - **ذخیره خودکار اضطراری داده‌های اسکن بلوتوث (Bluetooth Auto-Save):**
-              - در صورت وجود داده‌های اسکن دریافت‌شده از بلوتوث، پیش از خروج از برنامه یا قطع ارتباط یا بسته‌شدن پروسس، کلیه نقاط به طور خودکار در فایل‌های محلی ذخیره می‌شوند تا هیچ داده میدانی ارزشمندی از دست نرود.
-            - **اشتراک‌گذاری مستقیم داده‌های اسکن (One-Tap CSV Sharing):**
-              - اضافه شدن دکمه «Share» به کارت اکشن‌های سشن در حالت ریموت و دیالوگ خروج، جهت ارسال مستقیم فایل CSV به تلگرام، واتس‌اپ، جیمیل، گوگل درایو یا ذخیره در پوشه‌ها با پشتیبانی امن `FileProvider`.
-            - **پایداری کامل و سازگاری عمومی با تمام گوشی‌ها و تبلت‌ها:**
-              - معماری مستقل از ترتیبات JVM و تضمین اجرای ۱۰۰٪ بدون کرش بر روی تمامی برندها و نسخه‌های اندروید (Android 8 تا Android 16).
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 32`.
+            - **پشتیبانی کامل دو زبانه (فارسی 🇮🇷 / انگلیسی 🇬🇧):**
+              - بازنویسی کامل منوها، عنوان‌ها، دکمه‌ها، وضعیت‌ها، خطاها و دیالوگ‌ها به هر دو زبان فارسی و انگلیسی.
+            - **دیالوگ انتخاب زبان در اولین اجرای برنامه (First-Launch Onboarding):**
+              - در اولین ورود، دیالوگ مدرن شیشه‌ای با پرچم‌های ایران و انگلستان نمایش داده می‌شود تا کاربر زبان دلخواه خود را تعیین کند.
+            - **تغییر جهت هوشمند و داینامیک رابط کاربری (RTL / LTR):**
+              - چیدمان راست‌چین (RTL) خودکار برای زبان فارسی و چپ‌چین (LTR) برای زبان انگلیسی با استفاده از `CompositionLocalProvider` بدون نیاز به ریستارت اپلیکیشن و بدون قطع اتصال بلوتوث یا ریست شدن وب‌ویو.
+            - **دکمه سوئیچ سریع زبان در نوار بالا (Top Branding Bar):**
+              - دسترسی سریع به تغییر زبان در هر لحظه با لمس برچسب `🌐 فا` یا `🌐 EN`.
+            - **تداوم تمامی قابلیت‌های پیشرفته:**
+              - دیالوگ تایید خروج (Exit Confirmation) به زبان انتخابی.
+              - ذخیره خودکار داده‌های بلوتوث پیش از خروج و اشتراک‌گذاری مستقیم سشن.
+              - شیلد ضد کرش مستقل برای انواع گوشی‌ها و تبلت‌ها از اندروید ۸ تا ۱۶.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.6.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.6.0/Dnic-GeoScan-v1.6.0.apk)**
+            - **[دانلود مستقیم Dnic-GeoScan-v1.7.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.7.0/Dnic-GeoScan-v1.7.0.apk)**
           files: |
-            release/Dnic-GeoScan-v1.6.0.apk
+            release/Dnic-GeoScan-v1.7.0.apk
             release/emulator_phone.png
             release/emulator_tablet.png
         env:

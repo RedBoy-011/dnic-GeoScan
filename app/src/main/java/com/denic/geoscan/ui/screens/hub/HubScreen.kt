@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.denic.geoscan.ui.components.GlassmorphicCard
+import com.denic.geoscan.ui.localization.LocalAppStrings
 import com.denic.geoscan.ui.navigation.Screen
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
@@ -172,6 +173,7 @@ fun HubScreen(
 private fun QuickModeSelector(
     onNavigateTo: (Screen) -> Unit
 ) {
+    val strings = LocalAppStrings.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -200,13 +202,13 @@ private fun QuickModeSelector(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "LOCAL ANALYSIS",
+                        text = strings.hubLocalCardTitle,
                         style = Typography.labelLarge,
                         color = NeonGreen,
                         fontSize = 11.sp
                     )
                     Text(
-                        text = "100% OFFLINE",
+                        text = strings.hubLocalCardSubtitle,
                         style = Typography.labelSmall,
                         color = TextSecondary,
                         fontSize = 9.sp
@@ -239,13 +241,13 @@ private fun QuickModeSelector(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = "REMOTE SCAN",
+                        text = strings.hubRemoteCardTitle,
                         style = Typography.labelLarge,
                         color = NeonCyan,
                         fontSize = 11.sp
                     )
                     Text(
-                        text = "HC-05 SENSORS",
+                        text = strings.hubRemoteCardSubtitle,
                         style = Typography.labelSmall,
                         color = TextMuted,
                         fontSize = 9.sp
@@ -261,6 +263,7 @@ private fun HubHeader(
     isLocalDefault: Boolean = false,
     onToggleDefaultLocal: (() -> Unit)? = null
 ) {
+    val strings = LocalAppStrings.current
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -272,13 +275,13 @@ private fun HubHeader(
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
                 Text(
-                    text = "MISSION CONTROL",
+                    text = strings.hubMissionControl,
                     style = Typography.labelSmall,
                     color = NeonCyan,
                     letterSpacing = 2.sp
                 )
                 Text(
-                    text = "Geophysical Survey Hub",
+                    text = strings.hubSubtitle,
                     style = Typography.displayMedium,
                     color = TextPrimary
                 )
@@ -307,7 +310,7 @@ private fun HubHeader(
                                 .background(if (isLocalDefault) NeonGreen else TextMuted)
                         )
                         Text(
-                            text = if (isLocalDefault) "Boot: Local" else "Boot: Hub",
+                            text = if (isLocalDefault) strings.hubSetDefaultLocal else strings.hubSetDefaultHub,
                             style = Typography.labelSmall,
                             color = if (isLocalDefault) NeonGreen else TextSecondary,
                             fontSize = 11.sp
@@ -317,7 +320,7 @@ private fun HubHeader(
             }
         }
         Text(
-            text = "Select an operation mode to begin spatial magnetic inspection",
+            text = strings.hubDefaultStartNotice,
             style = Typography.bodyMedium,
             color = TextSecondary
         )
@@ -330,6 +333,7 @@ private fun HardwareStatusBanner(
     onNavigateToLocal: () -> Unit,
     onConnectHardware: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = NeonOrange.copy(alpha = 0.6f),
@@ -356,20 +360,14 @@ private fun HardwareStatusBanner(
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                text = "STATUS: DISCONNECTED",
+                                text = strings.hubHardwareDisconnected,
                                 style = Typography.labelLarge,
                                 color = NeonOrange,
                                 letterSpacing = 0.5.sp
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "• NO HARDWARE CONNECTED",
-                                style = Typography.labelSmall,
-                                color = NeonOrange.copy(alpha = 0.85f)
-                            )
                         }
                         Text(
-                            text = "Bluetooth Standby (SPP 1101) • Offline mode 100% active",
+                            text = strings.hubHardwareStatusDesc,
                             style = Typography.labelSmall,
                             color = TextSecondary,
                             fontSize = 11.sp
@@ -402,7 +400,7 @@ private fun HardwareStatusBanner(
                 ) {
                     Icon(imageVector = Icons.Outlined.FolderOpen, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Use Local Mode", style = Typography.labelSmall)
+                    Text(text = strings.hubOpenLocalBtn, style = Typography.labelSmall)
                 }
 
                 OutlinedButton(
@@ -417,7 +415,7 @@ private fun HardwareStatusBanner(
                 ) {
                     Icon(imageVector = Icons.Outlined.Sensors, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Connect Sensor", style = Typography.labelSmall)
+                    Text(text = strings.hubConnectHardwareBtn, style = Typography.labelSmall)
                 }
             }
         }
@@ -475,13 +473,14 @@ private fun LocalAnalysisHeroCard(
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
+                        val strings = LocalAppStrings.current
                         Text(
-                            text = "LOCAL ANALYSIS",
+                            text = strings.hubLocalCardTitle,
                             style = Typography.titleLarge,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Offline Magnetometer Data Inspector",
+                            text = strings.hubLocalCardSubtitle,
                             style = Typography.labelSmall,
                             color = NeonCyan
                         )
@@ -505,8 +504,9 @@ private fun LocalAnalysisHeroCard(
                 }
             }
 
+            val strings = LocalAppStrings.current
             Text(
-                text = "Load and inspect gridded survey datasets (10×10, 20×20, custom matrix, CSV/TXT) directly from storage. Runs Median Ground Zero baseline normalization and 3D bicubic rendering without requiring Bluetooth.",
+                text = strings.hubLocalCardDesc,
                 style = Typography.bodyMedium,
                 color = TextSecondary,
                 lineHeight = 20.sp
@@ -602,7 +602,7 @@ private fun LocalAnalysisHeroCard(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Open Local File & Analyze",
+                    text = strings.hubOpenLocalBtn,
                     style = Typography.labelLarge,
                     fontSize = 14.sp
                 )
@@ -620,6 +620,7 @@ private fun LocalAnalysisHeroCard(
 @Composable
 private fun RemoteScanHeroCard(onClick: () -> Unit) {
     val cardShape = RoundedCornerShape(20.dp)
+    val strings = LocalAppStrings.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -659,12 +660,12 @@ private fun RemoteScanHeroCard(onClick: () -> Unit) {
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
                         Text(
-                            text = "REMOTE SCAN",
+                            text = strings.hubRemoteCardTitle,
                             style = Typography.titleLarge,
                             color = TextPrimary
                         )
                         Text(
-                            text = "HC-05 Live SPP Telemetry",
+                            text = strings.hubRemoteCardSubtitle,
                             style = Typography.labelSmall,
                             color = TextMuted
                         )
@@ -688,7 +689,7 @@ private fun RemoteScanHeroCard(onClick: () -> Unit) {
             }
 
             Text(
-                text = "Connect to an HC-05 Bluetooth module to stream and capture live magnetometer readings (\$X,Y,Z#). Real-time discrete grid accumulation with session CSV export to Documents.",
+                text = strings.hubRemoteCardDesc,
                 style = Typography.bodyMedium,
                 color = TextSecondary,
                 lineHeight = 20.sp
@@ -721,7 +722,7 @@ private fun RemoteScanHeroCard(onClick: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Launch Remote Scanner",
+                    text = strings.hubConnectHardwareBtn,
                     style = Typography.labelLarge,
                     fontSize = 14.sp
                 )
@@ -756,13 +757,14 @@ private fun FeaturePill(text: String, color: Color) {
 
 @Composable
 private fun GeophysicalEngineSpecsCard() {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = GlassBorder
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = "GEOPHYSICAL PROCESSING PIPELINE",
+                text = strings.hubSpecsTitle,
                 style = Typography.labelSmall,
                 color = TextMuted,
                 letterSpacing = 1.sp
@@ -772,15 +774,15 @@ private fun GeophysicalEngineSpecsCard() {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = "Ground Zero:", style = Typography.labelSmall, color = TextMuted)
-                    Text(text = "Median Anomaly Delta", style = TelemetryTextStyle, color = NeonGreen)
+                    Text(text = strings.hubSpecGroundZero, style = Typography.labelSmall, color = TextMuted)
+                    Text(text = "Median Delta (µT)", style = TelemetryTextStyle, color = NeonGreen)
                 }
                 Column {
-                    Text(text = "Smoothing Engine:", style = Typography.labelSmall, color = TextMuted)
-                    Text(text = "Catmull-Rom Bicubic", style = TelemetryTextStyle, color = NeonCyan)
+                    Text(text = strings.hubSpecBicubic, style = Typography.labelSmall, color = TextMuted)
+                    Text(text = "Catmull-Rom Spline", style = TelemetryTextStyle, color = NeonCyan)
                 }
                 Column {
-                    Text(text = "Renderer:", style = Typography.labelSmall, color = TextMuted)
+                    Text(text = strings.hubSpecProjections, style = Typography.labelSmall, color = TextMuted)
                     Text(text = "Apache ECharts GL", style = TelemetryTextStyle, color = TextPrimary)
                 }
             }

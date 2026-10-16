@@ -144,5 +144,40 @@ class AppIntegrityTest {
         assertTrue(csv.contains("3,4,-12.3,2000"))
         assertTrue(csv.contains("# Total Points: 2"))
     }
+
+    @Test
+    fun testBilingualLocalizationCompleteness() {
+        val en = com.denic.geoscan.ui.localization.EnglishStrings
+        val fa = com.denic.geoscan.ui.localization.PersianStrings
+
+        assertNotNull(en)
+        assertNotNull(fa)
+
+        assertFalse("English appName must not be empty", en.appName.isBlank())
+        assertFalse("Persian appName must not be empty", fa.appName.isBlank())
+
+        assertEquals(com.denic.geoscan.ui.localization.AppLanguage.ENGLISH, com.denic.geoscan.ui.localization.AppLanguage.fromCode("en"))
+        assertEquals(com.denic.geoscan.ui.localization.AppLanguage.PERSIAN, com.denic.geoscan.ui.localization.AppLanguage.fromCode("fa"))
+        assertFalse(com.denic.geoscan.ui.localization.AppLanguage.ENGLISH.isRtl)
+        assertTrue(com.denic.geoscan.ui.localization.AppLanguage.PERSIAN.isRtl)
+
+        // Validate Persian exit dialog strings
+        assertFalse(fa.exitDialogTitle.isBlank())
+        assertFalse(fa.exitDialogBluetoothWarning.isBlank())
+        assertFalse(fa.exitDialogSaveAndExit.isBlank())
+        assertFalse(fa.exitDialogDirectShare.isBlank())
+
+        // Validate Persian and English language selection strings
+        assertFalse(fa.selectLanguageTitle.isBlank())
+        assertFalse(en.selectLanguageTitle.isBlank())
+        assertFalse(fa.startApp.isBlank())
+        assertFalse(en.startApp.isBlank())
+
+        // Validate all core labels
+        assertFalse(fa.navHub.isBlank())
+        assertFalse(fa.navLocalAnalysis.isBlank())
+        assertFalse(fa.navRemoteScan.isBlank())
+        assertFalse(fa.hubHardwareDisconnected.isBlank())
+    }
 }
 

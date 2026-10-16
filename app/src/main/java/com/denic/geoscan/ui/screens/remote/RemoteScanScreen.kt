@@ -72,6 +72,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.denic.geoscan.data.bluetooth.BluetoothConnectionState
 import com.denic.geoscan.data.bluetooth.BluetoothDeviceModel
 import com.denic.geoscan.ui.components.GlassmorphicCard
+import com.denic.geoscan.ui.localization.LocalAppStrings
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.DarkSurfaceElevated
@@ -310,6 +311,7 @@ private fun ScreenHeader(
     isConnected: Boolean,
     pulseAlpha: Float
 ) {
+    val strings = LocalAppStrings.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -317,12 +319,12 @@ private fun ScreenHeader(
     ) {
         Column {
             Text(
-                text = "REMOTE SCAN",
+                text = strings.remoteScreenTitle,
                 style = Typography.displayMedium,
                 color = TextPrimary
             )
             Text(
-                text = "HC-05 Bluetooth SPP Real-time Telemetry",
+                text = strings.remoteScreenSubtitle,
                 style = Typography.titleMedium,
                 color = TextSecondary
             )
@@ -402,6 +404,7 @@ private fun HardwareStatusCard(
     onToggleScan: () -> Unit,
     onNavigateToLocal: (() -> Unit)? = null
 ) {
+    val strings = LocalAppStrings.current
     val borderStrokeColor = when (connectionState) {
         is BluetoothConnectionState.Connected -> GlassBorderHighlighted
         is BluetoothConnectionState.Connecting -> NeonYellow.copy(alpha = 0.7f)
@@ -436,10 +439,10 @@ private fun HardwareStatusCard(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = when (connectionState) {
-                            is BluetoothConnectionState.Connected -> "CONNECTED: ${connectionState.deviceName}"
-                            is BluetoothConnectionState.Connecting -> "CONNECTING..."
+                            is BluetoothConnectionState.Connected -> "${strings.remoteConnected}: ${connectionState.deviceName}"
+                            is BluetoothConnectionState.Connecting -> strings.remoteConnecting
                             is BluetoothConnectionState.Error -> "ERROR: ${connectionState.message}"
-                            is BluetoothConnectionState.Disconnected -> "STATUS: DISCONNECTED • NO HARDWARE CONNECTED"
+                            is BluetoothConnectionState.Disconnected -> strings.remoteDisconnected
                         },
                         style = Typography.labelLarge,
                         color = statusColor
@@ -454,7 +457,7 @@ private fun HardwareStatusCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = "Target Sensor", style = Typography.labelSmall, color = TextMuted)
+                    Text(text = strings.remoteTargetDevice, style = Typography.labelSmall, color = TextMuted)
                     val addressText = when (connectionState) {
                         is BluetoothConnectionState.Connected -> connectionState.deviceAddress
                         is BluetoothConnectionState.Connecting -> connectionState.deviceAddress
@@ -463,7 +466,7 @@ private fun HardwareStatusCard(
                     Text(text = addressText, style = Typography.bodyLarge, color = TextPrimary)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(text = "Logged Points", style = Typography.labelSmall, color = TextMuted)
+                    Text(text = strings.remoteLoggedPoints, style = Typography.labelSmall, color = TextMuted)
                     Text(
                         text = "$scannedPointsCount pts",
                         style = TelemetryTextStyle,
@@ -487,7 +490,7 @@ private fun HardwareStatusCard(
                     ) {
                         Icon(imageVector = Icons.Outlined.Bluetooth, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "Connect HC-05", style = Typography.labelLarge)
+                        Text(text = strings.remoteConnectDevice, style = Typography.labelLarge)
                     }
                 } else {
                     OutlinedButton(
@@ -497,7 +500,7 @@ private fun HardwareStatusCard(
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonRed),
                         border = androidx.compose.foundation.BorderStroke(1.dp, NeonRed.copy(alpha = 0.6f))
                     ) {
-                        Text(text = "Disconnect", style = Typography.labelLarge)
+                        Text(text = strings.remoteDisconnectDevice, style = Typography.labelLarge)
                     }
                 }
 
@@ -520,7 +523,7 @@ private fun HardwareStatusCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (isScanning) "Stop Scan" else "Start Scan",
+                        text = if (isScanning) strings.remoteStopScan else strings.remoteStartScan,
                         style = Typography.labelLarge
                     )
                 }
@@ -544,7 +547,7 @@ private fun HardwareStatusCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Offline? Switch to Local Analysis Mode",
+                        text = strings.remoteSwitchToLocal,
                         style = Typography.labelLarge
                     )
                 }
@@ -559,6 +562,7 @@ private fun LiveStreamCard(
     rawPacketPreview: String,
     onClearData: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = GlassBorderCyan
@@ -578,7 +582,7 @@ private fun LiveStreamCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "LIVE PROTOCOL STREAM (\$X,Y,Z#)",
+                        text = strings.remoteLiveStreamTitle,
                         style = Typography.labelLarge,
                         color = NeonCyan
                     )
@@ -590,7 +594,7 @@ private fun LiveStreamCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.DeleteOutline,
-                        contentDescription = "Clear Data",
+                        contentDescription = strings.remoteClearBuffer,
                         tint = TextMuted,
                         modifier = Modifier.size(16.dp)
                     )
@@ -619,7 +623,7 @@ private fun LiveStreamCard(
                     .padding(horizontal = 10.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text = "RAW: $rawPacketPreview",
+                    text = "${strings.remoteRawPacket} $rawPacketPreview",
                     style = TelemetryTextStyle,
                     fontSize = 11.sp
                 )
@@ -637,6 +641,7 @@ private fun SessionActionsCard(
     onShareClick: () -> Unit,
     onToggleSmoothing: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = GlassBorder
@@ -665,7 +670,7 @@ private fun SessionActionsCard(
                 } else {
                     Icon(imageVector = Icons.Default.Save, contentDescription = null, modifier = Modifier.size(15.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Save", style = Typography.labelLarge, fontSize = 12.sp)
+                    Text(text = strings.remoteExportCsv, style = Typography.labelLarge, fontSize = 12.sp)
                 }
             }
 
@@ -686,7 +691,7 @@ private fun SessionActionsCard(
             ) {
                 Icon(imageVector = Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(15.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text(text = "Share", style = Typography.labelLarge, fontSize = 12.sp)
+                Text(text = strings.remoteShareBluetooth, style = Typography.labelLarge, fontSize = 12.sp)
             }
 
             // Bicubic Smoothing Filter Toggle
@@ -744,6 +749,7 @@ private fun BluetoothDevicePickerDialog(
     onRefresh: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     Dialog(onDismissRequest = onDismiss) {
         GlassmorphicCard(
             modifier = Modifier
@@ -762,12 +768,12 @@ private fun BluetoothDevicePickerDialog(
                 ) {
                     Column {
                         Text(
-                            text = "PAIRED DEVICES",
+                            text = strings.remotePairedDevices,
                             style = Typography.titleLarge,
                             color = TextPrimary
                         )
                         Text(
-                            text = "Select HC-05 magnetometer",
+                            text = strings.remoteSelectDevice,
                             style = Typography.labelSmall,
                             color = TextSecondary
                         )
@@ -791,13 +797,13 @@ private fun BluetoothDevicePickerDialog(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "No Paired Devices Found",
+                                text = strings.remoteNoDevices,
                                 style = Typography.bodyLarge,
                                 color = TextPrimary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Please pair your HC-05 in Android Settings first",
+                                text = strings.remotePairGuide,
                                 style = Typography.bodyMedium,
                                 color = TextMuted
                             )
@@ -836,7 +842,7 @@ private fun BluetoothDevicePickerDialog(
                                 }
 
                                 Text(
-                                    text = "CONNECT",
+                                    text = strings.remoteConnectDevice,
                                     style = Typography.labelSmall,
                                     color = NeonCyan
                                 )
@@ -852,7 +858,7 @@ private fun BluetoothDevicePickerDialog(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondary),
                     border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
                 ) {
-                    Text(text = "Close", style = Typography.labelLarge)
+                    Text(text = strings.close, style = Typography.labelLarge)
                 }
             }
         }

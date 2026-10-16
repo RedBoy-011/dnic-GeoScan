@@ -59,6 +59,8 @@ fun ExitConfirmationDialog(
     onDismiss: () -> Unit,
     onShareBluetoothData: (() -> Unit)? = null
 ) {
+    val strings = com.denic.geoscan.ui.localization.LocalAppStrings.current
+
     Dialog(onDismissRequest = onDismiss) {
         val shape = RoundedCornerShape(22.dp)
         Box(
@@ -111,7 +113,7 @@ fun ExitConfirmationDialog(
 
                 // Title
                 Text(
-                    text = "خروج از Dnic-GeoScan",
+                    text = strings.exitDialogTitle,
                     style = Typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = TextPrimary,
                     fontSize = 18.sp,
@@ -122,7 +124,7 @@ fun ExitConfirmationDialog(
 
                 // Prompt description
                 Text(
-                    text = "آیا قصد خروج از برنامه را دارید؟",
+                    text = strings.exitDialogPrompt,
                     style = Typography.bodyMedium,
                     color = TextSecondary,
                     textAlign = TextAlign.Center,
@@ -150,7 +152,7 @@ fun ExitConfirmationDialog(
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
-                                    text = "ذخیره خودکار داده‌های بلوتوث",
+                                    text = strings.exitDialogAutoSaveTitle,
                                     style = Typography.labelLarge,
                                     color = NeonGreen,
                                     fontSize = 12.sp,
@@ -159,7 +161,7 @@ fun ExitConfirmationDialog(
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "آخرین سشن اسکن ($unsavedPointsCount نقطه) پیش از خروج، به طور کامل در حافظه دستگاه ذخیره می‌شود.",
+                                text = "${strings.exitDialogAutoSaveDesc} ($unsavedPointsCount ${strings.points})",
                                 style = Typography.bodySmall,
                                 color = TextMuted,
                                 fontSize = 11.sp,
@@ -184,7 +186,7 @@ fun ExitConfirmationDialog(
                                     )
                                     Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = "اشتراک‌گذاری فایل اسکن قبل از خروج",
+                                        text = strings.exitDialogShareBtn,
                                         style = Typography.labelMedium,
                                         fontSize = 11.sp
                                     )
@@ -217,7 +219,7 @@ fun ExitConfirmationDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "انصراف", style = Typography.labelLarge)
+                        Text(text = strings.exitDialogCancelBtn, style = Typography.labelLarge)
                     }
 
                     // Confirm Exit Button
@@ -236,7 +238,7 @@ fun ExitConfirmationDialog(
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "خروج", style = Typography.labelLarge, fontWeight = FontWeight.Bold)
+                        Text(text = strings.exitDialogConfirmBtn, style = Typography.labelLarge, fontWeight = FontWeight.Bold)
                     }
                 }
             }

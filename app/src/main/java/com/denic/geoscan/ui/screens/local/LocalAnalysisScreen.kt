@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.denic.geoscan.data.model.ScanStatistics
 import com.denic.geoscan.ui.components.GlassmorphicCard
 import com.denic.geoscan.ui.components.MagneticCrossSectionCard
+import com.denic.geoscan.ui.localization.LocalAppStrings
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.DarkSurfaceElevated
@@ -244,6 +245,7 @@ fun LocalAnalysisScreen(
 
 @Composable
 private fun ScreenHeader() {
+    val strings = LocalAppStrings.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -251,12 +253,12 @@ private fun ScreenHeader() {
     ) {
         Column(modifier = Modifier.weight(1f, fill = false)) {
             Text(
-                text = "LOCAL ANALYSIS",
+                text = strings.localScreenTitle,
                 style = Typography.displayMedium,
                 color = TextPrimary
             )
             Text(
-                text = "Geophysical Dataset Offline Inspector (SAF)",
+                text = strings.localScreenSubtitle,
                 style = Typography.titleMedium,
                 color = TextSecondary
             )
@@ -377,6 +379,7 @@ private fun FileSourceCard(
     onLoadSampleGrid: (Int, Int) -> Unit,
     onExportProcessed: () -> Unit
 ) {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = if (dataset != null) GlassBorderHighlighted else GlassBorderCyan
@@ -471,7 +474,7 @@ private fun FileSourceCard(
                         ) {
                             Icon(imageVector = Icons.Outlined.FileUpload, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Open File", style = Typography.labelLarge)
+                            Text(text = strings.localOpenFile, style = Typography.labelLarge)
                         }
                     } else {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -506,7 +509,7 @@ private fun FileSourceCard(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "GRID PRESETS / OFFLINE DEMO",
+                            text = strings.localSampleGrid,
                             style = Typography.labelSmall,
                             color = TextMuted,
                             letterSpacing = 0.8.sp
@@ -611,7 +614,7 @@ private fun FileSourceCard(
                                 tint = NeonCyan
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "Export CSV", style = Typography.labelSmall)
+                            Text(text = strings.localExportCsv, style = Typography.labelSmall)
                         }
                     }
 
@@ -636,7 +639,7 @@ private fun FileSourceCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (isSmoothingEnabled) "Smoothing ON" else "Smoothing OFF",
+                            text = "${strings.localBicubicSmoothing} ${if (isSmoothingEnabled) "ON" else "OFF"}",
                             style = Typography.labelSmall
                         )
                     }
@@ -648,6 +651,7 @@ private fun FileSourceCard(
 
 @Composable
 private fun GroundZeroBaselineCard(stats: ScanStatistics) {
+    val strings = LocalAppStrings.current
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
         borderColor = GlassBorderHighlighted
@@ -667,7 +671,7 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "GROUND ZERO BASELINE (MEDIAN)",
+                        text = strings.localGroundZeroMedian,
                         style = Typography.labelLarge,
                         color = NeonGreen
                     )
@@ -694,21 +698,21 @@ private fun GroundZeroBaselineCard(stats: ScanStatistics) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 AnomalyStatBadge(
-                    label = "POS. METALS",
+                    label = strings.localMetalCount,
                     count = stats.metalCount,
                     total = stats.totalPoints,
                     color = NeonRed,
                     modifier = Modifier.weight(1f)
                 )
                 AnomalyStatBadge(
-                    label = "NOMINAL SOIL",
+                    label = strings.localNeutralCount,
                     count = stats.neutralCount,
                     total = stats.totalPoints,
                     color = NeonGreen,
                     modifier = Modifier.weight(1f)
                 )
                 AnomalyStatBadge(
-                    label = "NEG. CAVITIES",
+                    label = strings.localCavityCount,
                     count = stats.cavityCount,
                     total = stats.totalPoints,
                     color = NeonCyan,

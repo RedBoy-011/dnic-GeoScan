@@ -1,0 +1,374 @@
+package com.denic.geoscan.ui.localization
+
+import androidx.compose.runtime.staticCompositionLocalOf
+
+/**
+ * Supported application languages.
+ */
+enum class AppLanguage(val code: String, val displayName: String, val isRtl: Boolean) {
+    ENGLISH("en", "English", false),
+    PERSIAN("fa", "فارسی", true);
+
+    companion object {
+        fun fromCode(code: String): AppLanguage = entries.firstOrNull { it.code.equals(code, ignoreCase = true) } ?: ENGLISH
+    }
+}
+
+/**
+ * Complete strongly-typed string dictionary for bilingual (Persian & English) support.
+ */
+data class AppStrings(
+    // Common / General
+    val appName: String,
+    val brandSubtitle: String,
+    val cancel: String,
+    val confirm: String,
+    val save: String,
+    val share: String,
+    val clear: String,
+    val close: String,
+    val ready: String,
+    val loading: String,
+    val points: String,
+    val language: String,
+    val switchLanguage: String,
+
+    // Language Picker Dialog (First launch onboarding & manual switcher)
+    val selectLanguageTitle: String,
+    val selectLanguageSubtitle: String,
+    val englishOptionTitle: String,
+    val englishOptionDesc: String,
+    val persianOptionTitle: String,
+    val persianOptionDesc: String,
+    val startApp: String,
+
+    // Navigation & Top bar
+    val navHub: String,
+    val navLocalAnalysis: String,
+    val navRemoteScan: String,
+    val pillLocal: String,
+    val pillRemote: String,
+
+    // Hub Screen
+    val hubMissionControl: String,
+    val hubSubtitle: String,
+    val hubHardwareDisconnected: String,
+    val hubHardwareConnected: String,
+    val hubHardwareStatusDesc: String,
+    val hubConnectHardwareBtn: String,
+    val hubOpenLocalBtn: String,
+    val hubLocalCardTitle: String,
+    val hubLocalCardSubtitle: String,
+    val hubLocalCardDesc: String,
+    val hubLoadGridDemo: String,
+    val hubRemoteCardTitle: String,
+    val hubRemoteCardSubtitle: String,
+    val hubRemoteCardDesc: String,
+    val hubSpecsTitle: String,
+    val hubSpecBicubic: String,
+    val hubSpecGroundZero: String,
+    val hubSpecProjections: String,
+    val hubDefaultStartNotice: String,
+    val hubSetDefaultHub: String,
+    val hubSetDefaultLocal: String,
+
+    // Local Analysis Screen
+    val localScreenTitle: String,
+    val localScreenSubtitle: String,
+    val localOpenFile: String,
+    val localSampleGrid: String,
+    val localStatsTitle: String,
+    val localTotalPoints: String,
+    val localGridDimensions: String,
+    val localGroundZeroMedian: String,
+    val localCavityCount: String,
+    val localMetalCount: String,
+    val localNeutralCount: String,
+    val localCrossSectionTitle: String,
+    val localCrossSectionSubtitle: String,
+    val localTransectAxis: String,
+    val localIndex: String,
+    val localBicubicSmoothing: String,
+    val localExportCsv: String,
+    val localExportSuccess: String,
+    val localExportFailed: String,
+    val localNoDataTitle: String,
+    val localNoDataDesc: String,
+    val localView3dSurface: String,
+    val localView2dHeatmap: String,
+
+    // Remote Scan Screen
+    val remoteScreenTitle: String,
+    val remoteScreenSubtitle: String,
+    val remoteStatusConnected: String,
+    val remoteStatusDisconnected: String,
+    val remoteStatusConnecting: String,
+    val remoteStatusScanning: String,
+    val remoteConnectBtn: String,
+    val remoteDisconnectBtn: String,
+    val remoteStartScan: String,
+    val remoteStopScan: String,
+    val remoteClearBuffer: String,
+    val remoteLiveProtocolTitle: String,
+    val remoteXAxis: String,
+    val remoteYAxis: String,
+    val remoteZAxis: String,
+    val remoteRawLabel: String,
+    val remoteAwaitingStream: String,
+    val remoteDevicePickerTitle: String,
+    val remoteSelectScannerDevice: String,
+    val remoteNoPairedDevices: String,
+    val remoteSaveSession: String,
+    val remoteShareSession: String,
+    val remoteSmoothBicubic: String,
+    val remoteAutoSaveNotice: String,
+
+    // Exit Confirmation Dialog
+    val exitDialogTitle: String,
+    val exitDialogPrompt: String,
+    val exitDialogAutoSaveTitle: String,
+    val exitDialogAutoSaveDesc: String,
+    val exitDialogShareBtn: String,
+    val exitDialogCancelBtn: String,
+    val exitDialogConfirmBtn: String
+)
+
+val EnglishStrings = AppStrings(
+    // Common / General
+    appName = "Dnic-GeoScan",
+    brandSubtitle = "DIGITAL ELECTRONIC • 3D VISUALIZER",
+    cancel = "Cancel",
+    confirm = "Confirm",
+    save = "Save",
+    share = "Share",
+    clear = "Clear",
+    close = "Close",
+    ready = "Ready",
+    loading = "Processing...",
+    points = "pts",
+    language = "Language",
+    switchLanguage = "Switch Language",
+
+    // Language Picker Dialog
+    selectLanguageTitle = "Select Application Language",
+    selectLanguageSubtitle = "Please choose your preferred language for geophysical visualization and telemetry.",
+    englishOptionTitle = "English (Global)",
+    englishOptionDesc = "Standard international scientific terminology (Left-to-Right).",
+    persianOptionTitle = "فارسی (Persian)",
+    persianOptionDesc = "رابط کاربری و اصطلاحات تخصصی ژئوفیزیک به زبان فارسی (راست‌چین).",
+    startApp = "Confirm & Continue",
+
+    // Navigation & Top bar
+    navHub = "Hub",
+    navLocalAnalysis = "Local Analysis",
+    navRemoteScan = "Remote Scan",
+    pillLocal = "LOCAL",
+    pillRemote = "REMOTE",
+
+    // Hub Screen
+    hubMissionControl = "MISSION CONTROL HUB",
+    hubSubtitle = "Digital Electronic 3D Geophysical Visualizer",
+    hubHardwareDisconnected = "NO SCANNER DETECTED • OFFLINE",
+    hubHardwareConnected = "SCANNER CONNECTED • READY",
+    hubHardwareStatusDesc = "Connect hardware via Bluetooth or analyze local survey datasets offline.",
+    hubConnectHardwareBtn = "Connect Hardware",
+    hubOpenLocalBtn = "Open Local Analysis",
+    hubLocalCardTitle = "Local File Analysis",
+    hubLocalCardSubtitle = "OFFLINE 3D DATASET VISUALIZER",
+    hubLocalCardDesc = "Load survey files (CSV/TXT) or simulate standard 10x10, 20x20, 30x30 grids with full Ground-Zero median normalization.",
+    hubLoadGridDemo = "Load Demo Grid",
+    hubRemoteCardTitle = "Remote Live Scan",
+    hubRemoteCardSubtitle = "SPP BLUETOOTH DATA LOGGER",
+    hubRemoteCardDesc = "Stream live magnetometer telemetry over Bluetooth classic from HC-05 sensors with real-time ECharts 3D rendering.",
+    hubSpecsTitle = "GEOPHYSICAL PROCESSING ENGINE SPECIFICATIONS",
+    hubSpecBicubic = "Bicubic Catmull-Rom spline interpolation (a = -0.5)",
+    hubSpecGroundZero = "Ground Zero median nominal soil compensation baseline",
+    hubSpecProjections = "Dual-projection: 3D Surface Mesh & 2D Topographic Heatmap",
+    hubDefaultStartNotice = "Current default screen at launch:",
+    hubSetDefaultHub = "Set Hub as Default",
+    hubSetDefaultLocal = "Set Local Analysis as Default",
+
+    // Local Analysis Screen
+    localScreenTitle = "Local Dataset Analysis",
+    localScreenSubtitle = "Offline 3D Visualization & Geophysical Filtering",
+    localOpenFile = "Open File (SAF)",
+    localSampleGrid = "Sample Grid",
+    localStatsTitle = "GEOPHYSICAL FIELD METRICS",
+    localTotalPoints = "TOTAL POINTS",
+    localGridDimensions = "GRID SIZE",
+    localGroundZeroMedian = "GROUND ZERO (MEDIAN)",
+    localCavityCount = "CAVITIES (-µT)",
+    localMetalCount = "METALS (+µT)",
+    localNeutralCount = "NEUTRAL (0)",
+    localCrossSectionTitle = "MAGNETIC TRANSECT PROFILE",
+    localCrossSectionSubtitle = "2D Depth & Gradient Cross-Section Analysis",
+    localTransectAxis = "Transect Axis",
+    localIndex = "Index",
+    localBicubicSmoothing = "Bicubic Smoothing",
+    localExportCsv = "Export CSV",
+    localExportSuccess = "Dataset successfully exported to Documents.",
+    localExportFailed = "Failed to export dataset.",
+    localNoDataTitle = "No Survey Data Loaded",
+    localNoDataDesc = "Please import a CSV file or load a sample matrix above.",
+    localView3dSurface = "3D Surface",
+    localView2dHeatmap = "2D Heatmap",
+
+    // Remote Scan Screen
+    remoteScreenTitle = "Remote Live Scanner",
+    remoteScreenSubtitle = "Bluetooth Classic SPP Stream ($X,Y,Z#)",
+    remoteStatusConnected = "CONNECTED",
+    remoteStatusDisconnected = "DISCONNECTED",
+    remoteStatusConnecting = "CONNECTING...",
+    remoteStatusScanning = "STREAMING...",
+    remoteConnectBtn = "Connect Scanner",
+    remoteDisconnectBtn = "Disconnect",
+    remoteStartScan = "Start Stream",
+    remoteStopScan = "Stop Stream",
+    remoteClearBuffer = "Clear Buffer",
+    remoteLiveProtocolTitle = "LIVE PROTOCOL STREAM ($X,Y,Z#)",
+    remoteXAxis = "X-AXIS (col)",
+    remoteYAxis = "Y-AXIS (row)",
+    remoteZAxis = "Z-AXIS (µT)",
+    remoteRawLabel = "RAW STREAM",
+    remoteAwaitingStream = "Awaiting Bluetooth packet stream...",
+    remoteDevicePickerTitle = "Paired Bluetooth Devices",
+    remoteSelectScannerDevice = "Select your magnetometer / HC-05 hardware module to begin real-time stream.",
+    remoteNoPairedDevices = "No paired Bluetooth devices found. Please pair in Android Settings first.",
+    remoteSaveSession = "Save Session",
+    remoteShareSession = "Share",
+    remoteSmoothBicubic = "Bicubic ON",
+    remoteAutoSaveNotice = "Session automatically persisted to storage.",
+
+    // Exit Confirmation Dialog
+    exitDialogTitle = "Exit Dnic-GeoScan",
+    exitDialogPrompt = "Are you sure you want to exit the application?",
+    exitDialogAutoSaveTitle = "Bluetooth Data Auto-Saved",
+    exitDialogAutoSaveDesc = "Your latest scan points have been securely preserved in device storage before exit.",
+    exitDialogShareBtn = "Share Scan File Before Exit",
+    exitDialogCancelBtn = "Cancel",
+    exitDialogConfirmBtn = "Exit App"
+)
+
+val PersianStrings = AppStrings(
+    // Common / General
+    appName = "دنیک ژئواسکن",
+    brandSubtitle = "الکترونیک دیجیتال • تصویرساز سه‌بعدی",
+    cancel = "انصراف",
+    confirm = "تایید",
+    save = "ذخیره",
+    share = "اشتراک‌گذاری",
+    clear = "پاکسازی",
+    close = "بستن",
+    ready = "آماده",
+    loading = "در حال پردازش...",
+    points = "نقطه",
+    language = "زبان",
+    switchLanguage = "تغییر زبان",
+
+    // Language Picker Dialog
+    selectLanguageTitle = "انتخاب زبان برنامه",
+    selectLanguageSubtitle = "لطفاً زبان مورد نظر خود را جهت نمایش تله‌متری و تحلیل‌های سه‌بعدی ژئوفیزیک انتخاب فرمایید.",
+    englishOptionTitle = "English (انگلیسی)",
+    englishOptionDesc = "نمایش اصطلاحات بین‌المللی و چیدمان چپ‌به‌راست (LTR).",
+    persianOptionTitle = "فارسی (Persian)",
+    persianOptionDesc = "رابط کاربری و اصطلاحات تخصصی مغناطیس‌سنجی به زبان فارسی (راست‌چین).",
+    startApp = "تایید و ورود به برنامه",
+
+    // Navigation & Top bar
+    navHub = "مرکز کنترل (Hub)",
+    navLocalAnalysis = "آنالیز محلی",
+    navRemoteScan = "اسکن زنده",
+    pillLocal = "محلی",
+    pillRemote = "ریموت",
+
+    // Hub Screen
+    hubMissionControl = "مرکز کنترل عملیات ژئوفیزیک",
+    hubSubtitle = "سیستم تحلیل و تصویرسازی سه‌بعدی الکترونیک دیجیتال",
+    hubHardwareDisconnected = "اسکنر متصل نیست • حالت آفلاین",
+    hubHardwareConnected = "اسکنر متصل است • آماده دریافت",
+    hubHardwareStatusDesc = "جهت ثبت زنده به ماژول بلوتوث متصل شوید یا فایل‌های اسکن میدانی را به صورت آفلاین تحلیل کنید.",
+    hubConnectHardwareBtn = "اتصال به اسکنر",
+    hubOpenLocalBtn = "آنالیز فایل آفلاین",
+    hubLocalCardTitle = "آنالیز محلی داده‌ها",
+    hubLocalCardSubtitle = "تصویرساز سه‌بعدی فایل‌های آفلاین",
+    hubLocalCardDesc = "بارگذاری فایل‌های اسکن میدانی (CSV/TXT) یا شبیه‌سازی شبکه‌های ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰ با نرمال‌سازی میانه خاک.",
+    hubLoadGridDemo = "بارگذاری شبکه دمو",
+    hubRemoteCardTitle = "اسکن زنده از راه دور",
+    hubRemoteCardSubtitle = "لاگر داده‌های بلوتوث SPP",
+    hubRemoteCardDesc = "دریافت استریم زنده تله‌متری مغناطیس‌سنج از سنسورها و ماژول HC-05 به همراه رندر سه‌بعدی بلادرنگ ECharts.",
+    hubSpecsTitle = "مشخصات فنی و الگوریتم‌های پردازش ژئوفیزیک",
+    hubSpecBicubic = "درون‌یابی دوبعدی دومکعبی با اسپلاین Catmull-Rom (ضریب a = -0.5)",
+    hubSpecGroundZero = "نرمال‌سازی خط مبنای میانه جهت تفکیک فلز و حفره از خاک خنثی",
+    hubSpecProjections = "تصویرسازی دوگانه: پلات سطحی سه‌بعدی و نقشه حرارتی دوبعدی",
+    hubDefaultStartNotice = "صفحه پیش‌فرض در شروع برنامه:",
+    hubSetDefaultHub = "تنظیم صفحه اصلی به عنوان پیش‌فرض",
+    hubSetDefaultLocal = "تنظیم آنالیز محلی به عنوان پیش‌فرض",
+
+    // Local Analysis Screen
+    localScreenTitle = "تحلیل محلی داده‌های ژئوفیزیک",
+    localScreenSubtitle = "تصویرسازی سه‌بعدی آفلاین و فیلترهای میدان مغناطیسی",
+    localOpenFile = "انتخاب فایل (CSV/TXT)",
+    localSampleGrid = "شبکه دمو",
+    localStatsTitle = "شاخص‌های کمی و آماری میدان مغناطیسی",
+    localTotalPoints = "کل نقاط اسکن",
+    localGridDimensions = "ابعاد مشبک",
+    localGroundZeroMedian = "خط مبنای میانه (Ground Zero)",
+    localCavityCount = "فضای خالی و چاه (-µT)",
+    localMetalCount = "اهداف فلزی (+µT)",
+    localNeutralCount = "خاک خنثی (0)",
+    localCrossSectionTitle = "پروفیل مقطع عرضی مغناطیسی",
+    localCrossSectionSubtitle = "آنالیز دوبعدی عمق و گرادیان ترانسکت",
+    localTransectAxis = "محور برش",
+    localIndex = "شماره ردیف/ستون",
+    localBicubicSmoothing = "هموارسازی دو‌مکعبی",
+    localExportCsv = "خروجی CSV",
+    localExportSuccess = "داده‌ها با موفقیت در پوشه اسناد ذخیره شدند.",
+    localExportFailed = "خطا در استخراج فایل CSV.",
+    localNoDataTitle = "هیچ داده‌ای بارگذاری نشده است",
+    localNoDataDesc = "لطفاً از دکمه‌های بالا یک فایل اسکن انتخاب کنید یا شبکه آزمایشی را اجرا فرمایید.",
+    localView3dSurface = "پلات ۳بعدی",
+    localView2dHeatmap = "نقشه حرارتی ۲بعدی",
+
+    // Remote Scan Screen
+    remoteScreenTitle = "اسکن زنده مغناطیس‌سنج",
+    remoteScreenSubtitle = "استریم بلوتوث کلاسیک SPP با پروتکل ($X,Y,Z#)",
+    remoteStatusConnected = "متصل",
+    remoteStatusDisconnected = "قطع اتصال",
+    remoteStatusConnecting = "در حال اتصال...",
+    remoteStatusScanning = "در حال دریافت داده...",
+    remoteConnectBtn = "اتصال به اسکنر",
+    remoteDisconnectBtn = "قطع اتصال",
+    remoteStartScan = "شروع اسکن",
+    remoteStopScan = "توقف اسکن",
+    remoteClearBuffer = "پاکسازی بافر",
+    remoteLiveProtocolTitle = "پروتکل بلادرنگ جریان داده ($X,Y,Z#)",
+    remoteXAxis = "محور X (ستون)",
+    remoteYAxis = "محور Y (سطر)",
+    remoteZAxis = "محور Z (میکروتسلا)",
+    remoteRawLabel = "بسته خام دریافتی",
+    remoteAwaitingStream = "در انتظار برقراری استریم بلوتوث...",
+    remoteDevicePickerTitle = "دستگاه‌های بلوتوث جفت‌شده",
+    remoteSelectScannerDevice = "ماژول سخت‌افزاری اسکنر یا HC-05 خود را برای شروع اسکن انتخاب کنید.",
+    remoteNoPairedDevices = "هیچ دستگاه جفت‌شده‌ای یافت نشد. لطفاً ابتدا در تنظیمات بلوتوث اندروید جفت کنید.",
+    remoteSaveSession = "ذخیره سشن",
+    remoteShareSession = "اشتراک‌گذاری",
+    remoteSmoothBicubic = "هموارسازی ۳بعدی",
+    remoteAutoSaveNotice = "داده‌های اسکن به طور خودکار در حافظه ذخیره شد.",
+
+    // Exit Confirmation Dialog
+    exitDialogTitle = "خروج از دنیک ژئواسکن",
+    exitDialogPrompt = "آیا برای خروج از برنامه اطمینان دارید؟",
+    exitDialogAutoSaveTitle = "ذخیره خودکار داده‌های بلوتوث",
+    exitDialogAutoSaveDesc = "آخرین نقاط اسکن دریافتی قبل از بسته‌شدن برنامه به طور کامل در حافظه دستگاه ذخیره می‌شوند.",
+    exitDialogShareBtn = "اشتراک‌گذاری فایل اسکن قبل از خروج",
+    exitDialogCancelBtn = "انصراف",
+    exitDialogConfirmBtn = "خروج از برنامه"
+)
+
+val LocalAppLanguage = staticCompositionLocalOf { AppLanguage.ENGLISH }
+val LocalAppStrings = staticCompositionLocalOf { EnglishStrings }
+
+fun getStrings(language: AppLanguage): AppStrings = when (language) {
+    AppLanguage.ENGLISH -> EnglishStrings
+    AppLanguage.PERSIAN -> PersianStrings
+}

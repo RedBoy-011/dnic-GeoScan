@@ -45,7 +45,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import com.denic.geoscan.ui.components.ExitConfirmationDialog
+import com.denic.geoscan.ui.components.LanguagePickerDialog
+import com.denic.geoscan.ui.localization.AppLanguage
+import com.denic.geoscan.ui.localization.LocalAppLanguage
+import com.denic.geoscan.ui.localization.LocalAppStrings
+import com.denic.geoscan.ui.localization.getStrings
 import com.denic.geoscan.ui.screens.remote.RemoteScanViewModel
 import com.denic.geoscan.R
 import com.denic.geoscan.ui.screens.hub.HubScreen
@@ -75,6 +83,15 @@ fun AppNavigation(
         mutableStateOf(prefs.getString("start_screen", startDestination) ?: startDestination)
     }
 
+    // Language state & first launch detection
+    val savedLangCode = prefs.getString("app_language", "fa") ?: "fa"
+    var currentLanguage by remember { mutableStateOf(AppLanguage.fromCode(savedLangCode)) }
+    val isLanguageSelected = prefs.getBoolean("language_selected", false)
+    var showLanguageDialog by remember { mutableStateOf(!isLanguageSelected) }
+
+    val currentStrings = remember(currentLanguage) { getStrings(currentLanguage) }
+    val layoutDirection = if (currentLanguage.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+
     val remoteViewModel: RemoteScanViewModel = viewModel()
     val remotePoints by remoteViewModel.scannedPoints.collectAsState()
 
@@ -88,55 +105,78 @@ fun AppNavigation(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Hub.route
 
-    // Handle system back navigation (press Back on Hub triggers Exit confirmation, elsewhere returns to Hub)
-    BackHandler(enabled = true) {
-        if (currentRoute != Screen.Hub.route) {
-            navController.navigate(Screen.Hub.route) {
-                popUpTo(navController.graph.findStartDestination().id) {
-                    saveState = true
-                }
-                launchSingleTop = true
-                restoreState = true
-            }
-        } else {
-            showExitDialog = true
-        }
-    }
-
-    if (showExitDialog) {
-        ExitConfirmationDialog(
-            hasUnsavedBluetoothData = remotePoints.isNotEmpty(),
-            unsavedPointsCount = remotePoints.size,
-            onDismiss = { showExitDialog = false },
-            onConfirmExit = {
-                if (remotePoints.isNotEmpty()) {
-                    remoteViewModel.autoSaveCurrentSession()
-                }
-                showExitDialog = false
-                activity?.finish()
-            },
-            onShareBluetoothData = if (remotePoints.isNotEmpty()) {
-                { remoteViewModel.shareCurrentSession(context) }
-            } else null
-        )
-    }
-
-    Scaffold(
-        containerColor = DarkBase,
-        topBar = {
-            TopBrandingBar(
-                currentRoute = currentRoute,
-                onLogoClick = {
-                    if (currentRoute != Screen.Hub.route) {
-                        navController.navigate(Screen.Hub.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
+    CompositionLocalProvider(
+        LocalLayoutDirection provides layoutDirection,
+        LocalAppLanguage provides currentLanguage,
+        LocalAppStrings provides currentStrings
+    ) {
+        // Handle system back navigation (press Back on Hub triggers Exit confirmation, elsewhere returns to Hub)
+        BackHandler(enabled = true) {
+            if (currentRoute != Screen.Hub.route) {
+                navController.navigate(Screen.Hub.route) {
+                    popUpTo(navController.graph.findStartDestination().id) {
+                        saveState = true
                     }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            } else {
+                showExitDialog = true
+            }
+        }
+
+        // First launch language picker or manual switcher
+        if (showLanguageDialog) {
+            LanguagePickerDialog(
+                currentLanguage = currentLanguage,
+                onLanguageSelected = { lang ->
+                    currentLanguage = lang
+                    prefs.edit()
+                        .putString("app_language", lang.code)
+                        .putBoolean("language_selected", true)
+                        .apply()
+                    showLanguageDialog = false
                 },
+                onDismissRequest = if (isLanguageSelected) { { showLanguageDialog = false } } else null
+            )
+        }
+
+        if (showExitDialog) {
+            ExitConfirmationDialog(
+                hasUnsavedBluetoothData = remotePoints.isNotEmpty(),
+                unsavedPointsCount = remotePoints.size,
+                onDismiss = { showExitDialog = false },
+                onConfirmExit = {
+                    if (remotePoints.isNotEmpty()) {
+                        remoteViewModel.autoSaveCurrentSession()
+                    }
+                    showExitDialog = false
+                    activity?.finish()
+                },
+                onShareBluetoothData = if (remotePoints.isNotEmpty()) {
+                    { remoteViewModel.shareCurrentSession(context) }
+                } else null
+            )
+        }
+
+        Scaffold(
+            containerColor = DarkBase,
+            topBar = {
+                TopBrandingBar(
+                    currentRoute = currentRoute,
+                    currentLanguage = currentLanguage,
+                    onOpenLanguagePicker = { showLanguageDialog = true },
+                    onLogoClick = {
+                        if (currentRoute != Screen.Hub.route) {
+                            navController.navigate(Screen.Hub.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    },
                 onNavigate = { screen ->
                     val targetRoute = screen?.route ?: return@TopBrandingBar
                     if (currentRoute != targetRoute) {
@@ -240,9 +280,13 @@ fun AppNavigation(
 @Composable
 private fun TopBrandingBar(
     currentRoute: String,
+    currentLanguage: AppLanguage = AppLanguage.ENGLISH,
+    onOpenLanguagePicker: (() -> Unit)? = null,
     onLogoClick: (() -> Unit)? = null,
     onNavigate: ((Screen) -> Unit)? = null
 ) {
+    val strings = LocalAppStrings.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -264,77 +308,97 @@ private fun TopBrandingBar(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = clickModifier
             ) {
-            DenicBrandLogo(modifier = Modifier.size(36.dp))
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
-                Text(
-                    text = "Dnic-GeoScan",
-                    style = Typography.titleLarge,
-                    color = TextPrimary
-                )
-                Text(
-                    text = "DIGITAL ELECTRONIC • 3D VISUALIZER",
-                    style = Typography.labelSmall,
-                    color = NeonGreen,
-                    letterSpacing = 1.1.sp
-                )
+                DenicBrandLogo(modifier = Modifier.size(36.dp))
+                Spacer(modifier = Modifier.width(10.dp))
+                Column {
+                    Text(
+                        text = "Dnic-GeoScan",
+                        style = Typography.titleLarge,
+                        color = TextPrimary
+                    )
+                    Text(
+                        text = "DIGITAL ELECTRONIC • 3D VISUALIZER",
+                        style = Typography.labelSmall,
+                        color = NeonGreen,
+                        letterSpacing = 1.1.sp
+                    )
+                }
             }
-        }
 
-        // Quick Mode Switcher Pills (Direct 1-tap navigation between Local & Remote)
-        if (onNavigate != null) {
-            val isLocalActive = currentRoute.startsWith(Screen.LocalAnalysis.route)
-            val isRemoteActive = currentRoute.startsWith(Screen.RemoteScan.route)
-
+            // Quick Actions: Language Selector Pill + Mode Switcher Pills
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Local Switch Pill
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (isLocalActive) NeonGreen.copy(alpha = 0.2f) else DarkSurface)
-                        .border(
-                            1.dp,
-                            if (isLocalActive) NeonGreen else GlassBorder,
-                            RoundedCornerShape(8.dp)
+                // Language Switcher Pill (1-tap opens language dialog)
+                if (onOpenLanguagePicker != null) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(NeonCyan.copy(alpha = 0.15f))
+                            .border(1.dp, NeonCyan.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .clickable { onOpenLanguagePicker() }
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = if (currentLanguage == AppLanguage.PERSIAN) "🇮🇷 فا" else "🇬🇧 EN",
+                            style = Typography.labelSmall,
+                            color = NeonCyan,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontSize = 11.sp
                         )
-                        .clickable { onNavigate(Screen.LocalAnalysis) }
-                        .padding(horizontal = 8.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = "LOCAL",
-                        style = Typography.labelSmall,
-                        color = if (isLocalActive) NeonGreen else TextSecondary,
-                        fontSize = 11.sp
-                    )
+                    }
                 }
 
-                // Remote Switch Pill
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(if (isRemoteActive) NeonCyan.copy(alpha = 0.2f) else DarkSurface)
-                        .border(
-                            1.dp,
-                            if (isRemoteActive) NeonCyan else GlassBorder,
-                            RoundedCornerShape(8.dp)
+                if (onNavigate != null) {
+                    val isLocalActive = currentRoute.startsWith(Screen.LocalAnalysis.route)
+                    val isRemoteActive = currentRoute.startsWith(Screen.RemoteScan.route)
+
+                    // Local Switch Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isLocalActive) NeonGreen.copy(alpha = 0.2f) else DarkSurface)
+                            .border(
+                                1.dp,
+                                if (isLocalActive) NeonGreen else GlassBorder,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onNavigate(Screen.LocalAnalysis) }
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = strings.pillLocal,
+                            style = Typography.labelSmall,
+                            color = if (isLocalActive) NeonGreen else TextSecondary,
+                            fontSize = 11.sp
                         )
-                        .clickable { onNavigate(Screen.RemoteScan) }
-                        .padding(horizontal = 8.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = "REMOTE",
-                        style = Typography.labelSmall,
-                        color = if (isRemoteActive) NeonCyan else TextSecondary,
-                        fontSize = 11.sp
-                    )
+                    }
+
+                    // Remote Switch Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isRemoteActive) NeonCyan.copy(alpha = 0.2f) else DarkSurface)
+                            .border(
+                                1.dp,
+                                if (isRemoteActive) NeonCyan else GlassBorder,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onNavigate(Screen.RemoteScan) }
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = strings.pillRemote,
+                            style = Typography.labelSmall,
+                            color = if (isRemoteActive) NeonCyan else TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
     }
-}
 }
 
 @Composable
@@ -342,6 +406,8 @@ private fun GlassmorphicBottomNavBar(
     currentRoute: String,
     onNavigate: (Screen) -> Unit
 ) {
+    val strings = LocalAppStrings.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -396,6 +462,13 @@ private fun GlassmorphicBottomNavBar(
                     else -> NeonCyan
                 }
 
+                val title = when (screen) {
+                    Screen.Hub -> strings.navHub
+                    Screen.LocalAnalysis -> strings.navLocalAnalysis
+                    Screen.RemoteScan -> strings.navRemoteScan
+                    else -> screen.title
+                }
+
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(14.dp))
@@ -409,13 +482,13 @@ private fun GlassmorphicBottomNavBar(
                     ) {
                         Icon(
                             imageVector = screen.icon,
-                            contentDescription = screen.title,
+                            contentDescription = title,
                             tint = if (isSelected) activeColor else TextMuted,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.height(3.dp))
                         Text(
-                            text = screen.title,
+                            text = title,
                             style = Typography.labelLarge,
                             color = if (isSelected) TextPrimary else TextMuted,
                             fontSize = 10.sp
