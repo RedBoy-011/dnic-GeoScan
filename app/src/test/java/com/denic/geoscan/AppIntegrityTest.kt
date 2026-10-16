@@ -163,9 +163,10 @@ class AppIntegrityTest {
 
         // Validate Persian exit dialog strings
         assertFalse(fa.exitDialogTitle.isBlank())
-        assertFalse(fa.exitDialogBluetoothWarning.isBlank())
-        assertFalse(fa.exitDialogSaveAndExit.isBlank())
-        assertFalse(fa.exitDialogDirectShare.isBlank())
+        assertFalse(fa.exitDialogAutoSaveTitle.isBlank())
+        assertFalse(fa.exitDialogAutoSaveDesc.isBlank())
+        assertFalse(fa.exitDialogShareBtn.isBlank())
+        assertFalse(fa.exitDialogConfirmBtn.isBlank())
 
         // Validate Persian and English language selection strings
         assertFalse(fa.selectLanguageTitle.isBlank())
@@ -178,6 +179,9 @@ class AppIntegrityTest {
         assertFalse(fa.navLocalAnalysis.isBlank())
         assertFalse(fa.navRemoteScan.isBlank())
         assertFalse(fa.hubHardwareDisconnected.isBlank())
+        assertFalse(fa.remoteConnected.isBlank())
+        assertFalse(fa.remoteTargetDevice.isBlank())
+        assertFalse(fa.remoteLoggedPoints.isBlank())
     }
 }
 

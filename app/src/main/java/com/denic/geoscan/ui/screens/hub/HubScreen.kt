@@ -427,6 +427,7 @@ private fun LocalAnalysisHeroCard(
     onClick: () -> Unit,
     onGridDemoClick: ((Int) -> Unit)? = null
 ) {
+    val strings = LocalAppStrings.current
     val cardShape = RoundedCornerShape(20.dp)
     Box(
         modifier = Modifier
@@ -473,7 +474,6 @@ private fun LocalAnalysisHeroCard(
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        val strings = LocalAppStrings.current
                         Text(
                             text = strings.hubLocalCardTitle,
                             style = Typography.titleLarge,
@@ -504,7 +504,6 @@ private fun LocalAnalysisHeroCard(
                 }
             }
 
-            val strings = LocalAppStrings.current
             Text(
                 text = strings.hubLocalCardDesc,
                 style = Typography.bodyMedium,
