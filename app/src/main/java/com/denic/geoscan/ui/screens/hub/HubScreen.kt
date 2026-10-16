@@ -77,6 +77,8 @@ import com.denic.geoscan.ui.theme.Typography
 fun HubScreen(
     onNavigateTo: (Screen) -> Unit,
     onNavigateToGridDemo: ((Int) -> Unit)? = null,
+    preferredStartScreen: String? = null,
+    onToggleDefaultStartScreen: ((String) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
@@ -99,7 +101,13 @@ fun HubScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // Top Mission Header
-        HubHeader()
+        HubHeader(
+            isLocalDefault = (preferredStartScreen == Screen.LocalAnalysis.route),
+            onToggleDefaultLocal = {
+                val next = if (preferredStartScreen == Screen.LocalAnalysis.route) Screen.Hub.route else Screen.LocalAnalysis.route
+                onToggleDefaultStartScreen?.invoke(next)
+            }
+        )
 
         // Prominent Hardware Status Banner: Explicit Disconnected State
         HardwareStatusBanner(
@@ -125,19 +133,65 @@ fun HubScreen(
 }
 
 @Composable
-private fun HubHeader() {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(
-            text = "MISSION CONTROL",
-            style = Typography.labelSmall,
-            color = NeonCyan,
-            letterSpacing = 2.sp
-        )
-        Text(
-            text = "Geophysical Survey Hub",
-            style = Typography.displayMedium,
-            color = TextPrimary
-        )
+private fun HubHeader(
+    isLocalDefault: Boolean = false,
+    onToggleDefaultLocal: (() -> Unit)? = null
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier.weight(1f, fill = false),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = "MISSION CONTROL",
+                    style = Typography.labelSmall,
+                    color = NeonCyan,
+                    letterSpacing = 2.sp
+                )
+                Text(
+                    text = "Geophysical Survey Hub",
+                    style = Typography.displayMedium,
+                    color = TextPrimary
+                )
+            }
+            if (onToggleDefaultLocal != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(if (isLocalDefault) NeonGreen.copy(alpha = 0.15f) else DarkSurface)
+                        .border(
+                            1.dp,
+                            if (isLocalDefault) NeonGreen.copy(alpha = 0.6f) else GlassBorder,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable { onToggleDefaultLocal() }
+                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(if (isLocalDefault) NeonGreen else TextMuted)
+                        )
+                        Text(
+                            text = if (isLocalDefault) "Boot: Local" else "Boot: Hub",
+                            style = Typography.labelSmall,
+                            color = if (isLocalDefault) NeonGreen else TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
+                }
+            }
+        }
         Text(
             text = "Select an operation mode to begin spatial magnetic inspection",
             style = Typography.bodyMedium,

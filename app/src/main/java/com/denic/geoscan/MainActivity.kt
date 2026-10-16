@@ -40,10 +40,13 @@ class MainActivity : ComponentActivity() {
             Log.w("DnicGeoScan", "enableEdgeToEdge skipped safely", e)
         }
 
+        val prefs = getSharedPreferences("dnic_prefs", android.content.Context.MODE_PRIVATE)
+        val defaultStartScreen = prefs.getString("start_screen", "hub") ?: "hub"
+
         try {
             setContent {
                 DenicGeoScanTheme {
-                    AppNavigation()
+                    AppNavigation(startDestination = defaultStartScreen)
                 }
             }
         } catch (t: Throwable) {

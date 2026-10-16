@@ -23,10 +23,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,8 +58,20 @@ import com.denic.geoscan.ui.theme.Typography
 
 @Composable
 fun AppNavigation(
+    startDestination: String = Screen.Hub.route,
     navController: NavHostController = rememberNavController()
 ) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("dnic_prefs", android.content.Context.MODE_PRIVATE) }
+    var preferredStartScreen by remember {
+        mutableStateOf(prefs.getString("start_screen", startDestination) ?: startDestination)
+    }
+
+    val initialRoute = when (startDestination) {
+        Screen.LocalAnalysis.route, "local", "local_analysis" -> "local_analysis?grid={grid}"
+        else -> Screen.Hub.route
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Hub.route
 
@@ -107,7 +123,7 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Hub.route,
+            startDestination = initialRoute,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -131,6 +147,11 @@ fun AppNavigation(
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    preferredStartScreen = preferredStartScreen,
+                    onToggleDefaultStartScreen = { nextScreen ->
+                        preferredStartScreen = nextScreen
+                        prefs.edit().putString("start_screen", nextScreen).apply()
                     }
                 )
             }
