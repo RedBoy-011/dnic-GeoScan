@@ -182,6 +182,98 @@ class AppIntegrityTest {
         assertFalse(fa.remoteConnected.isBlank())
         assertFalse(fa.remoteTargetDevice.isBlank())
         assertFalse(fa.remoteLoggedPoints.isBlank())
+
+        // Validate new Telemetry Audio and Grid Matrix Localization Strings
+        assertFalse(fa.audioFeedbackTitle.isBlank())
+        assertFalse(fa.audioModeZPitch.isBlank())
+        assertFalse(fa.audioModeSimple.isBlank())
+        assertFalse(fa.audioModeMute.isBlank())
+        assertFalse(fa.gridConfigTitle.isBlank())
+        assertFalse(fa.gridStepsPerLine.isBlank())
+        assertFalse(fa.gridCurrentLine.isBlank())
+        assertFalse(fa.gridPointInLine.isBlank())
+        assertFalse(fa.gridAutoStepNotice.isBlank())
+        assertFalse(fa.gridModeParallel.isBlank())
+        assertFalse(fa.gridModeZigzag.isBlank())
+        assertFalse(fa.dnicConnectedNotification.isBlank())
+
+        assertFalse(en.audioFeedbackTitle.isBlank())
+        assertFalse(en.audioModeZPitch.isBlank())
+        assertFalse(en.audioModeSimple.isBlank())
+        assertFalse(en.audioModeMute.isBlank())
+        assertFalse(en.gridConfigTitle.isBlank())
+        assertFalse(en.gridStepsPerLine.isBlank())
+        assertFalse(en.dnicConnectedNotification.isBlank())
+    }
+
+    @Test
+    fun testAudioModeEnumResolution() {
+        val defaultMode = com.denic.geoscan.data.audio.TelemetryAudioMode.fromCode("unknown")
+        assertEquals(com.denic.geoscan.data.audio.TelemetryAudioMode.DYNAMIC_Z_PITCH, defaultMode)
+
+        val simpleMode = com.denic.geoscan.data.audio.TelemetryAudioMode.fromCode("simple")
+        assertEquals(com.denic.geoscan.data.audio.TelemetryAudioMode.SIMPLE_BEEP, simpleMode)
+
+        val muteMode = com.denic.geoscan.data.audio.TelemetryAudioMode.fromCode("mute")
+        assertEquals(com.denic.geoscan.data.audio.TelemetryAudioMode.MUTE, muteMode)
+    }
+
+    @Test
+    fun testParserFlexiblePacketFormats() {
+        val parser = ScanDataParser()
+
+        // 1-token packet ($Z#)
+        val single = parser.parsePacket("250.75")
+        assertNotNull(single)
+        assertEquals(0, single?.x)
+        assertEquals(0, single?.y)
+        assertEquals(250.75f, single?.zValue ?: 0f, 0.001f)
+
+        // 2-token packet ($X,Z#)
+        val double = parser.parsePacket("7, -35.2")
+        assertNotNull(double)
+        assertEquals(7, double?.x)
+        assertEquals(0, double?.y)
+        assertEquals(-35.2f, double?.zValue ?: 0f, 0.001f)
+
+        // 3-token packet ($X,Y,Z#)
+        val triple = parser.parsePacket("4, 8, 1024.0")
+        assertNotNull(triple)
+        assertEquals(4, triple?.x)
+        assertEquals(8, triple?.y)
+        assertEquals(1024.0f, triple?.zValue ?: 0f, 0.001f)
+    }
+
+    @Test
+    fun testGridLineSequencerAutoIncrementLogic() {
+        val targetX = 10
+        // Simulate points arriving: 0 to 24 points (total 25 points)
+        // Parallel mode:
+        for (count in 0..24) {
+            val autoY = count / targetX
+            val autoX = count % targetX
+            when (count) {
+                0 -> { assertEquals(0, autoX); assertEquals(0, autoY) }
+                9 -> { assertEquals(9, autoX); assertEquals(0, autoY) }
+                10 -> { assertEquals(0, autoX); assertEquals(1, autoY) } // Line Y stepped to 1!
+                19 -> { assertEquals(9, autoX); assertEquals(1, autoY) }
+                20 -> { assertEquals(0, autoX); assertEquals(2, autoY) } // Line Y stepped to 2!
+            }
+        }
+
+        // Zigzag mode (alternates direction on odd Y lines):
+        val zigzagPoints = (0..19).map { count ->
+            val autoY = count / targetX
+            val rawX = count % targetX
+            val autoX = if (autoY % 2 == 1) (targetX - 1 - rawX) else rawX
+            Pair(autoX, autoY)
+        }
+        // Line 0: forward 0..9
+        assertEquals(Pair(0, 0), zigzagPoints[0])
+        assertEquals(Pair(9, 0), zigzagPoints[9])
+        // Line 1: reverse 9..0
+        assertEquals(Pair(9, 1), zigzagPoints[10])
+        assertEquals(Pair(0, 1), zigzagPoints[19])
     }
 }
 

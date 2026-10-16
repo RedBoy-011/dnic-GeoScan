@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.data.parser
+package com.denic.geoscan.data.parser
 
 import com.denic.geoscan.data.model.ScanPoint
 
@@ -80,15 +80,28 @@ class ScanDataParser {
      */
     fun parsePacket(payload: String): ScanPoint? {
         val tokens = payload.split(",")
-        if (tokens.size != 3) {
-            return null
-        }
-
         return try {
-            val x = tokens[0].trim().toInt()
-            val y = tokens[1].trim().toInt()
-            val z = tokens[2].trim().toFloat()
-            ScanPoint(x = x, y = y, zValue = z)
+            when (tokens.size) {
+                1 -> {
+                    // Single Z reading (e.g. "$1045.5#")
+                    val z = tokens[0].trim().toFloat()
+                    ScanPoint(x = 0, y = 0, zValue = z)
+                }
+                2 -> {
+                    // X and Z (e.g. "$5,1045.5#")
+                    val x = tokens[0].trim().toInt()
+                    val z = tokens[1].trim().toFloat()
+                    ScanPoint(x = x, y = 0, zValue = z)
+                }
+                3 -> {
+                    // Full triplet (e.g. "$1,2,1045.5#")
+                    val x = tokens[0].trim().toInt()
+                    val y = tokens[1].trim().toInt()
+                    val z = tokens[2].trim().toFloat()
+                    ScanPoint(x = x, y = y, zValue = z)
+                }
+                else -> null
+            }
         } catch (_: NumberFormatException) {
             null
         }

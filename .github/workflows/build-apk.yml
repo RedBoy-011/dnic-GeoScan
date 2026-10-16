@@ -44,13 +44,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.7.0.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.8.0.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.7.0.apk
-          test -f release/Dnic-GeoScan-v1.7.0.apk
+          ls -lh release/Dnic-GeoScan-v1.8.0.apk
+          test -f release/Dnic-GeoScan-v1.8.0.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -64,7 +64,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.7.0.apk
+            adb install -r release/Dnic-GeoScan-v1.8.0.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -101,8 +101,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.7.0-apk
-          path: release/Dnic-GeoScan-v1.7.0.apk
+          name: Dnic-GeoScan-v1.8.0-apk
+          path: release/Dnic-GeoScan-v1.8.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -110,31 +110,36 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.7.0
-          name: "Dnic-GeoScan v1.7.0 - Bilingual Support (English 🇬🇧 & Persian 🇮🇷) & Dynamic RTL UI"
+          tag_name: v1.8.0
+          name: "Dnic-GeoScan v1.8.0 - Auto-Stepping Grid Sequencer, Acoustic Telemetry & Connection Announcements"
           body: |
-            ## 🌐 Dnic-GeoScan v1.7.0 - Bilingual Support (English 🇬🇧 & Persian 🇮🇷) & Dynamic RTL UI
+            ## 🔊 Dnic-GeoScan v1.8.0 - Auto-Stepping Grid Sequencer & Acoustic Telemetry Feedback
 
-            نسخه رسمی ۱.۷.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و گرادیومتر مغناطیسی **Dnic-GeoScan**.
+            نسخه رسمی ۱.۸.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و گرادیومتر مغناطیسی **Dnic-GeoScan**.
             
             ### ✨ قابلیت‌های جدید و کلیدی این نسخه:
-            - **پشتیبانی کامل دو زبانه (فارسی 🇮🇷 / انگلیسی 🇬🇧):**
-              - بازنویسی کامل منوها، عنوان‌ها، دکمه‌ها، وضعیت‌ها، خطاها و دیالوگ‌ها به هر دو زبان فارسی و انگلیسی.
-            - **دیالوگ انتخاب زبان در اولین اجرای برنامه (First-Launch Onboarding):**
-              - در اولین ورود، دیالوگ مدرن شیشه‌ای با پرچم‌های ایران و انگلستان نمایش داده می‌شود تا کاربر زبان دلخواه خود را تعیین کند.
-            - **تغییر جهت هوشمند و داینامیک رابط کاربری (RTL / LTR):**
-              - چیدمان راست‌چین (RTL) خودکار برای زبان فارسی و چپ‌چین (LTR) برای زبان انگلیسی با استفاده از `CompositionLocalProvider` بدون نیاز به ریستارت اپلیکیشن و بدون قطع اتصال بلوتوث یا ریست شدن وب‌ویو.
-            - **دکمه سوئیچ سریع زبان در نوار بالا (Top Branding Bar):**
-              - دسترسی سریع به تغییر زبان در هر لحظه با لمس برچسب `🌐 فا` یا `🌐 EN`.
-            - **تداوم تمامی قابلیت‌های پیشرفته:**
-              - دیالوگ تایید خروج (Exit Confirmation) به زبان انتخابی.
-              - ذخیره خودکار داده‌های بلوتوث پیش از خروج و اشتراک‌گذاری مستقیم سشن.
-              - شیلد ضد کرش مستقل برای انواع گوشی‌ها و تبلت‌ها از اندروید ۸ تا ۱۶.
+            - **تنظیمات هوشمند ماتریس پیمایش (محور X و افزایش خودکار سطر Y):**
+              - کاربر تنها تعداد نقاط سطر (X) را مشخص می‌کند (مثلاً ۵، ۱۰، ۱۵، ۲۰، ۳۰ یا هر عدد دلخواه).
+              - با دریافت هر نقطه از سنسور، شمارنده X افزایش یافته و با پایان هر سطر، سطر Y به صورت خودکار یک واحد جلو می‌رود ($Y \rightarrow Y+1$).
+              - پشتیبانی از حالت‌های پیمایش موازی (Parallel) و زیگزاگی (Zigzag).
+            - **موتور بازخورد صوتی زنده تله‌متری (Acoustic Telemetry Engine):**
+              - تولید سیگنال صوتی سینوسی PCM 16-bit در زمان واقعی و بدون تاخیر با ۳ حالت انتخابی:
+                1. **متناسب با Z (دینامیک):** تغییر بسامد صدا متناسب با شدت میدان مغناطیسی (فرکانس‌های بم ۱۸۰ تا ۴۵۰ هرتز برای حفرات و فرکانس‌های تیز ۶۰۰ تا ۲۲۰۰ هرتز برای فلزات).
+                2. **بوق کوتاه (Simple Beep):** صدای ملایم تایید ثبت نقطه.
+                3. **بی‌صدا (Mute):** برای شرایطی که نیاز به سکوت مطلق وجود دارد.
+            - **اعلان صوتی و زنگ اتصال به سخت‌افزار دنیک:**
+              - پس از برقراری موفق ارتباط بلوتوث با ماژول، برنامه با چایم صوتی ۳ صدایی و اعلام صوتی اعلام می‌کند:
+                - در زبان فارسی: **«اتصال با دنیک برقرار شد»**
+                - در زبان انگلیسی: **«Connected to Dnic System»**
+            - **سازگاری جامع و انعطاف‌پذیری استریم پروتکل:**
+              - پارسر بسته‌ها اکنون از انواع بسته‌های تک مقداره (`$Z#`)، دو مقداره (`$X,Z#`) و سه مقداره (`$X,Y,Z#`) پشتیبانی می‌کند.
+            - **کارت تایید سخت‌افزاری:**
+              - نمایش نشان اختصاصی در بالای صفحه اسکن هنگام اتصال موفق.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.7.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.7.0/Dnic-GeoScan-v1.7.0.apk)**
+            - **[دانلود مستقیم Dnic-GeoScan-v1.8.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.0/Dnic-GeoScan-v1.8.0.apk)**
           files: |
-            release/Dnic-GeoScan-v1.7.0.apk
+            release/Dnic-GeoScan-v1.8.0.apk
             release/emulator_phone.png
             release/emulator_tablet.png
         env:

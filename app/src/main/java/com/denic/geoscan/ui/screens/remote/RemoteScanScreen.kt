@@ -34,12 +34,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.BluetoothConnected
 import androidx.compose.material.icons.filled.BluetoothDisabled
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.BluetoothSearching
 import androidx.compose.material.icons.outlined.Check
@@ -58,6 +66,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import com.denic.geoscan.data.audio.TelemetryAudioMode
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
@@ -111,6 +120,12 @@ fun RemoteScanScreen(
     val isSmoothingEnabled by viewModel.isSmoothingEnabled.collectAsState()
     val exportStatusMessage by viewModel.exportStatusMessage.collectAsState()
     val isExporting by viewModel.isExporting.collectAsState()
+
+    val audioMode by viewModel.audioMode.collectAsState()
+    val targetPointsX by viewModel.targetPointsX.collectAsState()
+    val isZigzagMode by viewModel.isZigzagMode.collectAsState()
+    val currentLineY by viewModel.currentLineY.collectAsState()
+    val currentPointInLineX by viewModel.currentPointInLineX.collectAsState()
 
     val context = LocalContext.current
     val lastAutoSavePath by viewModel.lastAutoSavePath.collectAsState()
@@ -196,6 +211,8 @@ fun RemoteScanScreen(
                         onDismiss = { viewModel.clearExportMessage() }
                     )
 
+                    DnicConnectionNoticeCard(isConnected = isConnected)
+
                     HardwareStatusCard(
                         connectionState = connectionState,
                         isConnected = isConnected,
@@ -207,6 +224,20 @@ fun RemoteScanScreen(
                         onDisconnectClick = { viewModel.disconnectDevice() },
                         onToggleScan = { viewModel.toggleScan() },
                         onNavigateToLocal = onNavigateToLocal
+                    )
+
+                    GridMatrixSequencerCard(
+                        targetPointsX = targetPointsX,
+                        currentLineY = currentLineY,
+                        currentPointInLineX = currentPointInLineX,
+                        isZigzagMode = isZigzagMode,
+                        onTargetXChanged = { viewModel.setTargetPointsX(it) },
+                        onToggleZigzag = { viewModel.toggleZigzagMode() }
+                    )
+
+                    AudioFeedbackCard(
+                        currentMode = audioMode,
+                        onModeSelected = { viewModel.setAudioMode(it) }
                     )
 
                     LiveStreamCard(
@@ -254,6 +285,8 @@ fun RemoteScanScreen(
                     onDismiss = { viewModel.clearExportMessage() }
                 )
 
+                DnicConnectionNoticeCard(isConnected = isConnected)
+
                 HardwareStatusCard(
                     connectionState = connectionState,
                     isConnected = isConnected,
@@ -265,6 +298,20 @@ fun RemoteScanScreen(
                     onDisconnectClick = { viewModel.disconnectDevice() },
                     onToggleScan = { viewModel.toggleScan() },
                     onNavigateToLocal = onNavigateToLocal
+                )
+
+                GridMatrixSequencerCard(
+                    targetPointsX = targetPointsX,
+                    currentLineY = currentLineY,
+                    currentPointInLineX = currentPointInLineX,
+                    isZigzagMode = isZigzagMode,
+                    onTargetXChanged = { viewModel.setTargetPointsX(it) },
+                    onToggleZigzag = { viewModel.toggleZigzagMode() }
+                )
+
+                AudioFeedbackCard(
+                    currentMode = audioMode,
+                    onModeSelected = { viewModel.setAudioMode(it) }
                 )
 
                 LiveStreamCard(
@@ -385,6 +432,51 @@ private fun ExportNotificationBanner(
                             modifier = Modifier.size(16.dp)
                         )
                     }
+                }
+            }
+        }
+    }
+@Composable
+private fun DnicConnectionNoticeCard(
+    isConnected: Boolean
+) {
+    val strings = LocalAppStrings.current
+    AnimatedVisibility(visible = isConnected) {
+        GlassmorphicCard(
+            modifier = Modifier.fillMaxWidth(),
+            borderColor = NeonGreen
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(NeonGreen.copy(alpha = 0.15f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        tint = NeonGreen,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = strings.dnicConnectedNotification,
+                        style = Typography.titleMedium,
+                        color = NeonGreen
+                    )
+                    Text(
+                        text = "Hardware handshake validated • Telemetry active",
+                        style = Typography.labelSmall,
+                        color = TextSecondary
+                    )
                 }
             }
         }
@@ -553,6 +645,283 @@ private fun HardwareStatusCard(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun GridMatrixSequencerCard(
+    targetPointsX: Int,
+    currentLineY: Int,
+    currentPointInLineX: Int,
+    isZigzagMode: Boolean,
+    onTargetXChanged: (Int) -> Unit,
+    onToggleZigzag: () -> Unit
+) {
+    val strings = LocalAppStrings.current
+    val presets = listOf(5, 10, 15, 20, 30)
+
+    GlassmorphicCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = GlassBorderCyan
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Filled.GridOn,
+                        contentDescription = null,
+                        tint = NeonCyan,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = strings.gridConfigTitle,
+                        style = Typography.labelLarge,
+                        color = NeonCyan
+                    )
+                }
+
+                // Zigzag / Parallel toggle badge
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(DarkSurface)
+                        .border(1.dp, if (isZigzagMode) NeonYellow.copy(alpha = 0.6f) else GlassBorder, RoundedCornerShape(8.dp))
+                        .clickable { onToggleZigzag() }
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Filled.SwapHoriz,
+                            contentDescription = null,
+                            tint = if (isZigzagMode) NeonYellow else TextSecondary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = if (isZigzagMode) strings.gridModeZigzag else strings.gridModeParallel,
+                            style = Typography.labelSmall,
+                            color = if (isZigzagMode) NeonYellow else TextSecondary
+                        )
+                    }
+                }
+            }
+
+            // Stepper and Target X Points Selector
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = strings.gridStepsPerLine,
+                        style = Typography.labelSmall,
+                        color = TextMuted
+                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "$targetPointsX",
+                            style = TelemetryTextStyle,
+                            color = TextPrimary,
+                            fontSize = 24.sp
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = strings.points,
+                            style = Typography.labelSmall,
+                            color = TextMuted
+                        )
+                    }
+                }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(
+                        onClick = { if (targetPointsX > 2) onTargetXChanged(targetPointsX - 1) },
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DarkSurfaceElevated)
+                    ) {
+                        Icon(imageVector = Icons.Filled.Remove, contentDescription = "Decrease X", tint = TextPrimary, modifier = Modifier.size(16.dp))
+                    }
+
+                    IconButton(
+                        onClick = { if (targetPointsX < 200) onTargetXChanged(targetPointsX + 1) },
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(DarkSurfaceElevated)
+                    ) {
+                        Icon(imageVector = Icons.Filled.Add, contentDescription = "Increase X", tint = TextPrimary, modifier = Modifier.size(16.dp))
+                    }
+                }
+            }
+
+            // Quick Preset Chips (5, 10, 15, 20, 30)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                presets.forEach { preset ->
+                    val isSelected = targetPointsX == preset
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(if (isSelected) NeonCyan.copy(alpha = 0.2f) else DarkSurface)
+                            .border(1.dp, if (isSelected) NeonCyan else GlassBorder, RoundedCornerShape(6.dp))
+                            .clickable { onTargetXChanged(preset) }
+                            .padding(vertical = 6.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "$preset",
+                            style = Typography.labelMedium,
+                            color = if (isSelected) NeonCyan else TextSecondary
+                        )
+                    }
+                }
+            }
+
+            // Real-time Grid Line Progress Tracking
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(DarkSurface)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(text = strings.gridCurrentLine, style = Typography.labelSmall, color = TextMuted)
+                    Text(text = "Y = $currentLineY", style = TelemetryTextStyle, color = NeonGreen, fontSize = 16.sp)
+                }
+
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(text = strings.gridPointInLine, style = Typography.labelSmall, color = TextMuted)
+                    Text(text = "X = $currentPointInLineX / $targetPointsX", style = TelemetryTextStyle, color = NeonCyan, fontSize = 16.sp)
+                }
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(text = "SEQUENCE", style = Typography.labelSmall, color = TextMuted)
+                    Text(
+                        text = if (isZigzagMode) "ZIGZAG" else "PARALLEL",
+                        style = Typography.labelSmall,
+                        color = if (isZigzagMode) NeonYellow else TextSecondary
+                    )
+                }
+            }
+
+            // Explanatory Auto-stepping Notice
+            Text(
+                text = "ℹ ${strings.gridAutoStepNotice}",
+                style = Typography.bodySmall,
+                color = TextSecondary,
+                fontSize = 11.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun AudioFeedbackCard(
+    currentMode: TelemetryAudioMode,
+    onModeSelected: (TelemetryAudioMode) -> Unit
+) {
+    val strings = LocalAppStrings.current
+    GlassmorphicCard(
+        modifier = Modifier.fillMaxWidth(),
+        borderColor = GlassBorder
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = when (currentMode) {
+                        TelemetryAudioMode.DYNAMIC_Z_PITCH -> Icons.Filled.MusicNote
+                        TelemetryAudioMode.SIMPLE_BEEP -> Icons.Filled.VolumeUp
+                        TelemetryAudioMode.MUTE -> Icons.Filled.VolumeOff
+                    },
+                    contentDescription = null,
+                    tint = if (currentMode != TelemetryAudioMode.MUTE) NeonGreen else TextMuted,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = strings.audioFeedbackTitle,
+                    style = Typography.labelLarge,
+                    color = TextPrimary
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Option 1: Dynamic Z-Pitch
+                AudioModeChip(
+                    modifier = Modifier.weight(1.1f),
+                    title = strings.audioModeZPitch,
+                    isSelected = currentMode == TelemetryAudioMode.DYNAMIC_Z_PITCH,
+                    activeColor = NeonGreen,
+                    onClick = { onModeSelected(TelemetryAudioMode.DYNAMIC_Z_PITCH) }
+                )
+
+                // Option 2: Simple Beep
+                AudioModeChip(
+                    modifier = Modifier.weight(0.9f),
+                    title = strings.audioModeSimple,
+                    isSelected = currentMode == TelemetryAudioMode.SIMPLE_BEEP,
+                    activeColor = NeonCyan,
+                    onClick = { onModeSelected(TelemetryAudioMode.SIMPLE_BEEP) }
+                )
+
+                // Option 3: Mute
+                AudioModeChip(
+                    modifier = Modifier.weight(0.8f),
+                    title = strings.audioModeMute,
+                    isSelected = currentMode == TelemetryAudioMode.MUTE,
+                    activeColor = NeonRed,
+                    onClick = { onModeSelected(TelemetryAudioMode.MUTE) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AudioModeChip(
+    modifier: Modifier = Modifier,
+    title: String,
+    isSelected: Boolean,
+    activeColor: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(if (isSelected) activeColor.copy(alpha = 0.16f) else DarkSurface)
+            .border(1.dp, if (isSelected) activeColor else GlassBorder, RoundedCornerShape(8.dp))
+            .clickable { onClick() }
+            .padding(vertical = 8.dp, horizontal = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = title,
+            style = Typography.labelSmall,
+            color = if (isSelected) activeColor else TextSecondary,
+            fontSize = 11.sp,
+            maxLines = 1
+        )
     }
 }
 

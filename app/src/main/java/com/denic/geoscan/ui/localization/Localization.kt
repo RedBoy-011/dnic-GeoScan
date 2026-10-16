@@ -131,6 +131,22 @@ data class AppStrings(
     val remoteSmoothBicubic: String,
     val remoteAutoSaveNotice: String,
 
+    // Telemetry Audio Feedback
+    val audioFeedbackTitle: String,
+    val audioModeZPitch: String,
+    val audioModeSimple: String,
+    val audioModeMute: String,
+
+    // Grid Acquisition Sequencer (X line steps & Y auto-stepping)
+    val gridConfigTitle: String,
+    val gridStepsPerLine: String,
+    val gridCurrentLine: String,
+    val gridPointInLine: String,
+    val gridAutoStepNotice: String,
+    val gridModeParallel: String,
+    val gridModeZigzag: String,
+    val dnicConnectedNotification: String,
+
     // Exit Confirmation Dialog
     val exitDialogTitle: String,
     val exitDialogPrompt: String,
@@ -255,6 +271,22 @@ val EnglishStrings = AppStrings(
     remoteSmoothBicubic = "Bicubic ON",
     remoteAutoSaveNotice = "Session automatically persisted to storage.",
 
+    // Telemetry Audio Feedback
+    audioFeedbackTitle = "Acoustic Telemetry Audio",
+    audioModeZPitch = "Dynamic Z-Pitch",
+    audioModeSimple = "Simple Beep",
+    audioModeMute = "Mute",
+
+    // Grid Acquisition Sequencer (X line steps & Y auto-stepping)
+    gridConfigTitle = "Grid Matrix Line Sequencer",
+    gridStepsPerLine = "X Points Per Line",
+    gridCurrentLine = "Line (Y)",
+    gridPointInLine = "Step (X)",
+    gridAutoStepNotice = "Y auto-advances when X line reaches completion",
+    gridModeParallel = "Parallel",
+    gridModeZigzag = "Zigzag",
+    dnicConnectedNotification = "Connected to Dnic System",
+
     // Exit Confirmation Dialog
     exitDialogTitle = "Exit Dnic-GeoScan",
     exitDialogPrompt = "Are you sure you want to exit the application?",
@@ -378,6 +410,22 @@ val PersianStrings = AppStrings(
     remoteShareSession = "اشتراک‌گذاری",
     remoteSmoothBicubic = "هموارسازی ۳بعدی",
     remoteAutoSaveNotice = "داده‌های اسکن به طور خودکار در حافظه ذخیره شد.",
+
+    // Telemetry Audio Feedback
+    audioFeedbackTitle = "بازخورد صوتی تله‌متری",
+    audioModeZPitch = "متناسب با Z (دینامیک)",
+    audioModeSimple = "بوق کوتاه",
+    audioModeMute = "بی‌صدا",
+
+    // Grid Acquisition Sequencer (X line steps & Y auto-stepping)
+    gridConfigTitle = "تنظیمات ماتریس پیمایش (محور X)",
+    gridStepsPerLine = "تعداد نقاط هر خط (X)",
+    gridCurrentLine = "سطر جاری (Y)",
+    gridPointInLine = "نقطه در خط جاری (X)",
+    gridAutoStepNotice = "پس از اتمام تعداد X، مقدار Y خودکار افزایش می‌یابد",
+    gridModeParallel = "موازی",
+    gridModeZigzag = "زیگزاگ",
+    dnicConnectedNotification = "اتصال با دنیک برقرار شد",
 
     // Exit Confirmation Dialog
     exitDialogTitle = "خروج از دنیک ژئواسکن",

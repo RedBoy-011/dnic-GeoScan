@@ -5,6 +5,8 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.denic.geoscan.data.analysis.BicubicInterpolator
+import com.denic.geoscan.data.audio.AudioFeedbackManager
+import com.denic.geoscan.data.audio.TelemetryAudioMode
 import com.denic.geoscan.data.bluetooth.BluetoothConnectionState
 import com.denic.geoscan.data.bluetooth.BluetoothDeviceModel
 import com.denic.geoscan.data.bluetooth.BluetoothService
@@ -20,6 +22,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/**
+ * ViewModel managing Bluetooth live telemetry, automatic grid line stepping (X -> Y auto-increment),
+ * acoustic audio feedback synthesis, and session persistence.
+ */
 class RemoteScanViewModel(
     application: Application
 ) : AndroidViewModel(application) {
@@ -27,6 +33,9 @@ class RemoteScanViewModel(
     val bluetoothService = BluetoothService(application.applicationContext)
     private val sessionExporter = SessionExporter(application.applicationContext)
     private val bicubicInterpolator = BicubicInterpolator(subdivisionFactor = 2)
+    val audioFeedbackManager = AudioFeedbackManager(application.applicationContext)
+
+    private val prefs = application.getSharedPreferences("dnic_geoscan_settings", Context.MODE_PRIVATE)
 
     val connectionState: StateFlow<BluetoothConnectionState> = bluetoothService.connectionState
 
@@ -59,6 +68,37 @@ class RemoteScanViewModel(
     private val _isExporting = MutableStateFlow(false)
     val isExporting: StateFlow<Boolean> = _isExporting.asStateFlow()
 
+    // Audio Feedback Settings (DYNAMIC_Z_PITCH, SIMPLE_BEEP, MUTE)
+    private val _audioMode = MutableStateFlow(
+        TelemetryAudioMode.fromCode(
+            prefs.getString("telemetry_audio_mode", TelemetryAudioMode.DYNAMIC_Z_PITCH.code)
+                ?: TelemetryAudioMode.DYNAMIC_Z_PITCH.code
+        )
+    )
+    val audioMode: StateFlow<TelemetryAudioMode> = _audioMode.asStateFlow()
+
+    // Auto-Grid Sequencer: Points per Line (X steps)
+    private val _targetPointsX = MutableStateFlow(
+        prefs.getInt("grid_target_x", 10).coerceIn(2, 200)
+    )
+    val targetPointsX: StateFlow<Int> = _targetPointsX.asStateFlow()
+
+    // Zigzag vs Parallel line acquisition mode
+    private val _isZigzagMode = MutableStateFlow(
+        prefs.getBoolean("grid_is_zigzag", false)
+    )
+    val isZigzagMode: StateFlow<Boolean> = _isZigzagMode.asStateFlow()
+
+    // Current line index (Y): 0, 1, 2...
+    val currentLineY: StateFlow<Int> = combine(_scannedPoints, _targetPointsX) { pts, xCount ->
+        if (xCount > 0) pts.size / xCount else 0
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    // Current step in line (X): 0 to xCount - 1
+    val currentPointInLineX: StateFlow<Int> = combine(_scannedPoints, _targetPointsX) { pts, xCount ->
+        if (xCount > 0) pts.size % xCount else 0
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     // Points dispatched to ECharts (either raw or bicubic-interpolated)
     val visualizerPoints: StateFlow<List<ScanPoint>> = combine(
         _scannedPoints,
@@ -85,15 +125,64 @@ class RemoteScanViewModel(
             }
         }
 
-        // Collect parsed ScanPoints when scanning/recording is active
+        // Collect parsed ScanPoints and map to automatic grid coordinates (X -> Y auto-increment)
         viewModelScope.launch {
-            bluetoothService.scanPoints.collect { point ->
-                _latestPoint.value = point
+            bluetoothService.scanPoints.collect { rawPoint ->
+                val currentCount = _scannedPoints.value.size
+                val xTarget = _targetPointsX.value
+                val autoY = currentCount / xTarget
+                val rawXInLine = currentCount % xTarget
+                val autoX = if (_isZigzagMode.value && autoY % 2 == 1) {
+                    (xTarget - 1 - rawXInLine)
+                } else {
+                    rawXInLine
+                }
+
+                val gridPoint = rawPoint.copy(x = autoX, y = autoY)
+                _latestPoint.value = gridPoint
+
                 if (_isScanning.value) {
-                    _scannedPoints.value = _scannedPoints.value + point
+                    _scannedPoints.value = _scannedPoints.value + gridPoint
+                }
+
+                // Play acoustic telemetry feedback (Z-pitch, Simple beep, or Mute)
+                audioFeedbackManager.playPointFeedback(rawPoint.zValue, _audioMode.value)
+            }
+        }
+
+        // Announce Bluetooth connection voice notice upon establishing connection
+        viewModelScope.launch {
+            var wasConnected = false
+            bluetoothService.connectionState.collect { state ->
+                if (state is BluetoothConnectionState.Connected) {
+                    if (!wasConnected) {
+                        wasConnected = true
+                        val appLang = prefs.getString("app_language", "en") ?: "en"
+                        val isPersian = appLang.equals("fa", ignoreCase = true)
+                        audioFeedbackManager.announceConnection(isPersian)
+                    }
+                } else {
+                    wasConnected = false
                 }
             }
         }
+    }
+
+    fun setAudioMode(mode: TelemetryAudioMode) {
+        _audioMode.value = mode
+        prefs.edit().putString("telemetry_audio_mode", mode.code).apply()
+    }
+
+    fun setTargetPointsX(x: Int) {
+        val clamped = x.coerceIn(2, 200)
+        _targetPointsX.value = clamped
+        prefs.edit().putInt("grid_target_x", clamped).apply()
+    }
+
+    fun toggleZigzagMode() {
+        val next = !_isZigzagMode.value
+        _isZigzagMode.value = next
+        prefs.edit().putBoolean("grid_is_zigzag", next).apply()
     }
 
     fun openDevicePicker() {
@@ -234,8 +323,8 @@ class RemoteScanViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        audioFeedbackManager.release()
         if (_scannedPoints.value.isNotEmpty()) {
-            // Guarantee write to disk on cleanup
             try {
                 val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
                 val targetDir = getApplication<Application>().getExternalFilesDir("Scans")
