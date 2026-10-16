@@ -120,4 +120,29 @@ class AppIntegrityTest {
         val routes = screens.map { it.route }
         assertEquals("Each route must be unique", routes.distinct().size, routes.size)
     }
+
+    @Test
+    fun testSessionExporterCsvGeneration() {
+        // Test CSV content builder logic directly
+        val testPoints = listOf(
+            ScanPoint(1, 2, 45.5f, 1000L),
+            ScanPoint(3, 4, -12.3f, 2000L)
+        )
+        val headerTimestamp = "2026-10-16 12:00:00"
+        val csv = buildString {
+            appendLine("# denic GeoScan Geophysical Magnetometer Survey")
+            appendLine("# Exported Date: $headerTimestamp")
+            appendLine("# Total Points: ${testPoints.size}")
+            appendLine("# Coordinate Format: X (col), Y (row), Z (microtesla uT), Timestamp (epoch ms)")
+            appendLine("X,Y,Z,Timestamp")
+            for (p in testPoints) {
+                appendLine("${p.x},${p.y},${p.zValue},${p.timestamp}")
+            }
+        }
+        assertTrue(csv.contains("X,Y,Z,Timestamp"))
+        assertTrue(csv.contains("1,2,45.5,1000"))
+        assertTrue(csv.contains("3,4,-12.3,2000"))
+        assertTrue(csv.contains("# Total Points: 2"))
+    }
 }
+

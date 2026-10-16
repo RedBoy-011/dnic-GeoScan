@@ -48,6 +48,7 @@ import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedButton
@@ -58,6 +59,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -108,6 +110,9 @@ fun RemoteScanScreen(
     val isSmoothingEnabled by viewModel.isSmoothingEnabled.collectAsState()
     val exportStatusMessage by viewModel.exportStatusMessage.collectAsState()
     val isExporting by viewModel.isExporting.collectAsState()
+
+    val context = LocalContext.current
+    val lastAutoSavePath by viewModel.lastAutoSavePath.collectAsState()
 
     // Permission launcher for Bluetooth
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -214,6 +219,7 @@ fun RemoteScanScreen(
                         isExporting = isExporting,
                         isSmoothingEnabled = isSmoothingEnabled,
                         onExportClick = { viewModel.exportSession() },
+                        onShareClick = { viewModel.shareCurrentSession(context) },
                         onToggleSmoothing = { viewModel.toggleSmoothing() }
                     )
                 }
@@ -271,6 +277,7 @@ fun RemoteScanScreen(
                     isExporting = isExporting,
                     isSmoothingEnabled = isSmoothingEnabled,
                     onExportClick = { viewModel.exportSession() },
+                    onShareClick = { viewModel.shareCurrentSession(context) },
                     onToggleSmoothing = { viewModel.toggleSmoothing() }
                 )
 
@@ -627,6 +634,7 @@ private fun SessionActionsCard(
     isExporting: Boolean,
     isSmoothingEnabled: Boolean,
     onExportClick: () -> Unit,
+    onShareClick: () -> Unit,
     onToggleSmoothing: () -> Unit
 ) {
     GlassmorphicCard(
@@ -635,7 +643,7 @@ private fun SessionActionsCard(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Save Session to CSV button
             OutlinedButton(
@@ -655,16 +663,36 @@ private fun SessionActionsCard(
                 if (isExporting) {
                     CircularProgressIndicator(modifier = Modifier.size(16.dp), color = NeonCyan, strokeWidth = 2.dp)
                 } else {
-                    Icon(imageVector = Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "Save Session", style = Typography.labelLarge)
+                    Icon(imageVector = Icons.Default.Save, contentDescription = null, modifier = Modifier.size(15.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "Save", style = Typography.labelLarge, fontSize = 12.sp)
                 }
+            }
+
+            // Direct Share Button
+            OutlinedButton(
+                onClick = onShareClick,
+                enabled = hasPoints && !isExporting,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(10.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = NeonGreen,
+                    disabledContentColor = TextMuted
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                    1.dp,
+                    if (hasPoints) NeonGreen.copy(alpha = 0.6f) else GlassBorder
+                )
+            ) {
+                Icon(imageVector = Icons.Outlined.Share, contentDescription = null, modifier = Modifier.size(15.dp))
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(text = "Share", style = Typography.labelLarge, fontSize = 12.sp)
             }
 
             // Bicubic Smoothing Filter Toggle
             OutlinedButton(
                 onClick = onToggleSmoothing,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1.1f),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = if (isSmoothingEnabled) NeonGreen else TextSecondary,
@@ -678,13 +706,14 @@ private fun SessionActionsCard(
                 Icon(
                     imageVector = Icons.Default.AutoAwesome,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(15.dp),
                     tint = if (isSmoothingEnabled) NeonGreen else TextMuted
                 )
-                Spacer(modifier = Modifier.width(6.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = if (isSmoothingEnabled) "Bicubic ON" else "Smooth 3D",
-                    style = Typography.labelLarge
+                    text = if (isSmoothingEnabled) "Bicubic ON" else "Smooth",
+                    style = Typography.labelLarge,
+                    fontSize = 12.sp
                 )
             }
         }

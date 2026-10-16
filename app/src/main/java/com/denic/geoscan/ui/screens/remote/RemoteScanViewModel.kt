@@ -1,4 +1,4 @@
-﻿package com.denic.geoscan.ui.screens.remote
+package com.denic.geoscan.ui.screens.remote
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -115,10 +115,53 @@ class RemoteScanViewModel(
         }
     }
 
+    private val _lastAutoSavePath = MutableStateFlow<String?>(null)
+    val lastAutoSavePath: StateFlow<String?> = _lastAutoSavePath.asStateFlow()
+
+    fun autoSaveCurrentSession() {
+        val points = _scannedPoints.value
+        if (points.isEmpty()) return
+
+        viewModelScope.launch {
+            val result = sessionExporter.autoSaveSession(points)
+            result.onSuccess { file ->
+                _lastAutoSavePath.value = file.absolutePath
+                _exportStatusMessage.value = "ذخیره خودکار انجام شد: ${file.name}"
+            }
+        }
+    }
+
+    fun shareCurrentSession(context: Context) {
+        val points = _scannedPoints.value
+        if (points.isEmpty()) {
+            _exportStatusMessage.value = "داده‌ای برای اشتراک‌گذاری وجود ندارد."
+            return
+        }
+
+        viewModelScope.launch {
+            _isExporting.value = true
+            val result = sessionExporter.createShareIntent(points)
+            result.fold(
+                onSuccess = { intent ->
+                    try {
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        _exportStatusMessage.value = "خطا در اشتراک‌گذاری: ${e.localizedMessage}"
+                    }
+                },
+                onFailure = { err ->
+                    _exportStatusMessage.value = "خطا در آماده‌سازی فایل: ${err.localizedMessage}"
+                }
+            )
+            _isExporting.value = false
+        }
+    }
+
     fun disconnectDevice() {
         if (_isScanning.value) {
             stopScan()
         }
+        autoSaveCurrentSession()
         bluetoothService.disconnect()
     }
 
@@ -171,10 +214,18 @@ class RemoteScanViewModel(
         _isScanning.value = false
         viewModelScope.launch {
             bluetoothService.sendCommand("STOP\n")
+            // Automatically persist collected session immediately upon stopping
+            sessionExporter.autoSaveSession(_scannedPoints.value).onSuccess { file ->
+                _lastAutoSavePath.value = file.absolutePath
+            }
         }
     }
 
     fun clearData() {
+        // Auto-save before clearing if points existed
+        if (_scannedPoints.value.isNotEmpty()) {
+            autoSaveCurrentSession()
+        }
         _scannedPoints.value = emptyList()
         _latestPoint.value = null
         _rawPacketPreview.value = "Buffer cleared. Ready."
@@ -182,6 +233,19 @@ class RemoteScanViewModel(
 
     override fun onCleared() {
         super.onCleared()
+        if (_scannedPoints.value.isNotEmpty()) {
+            // Guarantee write to disk on cleanup
+            try {
+                val timestamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
+                val targetDir = getApplication<Application>().getExternalFilesDir("Scans")
+                    ?: java.io.File(getApplication<Application>().filesDir, "Scans")
+                if (!targetDir.exists()) targetDir.mkdirs()
+                val file = java.io.File(targetDir, "auto_saved_geoscan_$timestamp.csv")
+                file.writeText(sessionExporter.generateCsvContent(_scannedPoints.value))
+            } catch (_: Throwable) {
+                // Ignore
+            }
+        }
         bluetoothService.disconnect()
     }
 }

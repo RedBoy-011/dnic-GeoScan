@@ -41,6 +41,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.denic.geoscan.ui.components.ExitConfirmationDialog
+import com.denic.geoscan.ui.screens.remote.RemoteScanViewModel
 import com.denic.geoscan.R
 import com.denic.geoscan.ui.screens.hub.HubScreen
 import com.denic.geoscan.ui.screens.local.LocalAnalysisScreen
@@ -63,10 +69,18 @@ fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
     val context = LocalContext.current
+    val activity = context as? ComponentActivity
     val prefs = remember { context.getSharedPreferences("dnic_prefs", android.content.Context.MODE_PRIVATE) }
     var preferredStartScreen by remember {
         mutableStateOf(prefs.getString("start_screen", startDestination) ?: startDestination)
     }
+
+    val remoteViewModel: RemoteScanViewModel = viewModel(
+        viewModelStoreOwner = (activity ?: androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner.current!!)
+    )
+    val remotePoints by remoteViewModel.scannedPoints.collectAsState()
+
+    var showExitDialog by remember { mutableStateOf(false) }
 
     val initialRoute = when (startDestination) {
         Screen.LocalAnalysis.route, "local", "local_analysis" -> Screen.LocalAnalysis.route
@@ -75,6 +89,39 @@ fun AppNavigation(
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Hub.route
+
+    // Handle system back navigation (press Back on Hub triggers Exit confirmation, elsewhere returns to Hub)
+    BackHandler(enabled = true) {
+        if (currentRoute != Screen.Hub.route) {
+            navController.navigate(Screen.Hub.route) {
+                popUpTo(navController.graph.findStartDestination().id) {
+                    saveState = true
+                }
+                launchSingleTop = true
+                restoreState = true
+            }
+        } else {
+            showExitDialog = true
+        }
+    }
+
+    if (showExitDialog) {
+        ExitConfirmationDialog(
+            hasUnsavedBluetoothData = remotePoints.isNotEmpty(),
+            unsavedPointsCount = remotePoints.size,
+            onDismiss = { showExitDialog = false },
+            onConfirmExit = {
+                if (remotePoints.isNotEmpty()) {
+                    remoteViewModel.autoSaveCurrentSession()
+                }
+                showExitDialog = false
+                activity?.finish()
+            },
+            onShareBluetoothData = if (remotePoints.isNotEmpty()) {
+                { remoteViewModel.shareCurrentSession(context) }
+            } else null
+        )
+    }
 
     Scaffold(
         containerColor = DarkBase,
@@ -176,6 +223,7 @@ fun AppNavigation(
             }
             composable(Screen.RemoteScan.route) {
                 RemoteScanScreen(
+                    viewModel = remoteViewModel,
                     onNavigateToLocal = {
                         navController.navigate(Screen.LocalAnalysis.route) {
                             popUpTo(navController.graph.findStartDestination().id) {

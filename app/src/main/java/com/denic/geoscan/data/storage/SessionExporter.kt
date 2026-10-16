@@ -16,11 +16,26 @@ import java.util.Date
 import java.util.Locale
 
 /**
- * Exports in-memory scan sessions to standard CSV files saved in the device's Documents/denic-GeoScan folder.
+ * Exports in-memory scan sessions to standard CSV files saved in the device's Documents/denic-GeoScan folder,
+ * provides rock-solid auto-saving to local app storage, and prepares sharing intents.
  */
 class SessionExporter(
     private val context: Context
 ) {
+
+    fun generateCsvContent(points: List<ScanPoint>): String {
+        val headerTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
+        return buildString {
+            appendLine("# denic GeoScan Geophysical Magnetometer Survey")
+            appendLine("# Exported Date: $headerTimestamp")
+            appendLine("# Total Points: ${points.size}")
+            appendLine("# Coordinate Format: X (col), Y (row), Z (microtesla uT), Timestamp (epoch ms)")
+            appendLine("X,Y,Z,Timestamp")
+            for (p in points) {
+                appendLine("${p.x},${p.y},${p.zValue},${p.timestamp}")
+            }
+        }
+    }
 
     /**
      * Writes discrete scan points to a CSV file in Documents.
@@ -39,18 +54,7 @@ class SessionExporter(
 
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "${customPrefix}_$timestamp.csv"
-        val headerTimestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
-
-        val csvContent = buildString {
-            appendLine("# denic GeoScan Geophysical Magnetometer Survey")
-            appendLine("# Exported Date: $headerTimestamp")
-            appendLine("# Total Points: ${points.size}")
-            appendLine("# Coordinate Format: X (col), Y (row), Z (microtesla uT), Timestamp (epoch ms)")
-            appendLine("X,Y,Z,Timestamp")
-            for (p in points) {
-                appendLine("${p.x},${p.y},${p.zValue},${p.timestamp}")
-            }
-        }
+        val csvContent = generateCsvContent(points)
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -95,6 +99,91 @@ class SessionExporter(
                 Result.success(file.absolutePath)
             }
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Automatically saves the current session directly to dedicated app storage
+     * without requiring any permissions, guaranteeing data persistence before app exit.
+     */
+    suspend fun autoSaveSession(
+        points: List<ScanPoint>,
+        customPrefix: String = "auto_saved_geoscan"
+    ): Result<File> = withContext(Dispatchers.IO) {
+        if (points.isEmpty()) {
+            return@withContext Result.failure(IllegalArgumentException("Cannot auto-save empty points."))
+        }
+
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val fileName = "${customPrefix}_$timestamp.csv"
+            val targetDir = context.getExternalFilesDir("Scans") ?: File(context.filesDir, "Scans")
+            if (!targetDir.exists()) {
+                targetDir.mkdirs()
+            }
+
+            val file = File(targetDir, fileName)
+            file.writeText(generateCsvContent(points))
+
+            // Background attempt to also register in MediaStore Documents for user convenience
+            try {
+                exportToCsv(points, customPrefix)
+            } catch (_: Throwable) {
+                // Best-effort
+            }
+
+            Result.success(file)
+        } catch (e: Throwable) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Prepares an Android Chooser Intent using FileProvider to share the scan CSV
+     * with Telegram, WhatsApp, Email, Drive, or external storage apps.
+     */
+    suspend fun createShareIntent(
+        points: List<ScanPoint>,
+        customPrefix: String = "geoscan_survey"
+    ): Result<android.content.Intent> = withContext(Dispatchers.IO) {
+        if (points.isEmpty()) {
+            return@withContext Result.failure(IllegalArgumentException("No scan points to share."))
+        }
+
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+            val fileName = "${customPrefix}_$timestamp.csv"
+            val cacheDir = File(context.cacheDir, "shared_scans").apply { if (!exists()) mkdirs() }
+            val file = File(cacheDir, fileName)
+            file.writeText(generateCsvContent(points))
+
+            val contentUri = androidx.core.content.FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                file
+            )
+
+            val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                type = "text/csv"
+                putExtra(android.content.Intent.EXTRA_STREAM, contentUri)
+                putExtra(android.content.Intent.EXTRA_SUBJECT, "Dnic-GeoScan Data Export ($timestamp)")
+                putExtra(
+                    android.content.Intent.EXTRA_TEXT,
+                    "داده‌های خروجی اسکنر ژئوفیزیک Dnic-GeoScan (شامل ${points.size} نقطه پردازش‌شده)."
+                )
+                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+
+            val chooser = android.content.Intent.createChooser(
+                shareIntent,
+                "اشتراک‌گذاری داده‌های اسکن Dnic-GeoScan"
+            ).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            Result.success(chooser)
+        } catch (e: Throwable) {
             Result.failure(e)
         }
     }
