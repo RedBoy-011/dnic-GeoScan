@@ -12,12 +12,11 @@ import com.denic.geoscan.ui.theme.DenicGeoScanTheme
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Official Android 12+ Splash Screen handler:
-        // Calling installSplashScreen() before super.onCreate enables the Android OS WindowManager
-        // to automatically and smoothly dismiss the splash screen as soon as the first Compose frame renders.
-        // We do NOT register setOnExitAnimationListener, as registering it disables automatic dismissal
-        // and causes freezes on Samsung OneUI, Xiaomi HyperOS/MIUI, and OEM devices.
-        installSplashScreen()
+        try {
+            installSplashScreen()
+        } catch (e: Throwable) {
+            Log.w("DnicGeoScan", "installSplashScreen skipped safely", e)
+        }
         super.onCreate(savedInstanceState)
 
         try {
@@ -37,7 +36,12 @@ class MainActivity : ComponentActivity() {
             }
         } catch (t: Throwable) {
             Log.e("DnicGeoScan", "Fatal error during setContent", t)
-            showFatalDiagnosticView(t)
+            val intent = android.content.Intent(this, DiagnosticActivity::class.java).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                putExtra("error_trace", android.util.Log.getStackTraceString(t))
+            }
+            startActivity(intent)
+            finish()
         }
     }
 

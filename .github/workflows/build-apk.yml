@@ -44,13 +44,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.5.0.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.5.1.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.5.0.apk
-          test -f release/Dnic-GeoScan-v1.5.0.apk
+          ls -lh release/Dnic-GeoScan-v1.5.1.apk
+          test -f release/Dnic-GeoScan-v1.5.1.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -64,7 +64,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.5.0.apk
+            adb install -r release/Dnic-GeoScan-v1.5.1.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -101,8 +101,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.5.0-apk
-          path: release/Dnic-GeoScan-v1.5.0.apk
+          name: Dnic-GeoScan-v1.5.1-apk
+          path: release/Dnic-GeoScan-v1.5.1.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -110,33 +110,31 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.5.0
-          name: "Dnic-GeoScan v1.5.0 - Universal Responsive Release"
+          tag_name: v1.5.1
+          name: "Dnic-GeoScan v1.5.1 - Anti-Crash Shield & Samsung One UI 6 Stability"
           body: |
-            ## 📱 Dnic-GeoScan v1.5.0 - Universal Responsive Release & CI Emulator Verification
+            ## 📱 Dnic-GeoScan v1.5.1 - Anti-Crash Diagnostic Shield & Samsung One UI 6 Stability
             
-            نسخه رسمی ۱.۵.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۵.۱ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات، نوآوری‌ها و اصلاحات بنیادین این نسخه:
-            - **طراحی کاملاً رسپانسیو و تطبیقی برای گوشی‌های هوشمند و تبلت‌ها (Adaptive Multi-Screen):**
-              - در تبلت‌ها و صفحات عریض (`maxWidth >= 720.dp`)، چیدمان به صورت دو ستونه مدرن درمی‌آید و کارت‌های ناوبری در کنار هم چیده می‌شوند.
-              - نوار ناوبری پایینی (`GlassmorphicBottomNavBar`) به صورت یک داک شناور کپسولی متقارن و ارگونومیک در مرکز پایین صفحه تبلت بازطراحی شد (`widthIn(max = 520.dp)`).
-              - هدر بالایی برندینگ و دکمه‌های سوییچ حالت‌ها به صورت تطبیقی در تبلت‌ها و گوشی‌ها همگام‌سازی شدند.
-            - **حل ریشه‌ای مشکل عدم نصب در تمامی رام‌ها و گوشی‌های اندروید (Signed Release Build):**
-              - تولید APK اختصاصی نسخه Release با امضای دیجیتال رسمی V1 و V2 بدون خطای پکیج نامعتبر در شیائومی، سامسونگ، هواوی و اندروید خام.
-              - تعریف کلیه قابلیت‌های سخت‌افزاری (بلوتوث، سنسور قطب‌نما، شتاب‌سنج و جی‌پی‌اس) با فلگ `required="false"` جهت نصب بی‌دردسر روی تبلت‌های بدون سیم‌کارت و شبیه‌سازها.
-              - پشتیبانی از اندروید ۷.۰ به بالا (`minSdk = 24`) و کلیه چگالی‌های تصویر (`supports-screens`).
-            - **رفع ریشه‌ای صفحه سیاه و فریز روی لوگو (Native OS Splash Dismissal):**
-              - استفاده از رفتار بومی سیستم‌عامل با حذف لیسنرهای متناقض خروج؛ اکنون لایه اسپلش بومی اندروید به محض رسم اولین فریم کامپوز به صورت خودکار و بدون وقفه برداشته می‌شود.
-            - **تست کامل خودکار در شبیه‌ساز اندروید گیت‌هاب (CI Emulator Testing from Install to Execution):**
-              - تست بوت، نصب (`adb install`)، باز کردن اکتیویتی (`am start`) و بررسی زنده بودن پروسه در اندروید ۱۲.
-              - تست تطبیق رزولوشن به حالت تبلت (`1600x2560`) و استخراج اسکرین‌شات‌های موبایل و تبلت.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 29`.
+            ### ✨ تغییرات و اصلاحات این نسخه:
+            - **سیستم ضد فورس‌کلوز و جعبه سیاه نجات‌بخش (Anti-Crash Diagnostic Shield):**
+              - پیاده‌سازی کلاس سفارشی `DenicApplication` با متد ره‌گیری خطاهای پیش‌بینی نشده (UncaughtExceptionHandler).
+              - در صورت بروز هرگونه خطای راه‌اندازی، برنامه فورس‌کلوز یا بسته نمی‌شود؛ بلکه اکتیویتی بومی ایزوله `DiagnosticActivity` باز شده، مشخصات دقیق دستگاه و StackTrace را نشان می‌دهد و دکمه کپی فوری گزارش خطا را در اختیار کاربر می‌گذارد.
+              - ذخیره خودکار متن کامل خطا در فایل `crash_log.txt` در پوشه اختصاصی برنامه (`/sdcard/Android/data/com.denic.geoscan/files/`).
+            - **سازگاری ۱۰۰٪ با سامسونگ گلکسی S24 Ultra و اندروید ۱۴ (One UI 6.1 Stability):**
+              - رفع تداخل تم‌های XML با ویژگی `enableEdgeToEdge()` در اندروید ۱۴ و حذف ویژگی‌های قدیمی استاتوس‌بار که در رام سامسونگ موجب فورس‌کلوز می‌شدند.
+              - قرار دادن متد بومی `installSplashScreen()` در بلوک ایمن محافظتی جهت جلوگیری از هرگونه خطای لودینگ لایه پنجره WindowManager.
+            - **طراحی کاملاً رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌ها:**
+              - چیدمان دوسطونه در تبلت‌ها و داک ناوبری شناور کپسولی در مرکز پایین صفحه (`widthIn(max = 520.dp)`).
+            - **تست کامل در شبیه‌ساز اندروید گیت‌هاب:**
+              - نصب و اعتبارسنجی خودکار از طریق `adb install` و `am start` در پایپ‌لاین CI.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 30`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.5.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.5.0/Dnic-GeoScan-v1.5.0.apk)**
+            - **[دانلود مستقیم Dnic-GeoScan-v1.5.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.5.1/Dnic-GeoScan-v1.5.1.apk)**
           files: |
-            release/Dnic-GeoScan-v1.5.0.apk
+            release/Dnic-GeoScan-v1.5.1.apk
             release/emulator_phone.png
             release/emulator_tablet.png
         env:

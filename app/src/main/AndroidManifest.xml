@@ -66,6 +66,7 @@
         android:resizeable="true" />
 
     <application
+        android:name=".DenicApplication"
         android:allowBackup="true"
         android:hardwareAccelerated="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -87,5 +88,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".DiagnosticActivity"
+            android:exported="false"
+            android:process=":crash_handler"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
     </application>
 </manifest>

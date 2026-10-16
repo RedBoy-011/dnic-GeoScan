@@ -18,6 +18,14 @@ class AppIntegrityTest {
         val activityClass = MainActivity::class.java
         assertNotNull(activityClass)
         assertEquals("com.denic.geoscan.MainActivity", activityClass.name)
+
+        val appClass = DenicApplication::class.java
+        assertNotNull(appClass)
+        assertEquals("com.denic.geoscan.DenicApplication", appClass.name)
+
+        val diagClass = DiagnosticActivity::class.java
+        assertNotNull(diagClass)
+        assertEquals("com.denic.geoscan.DiagnosticActivity", diagClass.name)
     }
 
     @Test

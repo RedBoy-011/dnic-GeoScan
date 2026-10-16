@@ -2,8 +2,6 @@
 <resources>
     <style name="Theme.DenicGeoScan" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/bg_dark_base</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
     <!-- Official Android 12+ Splash Screen Theme -->
