@@ -276,6 +276,7 @@ fun AppNavigation(
         }
     }
 }
+}
 
 @Composable
 private fun TopBrandingBar(
