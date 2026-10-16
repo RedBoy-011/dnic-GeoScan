@@ -68,7 +68,7 @@ fun AppNavigation(
     }
 
     val initialRoute = when (startDestination) {
-        Screen.LocalAnalysis.route, "local", "local_analysis" -> "local_analysis?grid={grid}"
+        Screen.LocalAnalysis.route, "local", "local_analysis" -> Screen.LocalAnalysis.route
         else -> Screen.Hub.route
     }
 

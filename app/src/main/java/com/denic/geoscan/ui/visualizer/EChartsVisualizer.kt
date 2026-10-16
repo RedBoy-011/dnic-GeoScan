@@ -74,7 +74,7 @@ fun EChartsVisualizer(
 
     // Deferred mounting: Let Compose draw its first frame instantly to dismiss Android OS splash screen
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(250)
+        kotlinx.coroutines.delay(100)
         isEngineMounted = true
     }
 

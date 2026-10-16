@@ -113,4 +113,13 @@ class MainActivity : ComponentActivity() {
             // Last-resort fallback
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        try {
+            window?.decorView?.visibility = android.view.View.VISIBLE
+        } catch (_: Throwable) {
+            // Safe fallback
+        }
+    }
 }

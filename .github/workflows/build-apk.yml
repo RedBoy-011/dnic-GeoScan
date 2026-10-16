@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.4.0.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.4.1.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.4.0-apk
-          path: release/Dnic-GeoScan-v1.4.0.apk
+          name: Dnic-GeoScan-v1.4.1-apk
+          path: release/Dnic-GeoScan-v1.4.1.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,28 +52,24 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.4.0
-          name: "Dnic-GeoScan v1.4.0 - Official Release"
+          tag_name: v1.4.1
+          name: "Dnic-GeoScan v1.4.1 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.4.0 - Watchdog Splash Dismissal, Dual Mode Landing & Enhanced Disconnected Status
+            ## 📱 Dnic-GeoScan v1.4.1 - Navigation Route Optimization, Canvas Mount Acceleration & Window Safeguards
             
-            نسخه رسمی ۱.۴.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۴.۱ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و اصلاحات کلیدی این نسخه:
-            - **رفع قطعی و ایمن فریز اسپلش‌اسکرین (Watchdog Protected Splash Dismissal):**
-              - افزودن تم اختصاصی `values-v31/themes.xml` با تعاریف نیتیو سیستم‌عامل برای اندروید ۱۲ به بعد.
-              - پیاده‌سازی تایمر سگ‌نگهبان (Watchdog Timer - 250ms) همراه با انیمیشن خروج شفاف ۱۲۰ میلی‌ثانیه‌ای و حذف تضمینی لایه اسپلش در `MainActivity.kt`.
-            - **بازطراحی ناوبری و هاب اصلی با دو کارت بزرگ و انتخابگر مستقیم (Dual Mode Landing Screen):**
-              - افزوده شدن نوار انتخابگر مستقیم دوگانه در بالای هاب برای سوئیچ ۱-کلیکه بین `LOCAL ANALYSIS (100% OFFLINE)` و `REMOTE SCAN (HC-05)`.
-              - دو کارت مجزا و بزرگ با اولویت‌بندی تحلیل آفلاین محلی و دسترسی سریع به شبکه‌های ۵×۵، ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰.
-            - **نمایش شفاف وضعیت عدم اتصال سخت‌افزار (STATUS: DISCONNECTED • NO HARDWARE CONNECTED):**
-              - بردر برجسته نارنجی نئونی در کارت وضعیت سخت‌افزار همراه با دکمه انتقال فوری به حالت آفلاین در صفحه اسکن زنده.
-            - **پایداری کامل محاسبات ژئوفیزیک (Bicubic Spline & Median Ground Zero):**
-              - اجرای بدون کرش الگوریتم درون‌یابی کتمول-رام و نرمال‌سازی ترند روی ماتریس‌های ۱۰×۱۰، ۲۰×۲۰ و فایل‌های متنی/CSV.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 26`.
+            - **اصلاح دقیق مسیردهی ناوبری (Navigation Route Optimization):**
+              - تصحیح `initialRoute` در ناوبری جهت جلوگیری از تداخل پارامترهای بدون مقدار `{grid}` در `startDestination`.
+            - **تسریع و روان‌سازی رندرینگ بوم ۳ بعدی (Canvas Mount Acceleration):**
+              - کاهش تأخیر سوار شدن موتور WebView به ۱۰۰ میلی‌ثانیه در `EChartsVisualizer.kt` برای رندرینگ آنی بدون تأخیر در جابه‌جایی صفحات.
+            - **تضمین دیدپذیری پنجره اصلی (Window Decor Safeguards):**
+              - پیاده‌سازی متد محافظتی `onResume` در `MainActivity.kt` برای جلوگیری از هرگونه تداخل بازگشتی پنجره در رام‌های مختلف اندروید.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 27`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.4.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.4.0/Dnic-GeoScan-v1.4.0.apk)**
-          files: release/Dnic-GeoScan-v1.4.0.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.4.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.4.1/Dnic-GeoScan-v1.4.1.apk)**
+          files: release/Dnic-GeoScan-v1.4.1.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
