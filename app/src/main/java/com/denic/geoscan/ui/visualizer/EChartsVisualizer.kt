@@ -232,19 +232,6 @@ fun EChartsVisualizer(
                                     try { settings.useWideViewPort = true } catch (_: Throwable) {}
                                     try { settings.loadWithOverviewMode = true } catch (_: Throwable) {}
 
-                                    setOnTouchListener { v, event ->
-                                        when (event?.actionMasked) {
-                                            android.view.MotionEvent.ACTION_DOWN -> {
-                                                v?.parent?.requestDisallowInterceptTouchEvent(true)
-                                            }
-                                            android.view.MotionEvent.ACTION_UP,
-                                            android.view.MotionEvent.ACTION_CANCEL -> {
-                                                v?.parent?.requestDisallowInterceptTouchEvent(false)
-                                            }
-                                        }
-                                        false
-                                    }
-
                                     addJavascriptInterface(
                                         object {
                                             @JavascriptInterface
@@ -257,29 +244,11 @@ fun EChartsVisualizer(
                                         "AndroidBridge"
                                     )
 
-                                    webChromeClient = object : WebChromeClient() {
-                                        override fun onConsoleMessage(message: android.webkit.ConsoleMessage?): Boolean {
-                                            android.util.Log.d("VisualizerJS", "${message?.message()} [line ${message?.lineNumber()}]")
-                                            return true
-                                        }
-                                    }
+                                    webChromeClient = WebChromeClient()
                                     webViewClient = object : WebViewClient() {
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
                                             isChartReady = true
-                                            if (points.isNotEmpty()) {
-                                                try {
-                                                    val jsonBuilder = StringBuilder("[")
-                                                    points.forEachIndexed { index, p ->
-                                                        jsonBuilder.append("[${p.x},${p.y},${p.zValue}]")
-                                                        if (index < points.size - 1) jsonBuilder.append(",")
-                                                    }
-                                                    jsonBuilder.append("]")
-                                                    val is3D = viewMode == VisualizerViewMode.SURFACE_3D
-                                                    val script = "renderScanData($jsonBuilder, $is3D, $baseline);"
-                                                    view?.evaluateJavascript(script, null)
-                                                } catch (_: Throwable) {}
-                                            }
                                         }
 
                                         override fun onReceivedError(

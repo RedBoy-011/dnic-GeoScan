@@ -30,11 +30,7 @@ jobs:
           chmod +x gradlew
 
       - name: Build Signed Release APK
-        run: |
-          ./gradlew assembleRelease --stacktrace --info || {
-            echo "ERROR: assembleRelease failed."
-            exit 1
-          }
+        run: ./gradlew assembleRelease --stacktrace
 
       - name: Run Unit Tests
         run: ./gradlew testReleaseUnitTest --stacktrace

@@ -211,35 +211,36 @@ class LocalAnalysisViewModel(
                 val baseField = 1000.0f
                 for (y in 0 until height) {
                     for (x in 0 until width) {
-                        // Regional natural slope gradient
-                        val regionalGradient = (x * 0.35f + y * 0.25f)
+                        val xF = x.toFloat()
+                        val yF = y.toFloat()
+                        val regionalGradient = xF * 0.35f + yF * 0.25f
 
                         // 1. Shallow Ferrous Target at (4, 4) - Depth ~1.2m (steep gradient)
-                        val dxShallow = x - 4.0f
-                        val dyShallow = y - 4.0f
+                        val dxShallow = xF - 4.0f
+                        val dyShallow = yF - 4.0f
                         val distShallow = kotlin.math.sqrt(dxShallow * dxShallow + dyShallow * dyShallow)
                         val shallowPeak = 52.0f * kotlin.math.exp(-distShallow / 1.2f)
 
                         // 2. Deep Mineralized Ore Vein along diagonal line - Depth ~4.5m (broad gradient)
-                        val veinDist = kotlin.math.abs(x - y) / 1.414f
+                        val veinDist = kotlin.math.abs(xF - yF) / 1.414f
                         val veinMask = if (x in 2..12 && y in 2..12) 1.0f else 0.2f
                         val deepVeinAnomaly = 26.5f * kotlin.math.exp(-veinDist / 2.2f) * veinMask
 
                         // 3. Subterranean Mine Shaft / Tunnel Cavity along row y=12, x in 3..9 - Depth ~3.0m
-                        val cavityDist = if (x in 3..9) kotlin.math.abs(y - 12.0f) else {
+                        val cavityDist = if (x in 3..9) kotlin.math.abs(yF - 12.0f) else {
                             val edgeX = if (x < 3) 3.0f else 9.0f
-                            kotlin.math.sqrt((x - edgeX) * (x - edgeX) + (y - 12.0f) * (y - 12.0f))
+                            kotlin.math.sqrt((xF - edgeX) * (xF - edgeX) + (yF - 12.0f) * (yF - 12.0f))
                         }
                         val cavityDip = -28.0f * kotlin.math.exp(-cavityDist / 1.5f)
 
                         // 4. Secondary Medium-Depth Metal at (11, 4) - Depth ~2.8m
-                        val dxMed = x - 11.0f
-                        val dyMed = y - 4.0f
+                        val dxMed = xF - 11.0f
+                        val dyMed = yF - 4.0f
                         val distMed = kotlin.math.sqrt(dxMed * dxMed + dyMed * dyMed)
                         val mediumPeak = 24.0f * kotlin.math.exp(-distMed / 1.6f)
 
                         // Ground sensor micro-noise
-                        val noise = ((x * 17 + y * 31) % 11 - 5) * 0.08f
+                        val noise = (((x * 17 + y * 31) % 11) - 5).toFloat() * 0.08f
 
                         val z = baseField + regionalGradient + shallowPeak + deepVeinAnomaly + cavityDip + mediumPeak + noise
                         points.add(ScanPoint(x = x, y = y, zValue = z))
