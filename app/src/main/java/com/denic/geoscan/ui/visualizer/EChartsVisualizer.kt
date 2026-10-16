@@ -58,7 +58,7 @@ import com.denic.geoscan.ui.theme.Typography
  * @param initialMode Whether to start in 3D Surface View or 2D Heatmap View.
  * @param baseline Ground Zero baseline value (median) for color spectrum mapping.
  */
-@SuppressLint("SetJavaScriptEnabled")
+@SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
 @Composable
 fun EChartsVisualizer(
     points: List<ScanPoint>,
@@ -233,13 +233,13 @@ fun EChartsVisualizer(
                                     try { settings.loadWithOverviewMode = true } catch (_: Throwable) {}
 
                                     setOnTouchListener { v, event ->
-                                        when (event.actionMasked) {
+                                        when (event?.actionMasked) {
                                             android.view.MotionEvent.ACTION_DOWN -> {
-                                                v.parent?.requestDisallowInterceptTouchEvent(true)
+                                                v?.parent?.requestDisallowInterceptTouchEvent(true)
                                             }
                                             android.view.MotionEvent.ACTION_UP,
                                             android.view.MotionEvent.ACTION_CANCEL -> {
-                                                v.parent?.requestDisallowInterceptTouchEvent(false)
+                                                v?.parent?.requestDisallowInterceptTouchEvent(false)
                                             }
                                         }
                                         false

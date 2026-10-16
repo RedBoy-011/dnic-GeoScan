@@ -31,9 +31,8 @@ jobs:
 
       - name: Build Signed Release APK
         run: |
-          ./gradlew assembleRelease --stacktrace || {
-            echo "ERROR: assembleRelease failed. Dumping build reports:"
-            find app/build/reports -type f -exec cat {} + || true
+          ./gradlew assembleRelease --stacktrace --info || {
+            echo "ERROR: assembleRelease failed."
             exit 1
           }
 
