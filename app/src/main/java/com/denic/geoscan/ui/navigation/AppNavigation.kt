@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -155,6 +156,9 @@ fun AppNavigation(
                     }
                 )
             }
+            composable(Screen.LocalAnalysis.route) {
+                LocalAnalysisScreen()
+            }
             composable(
                 route = "local_analysis?grid={grid}",
                 arguments = listOf(
@@ -191,21 +195,27 @@ private fun TopBrandingBar(
     onLogoClick: (() -> Unit)? = null,
     onNavigate: ((Screen) -> Unit)? = null
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .background(DarkBase)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .background(DarkBase),
+        contentAlignment = Alignment.Center
     ) {
-        val clickModifier = if (onLogoClick != null) Modifier.clickable(onClick = onLogoClick) else Modifier
-
         Row(
+            modifier = Modifier
+                .widthIn(max = 1100.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = clickModifier
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            val clickModifier = if (onLogoClick != null) Modifier.clickable(onClick = onLogoClick) else Modifier
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = clickModifier
+            ) {
             DenicBrandLogo(modifier = Modifier.size(36.dp))
             Spacer(modifier = Modifier.width(10.dp))
             Column {
@@ -287,11 +297,13 @@ private fun GlassmorphicBottomNavBar(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(horizontal = 16.dp, vertical = 10.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        contentAlignment = Alignment.Center
     ) {
         val shape = RoundedCornerShape(24.dp)
         Row(
             modifier = Modifier
+                .widthIn(max = 520.dp)
                 .fillMaxWidth()
                 .clip(shape)
                 .border(

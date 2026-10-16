@@ -5,23 +5,23 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20(Material%203)-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
 [![Build Status](https://img.shields.io/badge/GitHub%20Actions-Passing-brightgreen.svg)](https://github.com/RedBoy-011/dnic-GeoScan/actions)
-[![Release](https://img.shields.io/badge/Release-v1.4.1-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.4.1)
+[![Release](https://img.shields.io/badge/Release-v1.5.0-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.5.0)
 
-> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز بوده و به صورت زنده یا آفلاین، داده‌های سطحی و زیرسطحی را اسکن و آنالیز می‌کند.
+> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار با معماری رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌های صنعتی، جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز بوده و به صورت زنده یا آفلاین، داده‌های سطحی و زیرسطحی را اسکن و آنالیز می‌کند.
 
 ---
 
 ## 📥 لینک‌های دانلود آخرین نسخه تایید شده (Download Links)
 
-برای دریافت آخرین نسخه رسمی و تایید شده برنامه (**Version 1.4.1**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
+برای دریافت آخرین نسخه رسمی، رسپانسیو و تایید شده برنامه (**Version 1.5.0**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
 
-* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v1.4.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.4.1/Dnic-GeoScan-v1.4.1.apk)**
-* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v1.4.1)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.4.1)**
+* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v1.5.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.5.0/Dnic-GeoScan-v1.5.0.apk)**
+* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v1.5.0)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.5.0)**
 * **[📦 دانلود از آرتیفکت‌های پایپ‌لاین تایید شده GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)**
 * **مسیر فایل محلی (Local APK Path):**
   ```text
-  release/Dnic-GeoScan-v1.4.1.apk
-  app/build/outputs/apk/debug/app-debug.apk
+  release/Dnic-GeoScan-v1.5.0.apk
+  app/build/outputs/apk/release/app-release.apk
   ```
 
 ---
@@ -69,7 +69,7 @@
 برای اجرای برنامه بر روی تبلت یا گوشی‌های اندرویدی مراحل زیر را دنبال فرمایید:
 
 1. **دانلود فایل APK:**
-   - فایل `denic-GeoScan-v1.0.0.apk` را از لینک بالای صفحه دانلود کرده و به حافظه دستگاه منتقل کنید.
+   - فایل `Dnic-GeoScan-v1.5.0.apk` را از لینک بالای صفحه دانلود کرده و به حافظه دستگاه منتقل کنید.
 2. **مجوز نصب (Install from Unknown Sources):**
    - در صورت نیاز در تنظیمات اندروید، اجازه نصب برنامه از مرورگر یا مدیریت فایل را تایید نمایید (`Allow from this source`).
 3. **اعطای مجوزها (Permissions):**

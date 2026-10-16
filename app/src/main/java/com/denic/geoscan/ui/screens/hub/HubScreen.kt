@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -92,46 +94,77 @@ fun HubScreen(
         label = "pulseAlpha"
     )
 
-    Column(
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
             .background(DarkBase)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 18.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Top Mission Header
-        HubHeader(
-            isLocalDefault = (preferredStartScreen == Screen.LocalAnalysis.route),
-            onToggleDefaultLocal = {
-                val next = if (preferredStartScreen == Screen.LocalAnalysis.route) Screen.Hub.route else Screen.LocalAnalysis.route
-                onToggleDefaultStartScreen?.invoke(next)
+        val isTabletLandscape = maxWidth >= 720.dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .widthIn(max = 1100.dp)
+                .align(Alignment.TopCenter)
+                .verticalScroll(rememberScrollState())
+                .padding(
+                    horizontal = if (isTabletLandscape) 28.dp else 18.dp,
+                    vertical = 14.dp
+                ),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Top Mission Header
+            HubHeader(
+                isLocalDefault = (preferredStartScreen == Screen.LocalAnalysis.route),
+                onToggleDefaultLocal = {
+                    val next = if (preferredStartScreen == Screen.LocalAnalysis.route) Screen.Hub.route else Screen.LocalAnalysis.route
+                    onToggleDefaultStartScreen?.invoke(next)
+                }
+            )
+
+            // Instant Two-Mode Selector (Direct 1-tap navigation)
+            QuickModeSelector(onNavigateTo = onNavigateTo)
+
+            // Prominent Hardware Status Banner: Explicit Disconnected State
+            HardwareStatusBanner(
+                pulseAlpha = pulseAlpha,
+                onNavigateToLocal = { onNavigateTo(Screen.LocalAnalysis) },
+                onConnectHardware = { onNavigateTo(Screen.RemoteScan) }
+            )
+
+            if (isTabletLandscape) {
+                // Adaptive Two-Column Grid for Tablets & Large Screens
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        LocalAnalysisHeroCard(
+                            onClick = { onNavigateTo(Screen.LocalAnalysis) },
+                            onGridDemoClick = onNavigateToGridDemo
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f)) {
+                        RemoteScanHeroCard(
+                            onClick = { onNavigateTo(Screen.RemoteScan) }
+                        )
+                    }
+                }
+            } else {
+                // Single Column Stack for Smartphones
+                LocalAnalysisHeroCard(
+                    onClick = { onNavigateTo(Screen.LocalAnalysis) },
+                    onGridDemoClick = onNavigateToGridDemo
+                )
+
+                RemoteScanHeroCard(
+                    onClick = { onNavigateTo(Screen.RemoteScan) }
+                )
             }
-        )
 
-        // Instant Two-Mode Selector (Direct 1-tap navigation)
-        QuickModeSelector(onNavigateTo = onNavigateTo)
-
-        // Prominent Hardware Status Banner: Explicit Disconnected State
-        HardwareStatusBanner(
-            pulseAlpha = pulseAlpha,
-            onNavigateToLocal = { onNavigateTo(Screen.LocalAnalysis) },
-            onConnectHardware = { onNavigateTo(Screen.RemoteScan) }
-        )
-
-        // Hero Card 1: Local Analysis (Primary & Recommended for Offline Survey Files)
-        LocalAnalysisHeroCard(
-            onClick = { onNavigateTo(Screen.LocalAnalysis) },
-            onGridDemoClick = onNavigateToGridDemo
-        )
-
-        // Hero Card 2: Remote Scan (Real-time SPP Bluetooth Stream)
-        RemoteScanHeroCard(
-            onClick = { onNavigateTo(Screen.RemoteScan) }
-        )
-
-        // Geophysical Processing Engine Specifications Footer
-        GeophysicalEngineSpecsCard()
+            // Geophysical Processing Engine Specifications Footer
+            GeophysicalEngineSpecsCard()
+        }
     }
 }
 

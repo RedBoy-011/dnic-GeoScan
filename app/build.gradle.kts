@@ -10,10 +10,10 @@ android {
 
     defaultConfig {
         applicationId = "com.denic.geoscan"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 34
-        versionCode = 27
-        versionName = "1.4.1"
+        versionCode = 29
+        versionName = "1.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -27,6 +27,8 @@ android {
             storePassword = "dnicgeoscan2026"
             keyAlias = "dnicgeoscan"
             keyPassword = "dnicgeoscan2026"
+            enableV1Signing = true
+            enableV2Signing = true
         }
     }
 

@@ -13,48 +13,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Official Android 12+ Splash Screen handler:
-        // installSplashScreen() must precede super.onCreate() so Android WindowManager binds correctly.
-        val splashScreen = installSplashScreen()
+        // Calling installSplashScreen() before super.onCreate enables the Android OS WindowManager
+        // to automatically and smoothly dismiss the splash screen as soon as the first Compose frame renders.
+        // We do NOT register setOnExitAnimationListener, as registering it disables automatic dismissal
+        // and causes freezes on Samsung OneUI, Xiaomi HyperOS/MIUI, and OEM devices.
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-
-        // Smooth fade-out with watchdog safety timer: guarantees removal on OEM ROMs (OneUI, HyperOS, MIUI)
-        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            val splashView = splashScreenViewProvider.view
-            var isRemoved = false
-            fun safeRemove() {
-                if (!isRemoved) {
-                    isRemoved = true
-                    try {
-                        splashScreenViewProvider.remove()
-                    } catch (e: Throwable) {
-                        Log.w("DnicGeoScan", "Safe remove splash", e)
-                    }
-                }
-            }
-
-            // Watchdog fallback: guaranteed removal within 250ms maximum
-            splashView.postDelayed({ safeRemove() }, 250L)
-
-            splashView.animate()
-                .alpha(0f)
-                .setDuration(120L)
-                .withEndAction { safeRemove() }
-                .start()
-        }
-        setTheme(R.style.Theme_DenicGeoScan)
-
-        // Global crash catcher: Immediately renders a native Android view if anything fails
-        val previousHandler = Thread.getDefaultUncaughtExceptionHandler()
-        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
-            Log.e("DnicGeoScan", "Fatal Uncaught Exception", throwable)
-            try {
-                runOnUiThread {
-                    showFatalDiagnosticView(throwable)
-                }
-            } catch (_: Throwable) {
-                previousHandler?.uncaughtException(thread, throwable)
-            }
-        }
 
         try {
             enableEdgeToEdge()

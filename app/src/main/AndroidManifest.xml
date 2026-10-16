@@ -33,10 +33,37 @@
     <!-- Optional Network permission for WebView features -->
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <!-- Hardware Features (Set to false so tablets/emulators without full classic Bluetooth still launch) -->
+    <!-- Hardware Features (Set required=false so tablets, emulators, and devices without cellular/compass still install & launch) -->
     <uses-feature
         android:name="android.hardware.bluetooth"
         android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.compass"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.sensor.accelerometer"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.touchscreen"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
+    <!-- Universal Screen & Device Density Support (Phones, Phablets, Foldables, Tablets) -->
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:xlargeScreens="true"
+        android:anyDensity="true"
+        android:resizeable="true" />
 
     <application
         android:allowBackup="true"
@@ -53,7 +80,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|uiMode|keyboardHidden"
             android:theme="@style/Theme.App.Starting">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -61,5 +88,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>
