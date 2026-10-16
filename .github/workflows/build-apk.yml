@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.7.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.8.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.3.7-apk
-          path: release/Dnic-GeoScan-v1.3.7.apk
+          name: Dnic-GeoScan-v1.3.8-apk
+          path: release/Dnic-GeoScan-v1.3.8.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,25 +52,26 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.3.7
-          name: "Dnic-GeoScan v1.3.7 - Official Release"
+          tag_name: v1.3.8
+          name: "Dnic-GeoScan v1.3.8 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.3.7 - Persistent In-Screen Grid Presets & High-Speed Offline Pipeline
+            ## 📱 Dnic-GeoScan v1.3.8 - Confirmed Zero-Hang Splash & Offline Geophysical Priority
             
-            نسخه رسمی ۱.۳.۷ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۳.۸ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و قابلیت‌های اصلی این نسخه:
-            - **انتخابگر دائمی شبکه‌های میدانی در صفحه تحلیل محلی (Persistent In-Screen Grid Presets):**
-              - امکان جابه‌جایی آنی با ۱ لمس میان شبکه‌های ۵×۵، ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰ بدون نیاز به پاک کردن فایل فعلی، در هر دو حالت گوشی و تبلت.
-              - نمایش نشانگر وضعیت فعال بودن شبکه به همراه ابعاد دقیق نقطه و تفکیک خودکار فایل‌های نمونه و فایل‌های دیسک.
-            - **رفع نهایی فریز اسپلش با خروج تضمینی در اندروید ۱۲+:**
-              - لیسنر اختصاصی خروج اسپلش `setOnExitAnimationListener` با فراخوانی مستقیم `remove()`، حذف سریع لوگوی نئونی و انتقال روان به کامپوزیتور گرافیکی.
-            - **بنر بدون انسداد وضعیت عدم اتصال سخت‌افزار (Disconnected Status):**
-              - اعلام وضعیت `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه میانبرهای مستقیم به تحلیل آفلاین یا اتصال سنسور.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 23`.
+            ### ✨ تغییرات و اصلاحات کلیدی این نسخه:
+            - **تثبیت نشانگر وضعیت آفلاین در سربرگ تحلیل داده (100% Offline Status Badge):**
+              - افزودن نشانگر نئونی فعال بودن موتور پردازش آفلاین بدون نیاز به سخت‌افزار یا اتصال بلوتوث در بالای صفحه Local Analysis.
+            - **انتخابگر پایدار شبکه‌های میدانی (Persistent Grid Selector):**
+              - دسترسی دائمی به شبکه‌های ۵×۵، ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰ به همراه هایلایت فعال و تشخیص هوشمند داده‌های فایل در برابر شبکه‌های نمونه.
+            - **انتقال بدون معطلی و رفع فریز اسپلش در اندروید ۱۲ به بالا:**
+              - فراخوانی لیسنر خروج صریح با متد `remove()` بلافاصله پس از آماده‌سازی اولین فریم، بدون وابستگی به انیماتورهای سیستمی OEM.
+            - **نمایش شفاف وضعیت عدم اتصال سخت‌افزار (Disconnected Status):**
+              - کارت اعلام وضعیت `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه دکمه‌های اقدام مستقیم در هاب و صفحه ریموت.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 24`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.3.7.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.7/Dnic-GeoScan-v1.3.7.apk)**
-          files: release/Dnic-GeoScan-v1.3.7.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.3.8.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.8/Dnic-GeoScan-v1.3.8.apk)**
+          files: release/Dnic-GeoScan-v1.3.8.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

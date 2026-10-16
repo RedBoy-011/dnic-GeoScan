@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -243,17 +244,49 @@ fun LocalAnalysisScreen(
 
 @Composable
 private fun ScreenHeader() {
-    Column {
-        Text(
-            text = "LOCAL ANALYSIS",
-            style = Typography.displayMedium,
-            color = TextPrimary
-        )
-        Text(
-            text = "Geophysical Dataset Offline Inspector (SAF)",
-            style = Typography.titleMedium,
-            color = TextSecondary
-        )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f, fill = false)) {
+            Text(
+                text = "LOCAL ANALYSIS",
+                style = Typography.displayMedium,
+                color = TextPrimary
+            )
+            Text(
+                text = "Geophysical Dataset Offline Inspector (SAF)",
+                style = Typography.titleMedium,
+                color = TextSecondary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(NeonGreen.copy(alpha = 0.15f))
+                .border(1.dp, NeonGreen.copy(alpha = 0.6f), RoundedCornerShape(8.dp))
+                .padding(horizontal = 8.dp, vertical = 5.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(NeonGreen)
+                )
+                Text(
+                    text = "100% OFFLINE",
+                    style = Typography.labelSmall,
+                    color = NeonGreen,
+                    fontSize = 10.sp
+                )
+            }
+        }
     }
 }
 
