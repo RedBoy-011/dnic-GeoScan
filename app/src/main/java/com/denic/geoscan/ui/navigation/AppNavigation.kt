@@ -177,8 +177,8 @@ fun AppNavigation(
                             }
                         }
                     },
-                onNavigate = { screen ->
-                    val targetRoute = screen?.route ?: return@TopBrandingBar
+                onNavigate = { screen: Screen ->
+                    val targetRoute = screen.route
                     if (currentRoute != targetRoute) {
                         navController.navigate(targetRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -194,8 +194,8 @@ fun AppNavigation(
         bottomBar = {
             GlassmorphicBottomNavBar(
                 currentRoute = currentRoute,
-                onNavigate = { screen ->
-                    val targetRoute = screen?.route ?: return@GlassmorphicBottomNavBar
+                onNavigate = { screen: Screen ->
+                    val targetRoute = screen.route
                     if (currentRoute != targetRoute) {
                         navController.navigate(targetRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {

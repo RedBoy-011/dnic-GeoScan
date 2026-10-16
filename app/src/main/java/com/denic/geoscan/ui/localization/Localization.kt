@@ -223,7 +223,7 @@ val EnglishStrings = AppStrings(
 
     // Remote Scan Screen
     remoteScreenTitle = "Remote Live Scanner",
-    remoteScreenSubtitle = "Bluetooth Classic SPP Stream ($X,Y,Z#)",
+    remoteScreenSubtitle = "Bluetooth Classic SPP Stream (\$X,Y,Z#)",
     remoteConnected = "CONNECTED",
     remoteDisconnected = "DISCONNECTED",
     remoteConnecting = "CONNECTING...",
@@ -236,8 +236,8 @@ val EnglishStrings = AppStrings(
     remoteStopScan = "Stop Scan",
     remoteSwitchToLocal = "Offline? Switch to Local Analysis Mode",
     remoteClearBuffer = "Clear Buffer",
-    remoteLiveStreamTitle = "LIVE PROTOCOL STREAM ($X,Y,Z#)",
-    remoteLiveProtocolTitle = "LIVE PROTOCOL STREAM ($X,Y,Z#)",
+    remoteLiveStreamTitle = "LIVE PROTOCOL STREAM (\$X,Y,Z#)",
+    remoteLiveProtocolTitle = "LIVE PROTOCOL STREAM (\$X,Y,Z#)",
     remoteXAxis = "X-AXIS (col)",
     remoteYAxis = "Y-AXIS (row)",
     remoteZAxis = "Z-AXIS (µT)",
@@ -347,7 +347,7 @@ val PersianStrings = AppStrings(
 
     // Remote Scan Screen
     remoteScreenTitle = "اسکن زنده مغناطیس‌سنج",
-    remoteScreenSubtitle = "استریم بلوتوث کلاسیک SPP با پروتکل ($X,Y,Z#)",
+    remoteScreenSubtitle = "استریم بلوتوث کلاسیک SPP با پروتکل (\$X,Y,Z#)",
     remoteConnected = "متصل",
     remoteDisconnected = "قطع اتصال",
     remoteConnecting = "در حال اتصال...",
@@ -360,8 +360,8 @@ val PersianStrings = AppStrings(
     remoteStopScan = "توقف اسکن",
     remoteSwitchToLocal = "آفلاین هستید؟ رفتن به آنالیز محلی",
     remoteClearBuffer = "پاکسازی بافر",
-    remoteLiveStreamTitle = "استریم زنده پروتکل ($X,Y,Z#)",
-    remoteLiveProtocolTitle = "پروتکل بلادرنگ جریان داده ($X,Y,Z#)",
+    remoteLiveStreamTitle = "استریم زنده پروتکل (\$X,Y,Z#)",
+    remoteLiveProtocolTitle = "پروتکل بلادرنگ جریان داده (\$X,Y,Z#)",
     remoteXAxis = "محور X (ستون)",
     remoteYAxis = "محور Y (سطر)",
     remoteZAxis = "محور Z (میکروتسلا)",

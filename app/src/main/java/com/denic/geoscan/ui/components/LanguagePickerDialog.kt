@@ -40,7 +40,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.denic.geoscan.ui.localization.AppLanguage
 import com.denic.geoscan.ui.localization.getStrings
-import com.denic.geoscan.ui.navigation.DenicBrandLogo
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.DarkSurfaceElevated
