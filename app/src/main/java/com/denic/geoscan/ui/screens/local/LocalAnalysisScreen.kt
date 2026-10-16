@@ -464,30 +464,46 @@ private fun FileSourceCard(
                 }
             }
 
-            // Quick Demo Survey Grid (Offline test without external files)
-            if (dataset == null && !isLoading) {
+            // Quick Demo / Preset Survey Grids (Always accessible for offline field testing)
+            if (!isLoading) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(
-                        text = "QUICK OFFLINE SURVEY DEMO (TAP TO TEST)",
-                        style = Typography.labelSmall,
-                        color = TextMuted,
-                        letterSpacing = 0.8.sp
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "GRID PRESETS / OFFLINE DEMO",
+                            style = Typography.labelSmall,
+                            color = TextMuted,
+                            letterSpacing = 0.8.sp
+                        )
+                        if (dataset != null && dataset.fileName.startsWith("demo_survey_")) {
+                            Text(
+                                text = "Active: ${dataset.statistics.gridWidth}×${dataset.statistics.gridHeight}",
+                                style = Typography.labelSmall,
+                                color = NeonGreen
+                            )
+                        }
+                    }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
+                        val activeW = dataset?.statistics?.gridWidth
+                        val isDemo = dataset?.fileName?.startsWith("demo_survey_") == true
+
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(5, 5) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = NeonCyan,
-                                containerColor = NeonCyan.copy(alpha = 0.08f)
+                                containerColor = if (isDemo && activeW == 5) NeonCyan.copy(alpha = 0.22f) else NeonCyan.copy(alpha = 0.05f)
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 5) NeonCyan else GlassBorderCyan)
                         ) {
-                            Text(text = "⚡ 5×5", style = Typography.labelSmall)
+                            Text(text = "5×5", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(10, 10) },
@@ -495,11 +511,11 @@ private fun FileSourceCard(
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = NeonCyan,
-                                containerColor = NeonCyan.copy(alpha = 0.08f)
+                                containerColor = if (isDemo && activeW == 10) NeonCyan.copy(alpha = 0.22f) else NeonCyan.copy(alpha = 0.05f)
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 10) NeonCyan else GlassBorderCyan)
                         ) {
-                            Text(text = "⚡ 10×10", style = Typography.labelSmall)
+                            Text(text = "10×10", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(20, 20) },
@@ -507,11 +523,11 @@ private fun FileSourceCard(
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = NeonYellow,
-                                containerColor = NeonYellow.copy(alpha = 0.08f)
+                                containerColor = if (isDemo && activeW == 20) NeonYellow.copy(alpha = 0.22f) else NeonYellow.copy(alpha = 0.05f)
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 20) NeonYellow else GlassBorderHighlighted)
                         ) {
-                            Text(text = "⚡ 20×20", style = Typography.labelSmall)
+                            Text(text = "20×20", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(30, 30) },
@@ -519,11 +535,11 @@ private fun FileSourceCard(
                             shape = RoundedCornerShape(8.dp),
                             colors = ButtonDefaults.outlinedButtonColors(
                                 contentColor = NeonGreen,
-                                containerColor = NeonGreen.copy(alpha = 0.08f)
+                                containerColor = if (isDemo && activeW == 30) NeonGreen.copy(alpha = 0.22f) else NeonGreen.copy(alpha = 0.05f)
                             ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 30) NeonGreen else NeonGreen.copy(alpha = 0.5f))
                         ) {
-                            Text(text = "⚡ 30×30", style = Typography.labelSmall)
+                            Text(text = "30×30", style = Typography.labelSmall)
                         }
                     }
                 }
