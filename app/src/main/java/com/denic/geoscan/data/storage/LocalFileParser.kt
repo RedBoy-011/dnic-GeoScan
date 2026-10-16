@@ -26,13 +26,28 @@ class LocalFileParser {
      * Parses a list of raw text lines into [ScanPoint] models.
      */
     fun parseLines(rawLines: List<String>): List<ScanPoint> {
+        var explicitWidth: Int? = null
+
+        // Check for metadata like Width=10, SamplesPerLine=10, Matrix, V3D
+        for (line in rawLines) {
+            val lower = line.trim().lowercase()
+            if (lower.contains("samplesperline=") || lower.contains("width=") || lower.contains("points_x=")) {
+                val valuePart = lower.substringAfter("=").trim()
+                valuePart.toIntOrNull()?.let { explicitWidth = it }
+            } else if (lower.contains("dim=") || lower.contains("dimension=")) {
+                val dimStr = lower.substringAfter("=").trim()
+                val parts = dimStr.split("x", "*", ",", " ")
+                parts.firstOrNull()?.toIntOrNull()?.let { explicitWidth = it }
+            }
+        }
+
         val isExplicitMatrix = rawLines.any { line ->
             val trimmed = line.trim().lowercase()
-            (trimmed.startsWith("#") || trimmed.startsWith("//")) && trimmed.contains("matrix")
+            (trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith(";")) && trimmed.contains("matrix")
         }
 
         val cleanLines = rawLines.map { it.trim() }.filter { line ->
-            line.isNotEmpty() && !line.startsWith("#") && !line.startsWith("//")
+            !isCommentOrMetadata(line)
         }
 
         if (cleanLines.isEmpty()) return emptyList()
@@ -42,32 +57,62 @@ class LocalFileParser {
         }
 
         val hasProtocolEnvelope = cleanLines.any { it.startsWith("$") && it.contains("#") }
-        val hasTripletHeader = cleanLines.any { isHeader(it) }
+        val hasTripletHeader = rawLines.any { isHeader(it) }
 
         // Check if file uses triplet coordinate format (X, Y, Z per line)
-        val sampleLine = cleanLines.firstOrNull { !isHeader(it) } ?: return emptyList()
+        val sampleLine = cleanLines.firstOrNull() ?: return emptyList()
         val tokens = tokenizeLine(sampleLine)
 
-        val isTriplet = hasProtocolEnvelope || hasTripletHeader || (tokens.size == 3 && cleanLines.all { isHeader(it) || tokenizeLine(it).size == 3 } && isProbableCoordinate(tokens[0], tokens[1]))
+        val isTriplet = hasProtocolEnvelope || (hasTripletHeader && tokens.size >= 3) ||
+                (tokens.size == 3 && cleanLines.all { tokenizeLine(it).size == 3 } && isProbableCoordinate(tokens[0], tokens[1]))
 
-        return if (isTriplet) {
-            parseTripletLines(cleanLines)
-        } else {
-            // Treat as 2D Matrix format or fallback
-            parseMatrixLines(cleanLines)
+        if (isTriplet) {
+            return parseTripletLines(cleanLines)
         }
+
+        // Check if file is a 1D sequential stream of values (1 value per line)
+        val isSingleValueStream = cleanLines.size >= 4 && cleanLines.all { tokenizeLine(it).size == 1 && it.toFloatOrNull() != null }
+        if (isSingleValueStream) {
+            val total = cleanLines.size
+            val width = explicitWidth ?: run {
+                val sqrt = kotlin.math.sqrt(total.toDouble()).toInt()
+                if (sqrt * sqrt == total) sqrt else 10
+            }
+            val points = mutableListOf<ScanPoint>()
+            cleanLines.forEachIndexed { index, line ->
+                line.toFloatOrNull()?.let { z ->
+                    val x = index % width
+                    val y = index / width
+                    points.add(ScanPoint(x = x, y = y, zValue = z))
+                }
+            }
+            return points
+        }
+
+        // Standard 2D Gridded Matrix format (space, comma, or tab separated values across rows)
+        return parseMatrixLines(cleanLines)
+    }
+
+    private fun isCommentOrMetadata(line: String): Boolean {
+        val trimmed = line.trim()
+        if (trimmed.isEmpty()) return true
+        if (trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith(";") || trimmed.startsWith("!")) return true
+        if (trimmed.startsWith("[") && trimmed.endsWith("]")) return true // INI/V3D section headers e.g. [Data], [Header]
+        if (trimmed.contains("=") && !trimmed.contains(",") && !trimmed.contains("$")) return true // Metadata key=value
+        return isHeader(trimmed)
     }
 
     private fun isProbableCoordinate(token0: String, token1: String): Boolean {
         val x = token0.toIntOrNull() ?: return false
         val y = token1.toIntOrNull() ?: return false
-        return x in 0..100 && y in 0..100
+        return x in 0..500 && y in 0..500
     }
 
     private fun isHeader(line: String): Boolean {
-        val lower = line.lowercase()
+        val lower = line.lowercase().trim()
         return (lower.contains("x") && lower.contains("y") && lower.contains("z")) ||
-                lower.startsWith("date") || lower.startsWith("scan") || lower.startsWith("device")
+                lower.startsWith("date") || lower.startsWith("scan") || lower.startsWith("device") ||
+                lower.startsWith("visualizer") || lower.startsWith("v3d") || lower.startsWith("version")
     }
 
     private fun tokenizeLine(line: String): List<String> {
@@ -83,7 +128,7 @@ class LocalFileParser {
         val points = mutableListOf<ScanPoint>()
 
         for (line in lines) {
-            if (isHeader(line)) continue
+            if (isCommentOrMetadata(line)) continue
             val tokens = tokenizeLine(line)
             if (tokens.size >= 3) {
                 try {
@@ -103,7 +148,7 @@ class LocalFileParser {
         val points = mutableListOf<ScanPoint>()
 
         lines.forEachIndexed { rowIndex, line ->
-            if (isHeader(line)) return@forEachIndexed
+            if (isCommentOrMetadata(line)) return@forEachIndexed
             val tokens = tokenizeLine(line)
 
             tokens.forEachIndexed { colIndex, token ->

@@ -275,5 +275,34 @@ class AppIntegrityTest {
         assertEquals(Pair(9, 1), zigzagPoints[10])
         assertEquals(Pair(0, 1), zigzagPoints[19])
     }
+
+    @Test
+    fun testV3DFormatParsingWithHeaders() {
+        val parser = com.denic.geoscan.data.storage.LocalFileParser()
+        val v3dLines = listOf(
+            "; Visualizer 3D Geophysical Data Export",
+            "[Header]",
+            "Version=3.0",
+            "SamplesPerLine=10",
+            "Lines=10",
+            "[Data]",
+            "0, 0, 1000.0",
+            "1, 0, 1001.1",
+            "2, 0, 1002.2",
+            "3, 3, 1027.83",
+            "7, 7, 979.78"
+        )
+        val points = parser.parseLines(v3dLines)
+        assertEquals(5, points.size)
+        assertEquals(0, points[0].x)
+        assertEquals(0, points[0].y)
+        assertEquals(1000.0f, points[0].zValue, 0.01f)
+        assertEquals(3, points[3].x)
+        assertEquals(3, points[3].y)
+        assertEquals(1027.83f, points[3].zValue, 0.01f)
+        assertEquals(7, points[4].x)
+        assertEquals(7, points[4].y)
+        assertEquals(979.78f, points[4].zValue, 0.01f)
+    }
 }
 
