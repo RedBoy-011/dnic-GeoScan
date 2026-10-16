@@ -287,6 +287,7 @@ private fun TopBrandingBar(
         }
     }
 }
+}
 
 @Composable
 private fun GlassmorphicBottomNavBar(
