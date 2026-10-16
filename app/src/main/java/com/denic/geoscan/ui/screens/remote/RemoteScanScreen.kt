@@ -436,6 +436,8 @@ private fun ExportNotificationBanner(
             }
         }
     }
+}
+
 @Composable
 private fun DnicConnectionNoticeCard(
     isConnected: Boolean
