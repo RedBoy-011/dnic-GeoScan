@@ -17,10 +17,29 @@ class MainActivity : ComponentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Immediate removal ensures OEM ROMs (Samsung OneUI, Xiaomi HyperOS/MIUI) never hang
-        splashScreen.setKeepOnScreenCondition { false }
+        // Smooth fade-out with watchdog safety timer: guarantees removal on OEM ROMs (OneUI, HyperOS, MIUI)
         splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
-            splashScreenViewProvider.remove()
+            val splashView = splashScreenViewProvider.view
+            var isRemoved = false
+            fun safeRemove() {
+                if (!isRemoved) {
+                    isRemoved = true
+                    try {
+                        splashScreenViewProvider.remove()
+                    } catch (e: Throwable) {
+                        Log.w("DnicGeoScan", "Safe remove splash", e)
+                    }
+                }
+            }
+
+            // Watchdog fallback: guaranteed removal within 250ms maximum
+            splashView.postDelayed({ safeRemove() }, 250L)
+
+            splashView.animate()
+                .alpha(0f)
+                .setDuration(120L)
+                .withEndAction { safeRemove() }
+                .start()
         }
         setTheme(R.style.Theme_DenicGeoScan)
 

@@ -109,6 +109,9 @@ fun HubScreen(
             }
         )
 
+        // Instant Two-Mode Selector (Direct 1-tap navigation)
+        QuickModeSelector(onNavigateTo = onNavigateTo)
+
         // Prominent Hardware Status Banner: Explicit Disconnected State
         HardwareStatusBanner(
             pulseAlpha = pulseAlpha,
@@ -129,6 +132,94 @@ fun HubScreen(
 
         // Geophysical Processing Engine Specifications Footer
         GeophysicalEngineSpecsCard()
+    }
+}
+
+@Composable
+private fun QuickModeSelector(
+    onNavigateTo: (Screen) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        // Direct Action 1: Local Analysis (Offline)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(NeonGreen.copy(alpha = 0.12f))
+                .border(1.5.dp, NeonGreen.copy(alpha = 0.7f), RoundedCornerShape(12.dp))
+                .clickable { onNavigateTo(Screen.LocalAnalysis) }
+                .padding(vertical = 12.dp, horizontal = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.FolderOpen,
+                    contentDescription = null,
+                    tint = NeonGreen,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "LOCAL ANALYSIS",
+                        style = Typography.labelLarge,
+                        color = NeonGreen,
+                        fontSize = 11.sp
+                    )
+                    Text(
+                        text = "100% OFFLINE",
+                        style = Typography.labelSmall,
+                        color = TextSecondary,
+                        fontSize = 9.sp
+                    )
+                }
+            }
+        }
+
+        // Direct Action 2: Remote Scan (Hardware)
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .background(DarkSurfaceElevated)
+                .border(1.dp, GlassBorderCyan, RoundedCornerShape(12.dp))
+                .clickable { onNavigateTo(Screen.RemoteScan) }
+                .padding(vertical = 12.dp, horizontal = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Sensors,
+                    contentDescription = null,
+                    tint = NeonCyan,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "REMOTE SCAN",
+                        style = Typography.labelLarge,
+                        color = NeonCyan,
+                        fontSize = 11.sp
+                    )
+                    Text(
+                        text = "HC-05 SENSORS",
+                        style = Typography.labelSmall,
+                        color = TextMuted,
+                        fontSize = 9.sp
+                    )
+                }
+            }
+        }
     }
 }
 

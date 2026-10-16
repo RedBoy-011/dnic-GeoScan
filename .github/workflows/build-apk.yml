@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.9.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.4.0.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.3.9-apk
-          path: release/Dnic-GeoScan-v1.3.9.apk
+          name: Dnic-GeoScan-v1.4.0-apk
+          path: release/Dnic-GeoScan-v1.4.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,24 +52,28 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.3.9
-          name: "Dnic-GeoScan v1.3.9 - Official Release"
+          tag_name: v1.4.0
+          name: "Dnic-GeoScan v1.4.0 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.3.9 - Lifecycle-Compliant Splash Dismissal & Offline Geophysical Engine
+            ## 📱 Dnic-GeoScan v1.4.0 - Watchdog Splash Dismissal, Dual Mode Landing & Enhanced Disconnected Status
             
-            نسخه رسمی ۱.۳.۹ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۴.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
             ### ✨ تغییرات و اصلاحات کلیدی این نسخه:
-            - **اصلاح دقیق چرخه حیات اسپلش (Lifecycle-Compliant Splash):**
-              - تفکیک زمان‌بندی `installSplashScreen()` قبل از `super.onCreate()` و اعمال لیسنر خروج و تم نهایی بعد از آن در `MainActivity` جهت جلوگیری از تداخل بازخوانی اتریبیوت‌های تم در اندروید ۱۲ به بالا.
-            - **تضمین ۱۰۰٪ آفلاین بودن و عدم وابستگی به سخت‌افزار (Local Analysis Priority):**
-              - نشانگر رسمی `100% OFFLINE` در سربرگ صفحه تحلیل محلی به همراه نوار انتخابگر دائمی شبکه‌های ۵×۵، ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰.
-            - **اعلام شفاف وضعیت عدم اتصال سخت‌افزار (Disconnected Status):**
-              - نمایش بنر `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` به همراه میانبرهای مستقیم به تحلیل آفلاین یا اتصال سنسور در هاب و صفحه ریموت.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 25`.
+            - **رفع قطعی و ایمن فریز اسپلش‌اسکرین (Watchdog Protected Splash Dismissal):**
+              - افزودن تم اختصاصی `values-v31/themes.xml` با تعاریف نیتیو سیستم‌عامل برای اندروید ۱۲ به بعد.
+              - پیاده‌سازی تایمر سگ‌نگهبان (Watchdog Timer - 250ms) همراه با انیمیشن خروج شفاف ۱۲۰ میلی‌ثانیه‌ای و حذف تضمینی لایه اسپلش در `MainActivity.kt`.
+            - **بازطراحی ناوبری و هاب اصلی با دو کارت بزرگ و انتخابگر مستقیم (Dual Mode Landing Screen):**
+              - افزوده شدن نوار انتخابگر مستقیم دوگانه در بالای هاب برای سوئیچ ۱-کلیکه بین `LOCAL ANALYSIS (100% OFFLINE)` و `REMOTE SCAN (HC-05)`.
+              - دو کارت مجزا و بزرگ با اولویت‌بندی تحلیل آفلاین محلی و دسترسی سریع به شبکه‌های ۵×۵، ۱۰×۱۰، ۲۰×۲۰ و ۳۰×۳۰.
+            - **نمایش شفاف وضعیت عدم اتصال سخت‌افزار (STATUS: DISCONNECTED • NO HARDWARE CONNECTED):**
+              - بردر برجسته نارنجی نئونی در کارت وضعیت سخت‌افزار همراه با دکمه انتقال فوری به حالت آفلاین در صفحه اسکن زنده.
+            - **پایداری کامل محاسبات ژئوفیزیک (Bicubic Spline & Median Ground Zero):**
+              - اجرای بدون کرش الگوریتم درون‌یابی کتمول-رام و نرمال‌سازی ترند روی ماتریس‌های ۱۰×۱۰، ۲۰×۲۰ و فایل‌های متنی/CSV.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 26`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.3.9.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.9/Dnic-GeoScan-v1.3.9.apk)**
-          files: release/Dnic-GeoScan-v1.3.9.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.4.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.4.0/Dnic-GeoScan-v1.4.0.apk)**
+          files: release/Dnic-GeoScan-v1.4.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

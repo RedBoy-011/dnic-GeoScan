@@ -395,9 +395,16 @@ private fun HardwareStatusCard(
     onToggleScan: () -> Unit,
     onNavigateToLocal: (() -> Unit)? = null
 ) {
+    val borderStrokeColor = when (connectionState) {
+        is BluetoothConnectionState.Connected -> GlassBorderHighlighted
+        is BluetoothConnectionState.Connecting -> NeonYellow.copy(alpha = 0.7f)
+        is BluetoothConnectionState.Error -> NeonRed.copy(alpha = 0.8f)
+        is BluetoothConnectionState.Disconnected -> com.denic.geoscan.ui.theme.NeonOrange.copy(alpha = 0.75f)
+    }
+
     GlassmorphicCard(
         modifier = Modifier.fillMaxWidth(),
-        borderColor = if (isConnected) GlassBorderHighlighted else GlassBorder
+        borderColor = borderStrokeColor
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
@@ -405,7 +412,10 @@ private fun HardwareStatusCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f, fill = false)
+                ) {
                     Icon(
                         imageVector = when {
                             isConnected -> Icons.Filled.BluetoothConnected
@@ -422,7 +432,7 @@ private fun HardwareStatusCard(
                             is BluetoothConnectionState.Connected -> "CONNECTED: ${connectionState.deviceName}"
                             is BluetoothConnectionState.Connecting -> "CONNECTING..."
                             is BluetoothConnectionState.Error -> "ERROR: ${connectionState.message}"
-                            is BluetoothConnectionState.Disconnected -> "DISCONNECTED • NO HARDWARE CONNECTED"
+                            is BluetoothConnectionState.Disconnected -> "STATUS: DISCONNECTED • NO HARDWARE CONNECTED"
                         },
                         style = Typography.labelLarge,
                         color = statusColor
@@ -514,8 +524,11 @@ private fun HardwareStatusCard(
                     onClick = onNavigateToLocal,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonGreen),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.5f))
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = NeonGreen,
+                        containerColor = NeonGreen.copy(alpha = 0.08f)
+                    ),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.7f))
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.FolderOpen,
