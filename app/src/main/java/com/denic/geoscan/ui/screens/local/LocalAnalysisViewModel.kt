@@ -81,9 +81,9 @@ class LocalAnalysisViewModel(
     }
 
     init {
-        // Pre-load a baseline 10x10 geophysical reference grid on launch
-        // Ensures Local Analysis is immediately functional, interactive and stable
-        loadSampleGrid(10, 10)
+        // Pre-load a realistic 15x15 multi-depth mining & metal survey grid on launch
+        // Features deep ore vein, shallow metal dipole, and tunnel cavity
+        loadMiningSimulation(15, 15)
     }
 
     fun toggleSmoothing() {
@@ -188,6 +188,71 @@ class LocalAnalysisViewModel(
                 _dataset.value = normalizedData
             } catch (e: Exception) {
                 _errorMessage.value = e.localizedMessage ?: "Failed to generate sample grid"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Synthesizes a realistic multi-depth geophysical survey representing:
+     * - Deep Magnetite / Iron Ore Vein (~4.5m depth, broad diagonal anomaly)
+     * - Shallow High-Grade Ferrous Metal Target (~1.2m depth, sharp dipole peak)
+     * - Secondary Polymetallic Metal Node (~2.8m depth)
+     * - Underground Ancient Mine Tunnel / Cavity Shaft (~3.0m depth, negative void dip)
+     * - Regional geomagnetic gradient baseline (1000 - 1008 µT)
+     */
+    fun loadMiningSimulation(width: Int = 15, height: Int = 15) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val points = mutableListOf<ScanPoint>()
+                val baseField = 1000.0f
+                for (y in 0 until height) {
+                    for (x in 0 until width) {
+                        // Regional natural slope gradient
+                        val regionalGradient = (x * 0.35f + y * 0.25f)
+
+                        // 1. Shallow Ferrous Target at (4, 4) - Depth ~1.2m (steep gradient)
+                        val dxShallow = x - 4.0f
+                        val dyShallow = y - 4.0f
+                        val distShallow = kotlin.math.sqrt(dxShallow * dxShallow + dyShallow * dyShallow)
+                        val shallowPeak = 52.0f * kotlin.math.exp(-distShallow / 1.2f)
+
+                        // 2. Deep Mineralized Ore Vein along diagonal line - Depth ~4.5m (broad gradient)
+                        val veinDist = kotlin.math.abs(x - y) / 1.414f
+                        val veinMask = if (x in 2..12 && y in 2..12) 1.0f else 0.2f
+                        val deepVeinAnomaly = 26.5f * kotlin.math.exp(-veinDist / 2.2f) * veinMask
+
+                        // 3. Subterranean Mine Shaft / Tunnel Cavity along row y=12, x in 3..9 - Depth ~3.0m
+                        val cavityDist = if (x in 3..9) kotlin.math.abs(y - 12.0f) else {
+                            val edgeX = if (x < 3) 3.0f else 9.0f
+                            kotlin.math.sqrt((x - edgeX) * (x - edgeX) + (y - 12.0f) * (y - 12.0f))
+                        }
+                        val cavityDip = -28.0f * kotlin.math.exp(-cavityDist / 1.5f)
+
+                        // 4. Secondary Medium-Depth Metal at (11, 4) - Depth ~2.8m
+                        val dxMed = x - 11.0f
+                        val dyMed = y - 4.0f
+                        val distMed = kotlin.math.sqrt(dxMed * dxMed + dyMed * dyMed)
+                        val mediumPeak = 24.0f * kotlin.math.exp(-distMed / 1.6f)
+
+                        // Ground sensor micro-noise
+                        val noise = ((x * 17 + y * 31) % 11 - 5) * 0.08f
+
+                        val z = baseField + regionalGradient + shallowPeak + deepVeinAnomaly + cavityDip + mediumPeak + noise
+                        points.add(ScanPoint(x = x, y = y, zValue = z))
+                    }
+                }
+                val normalizedData = normalizer.normalize(
+                    rawPoints = points,
+                    fileName = "demo_mine_multidepth_${width}x${height}.v3d",
+                    fileSizeFormatted = "${points.size * 22} B"
+                )
+                _dataset.value = normalizedData
+            } catch (e: Exception) {
+                _errorMessage.value = e.localizedMessage ?: "Failed to generate mining simulation"
             } finally {
                 _isLoading.value = false
             }

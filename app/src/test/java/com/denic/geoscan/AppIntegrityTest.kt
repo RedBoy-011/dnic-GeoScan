@@ -304,5 +304,53 @@ class AppIntegrityTest {
         assertEquals(7, points[4].y)
         assertEquals(979.78f, points[4].zValue, 0.01f)
     }
+
+    @Test
+    fun testMultiDepthMiningScanDatasetIntegrity() {
+        val parser = com.denic.geoscan.data.storage.LocalFileParser()
+        val csvFile = java.io.File("demo_scans/demo_mine_multidepth.csv")
+        assertTrue("demo_mine_multidepth.csv must exist", csvFile.exists())
+        val lines = csvFile.readLines()
+        val points = parser.parseLines(lines)
+        assertEquals("Must contain 225 points (15x15 grid)", 225, points.size)
+
+        val v3dFile = java.io.File("demo_scans/demo_mine_multidepth.v3d")
+        assertTrue("demo_mine_multidepth.v3d must exist", v3dFile.exists())
+        val v3dLines = v3dFile.readLines()
+        val v3dPoints = parser.parseLines(v3dLines)
+        assertEquals("Must contain 225 points in V3D", 225, v3dPoints.size)
+
+        // Verify multi-depth targets: shallow metal peak at (4, 4), cavity at y=12
+        val peakPoint = points.maxByOrNull { it.zValue }
+        assertNotNull("Peak point must exist", peakPoint)
+        assertEquals(4, peakPoint!!.x)
+        assertEquals(4, peakPoint.y)
+        assertTrue("Shallow peak must exceed 1040 µT", peakPoint.zValue > 1040f)
+
+        val minPoint = points.minByOrNull { it.zValue }
+        assertNotNull("Cavity point must exist", minPoint)
+        assertEquals(12, minPoint!!.y)
+        assertTrue("Tunnel cavity must be below 985 µT", minPoint.zValue < 985f)
+
+        // Normalization verification
+        val normalizer = com.denic.geoscan.data.analysis.DatasetNormalizer()
+        val dataset = normalizer.normalize(points, "demo_mine_multidepth.csv", "3 KB")
+        assertEquals(15, dataset.statistics.gridWidth)
+        assertEquals(15, dataset.statistics.gridHeight)
+        assertTrue("Must detect positive metal anomalies", dataset.statistics.metalCount > 20)
+        assertTrue("Must detect negative cavity anomalies", dataset.statistics.cavityCount > 10)
+    }
+
+    @Test
+    fun testVisualizerIndexHtmlAssetsIntegrity() {
+        val htmlFile = java.io.File("app/src/main/assets/echarts/index.html")
+        assertTrue("index.html must exist in assets", htmlFile.exists())
+        val content = htmlFile.readText()
+        assertTrue("Must contain renderScanData", content.contains("function renderScanData"))
+        assertTrue("Must contain geoCanvas", content.contains("geoCanvas"))
+        assertTrue("Must contain AndroidBridge.onChartReady", content.contains("AndroidBridge.onChartReady"))
+        assertTrue("Must support 3D surface projection", content.contains("render3DSurface"))
+        assertTrue("Must support 2D heatmap", content.contains("render2DHeatmap"))
+    }
 }
 

@@ -153,6 +153,7 @@ fun LocalAnalysisScreen(
                         onClearDataset = { viewModel.clearDataset() },
                         onToggleSmoothing = { viewModel.toggleSmoothing() },
                         onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
+                        onLoadMiningSimulation = { viewModel.loadMiningSimulation(15, 15) },
                         onExportProcessed = { viewModel.exportProcessedDataset() }
                     )
 
@@ -212,6 +213,7 @@ fun LocalAnalysisScreen(
                     onClearDataset = { viewModel.clearDataset() },
                     onToggleSmoothing = { viewModel.toggleSmoothing() },
                     onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
+                    onLoadMiningSimulation = { viewModel.loadMiningSimulation(15, 15) },
                     onExportProcessed = { viewModel.exportProcessedDataset() }
                 )
 
@@ -377,6 +379,7 @@ private fun FileSourceCard(
     onClearDataset: () -> Unit,
     onToggleSmoothing: () -> Unit,
     onLoadSampleGrid: (Int, Int) -> Unit,
+    onLoadMiningSimulation: () -> Unit,
     onExportProcessed: () -> Unit
 ) {
     val strings = LocalAppStrings.current
@@ -522,6 +525,23 @@ private fun FileSourceCard(
                             )
                         }
                     }
+                    // Multi-Depth Mining & Metal Survey Preset
+                    val isMiningDemo = dataset?.fileName?.contains("demo_mine_") == true
+                    OutlinedButton(
+                        onClick = onLoadMiningSimulation,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = NeonGreen,
+                            containerColor = if (isMiningDemo) NeonGreen.copy(alpha = 0.22f) else NeonGreen.copy(alpha = 0.06f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isMiningDemo) NeonGreen else GlassBorderHighlighted)
+                    ) {
+                        Icon(imageVector = Icons.Outlined.ViewInAr, contentDescription = null, modifier = Modifier.size(15.dp), tint = NeonGreen)
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(text = "⛏️ Multi-Depth Mine & Metal Simulation (15×15)", style = Typography.labelSmall)
+                    }
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
