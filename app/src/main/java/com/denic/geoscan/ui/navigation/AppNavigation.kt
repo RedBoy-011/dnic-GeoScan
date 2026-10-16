@@ -93,8 +93,9 @@ fun AppNavigation(
                     }
                 },
                 onNavigate = { screen ->
-                    if (currentRoute != screen.route) {
-                        navController.navigate(screen.route) {
+                    val targetRoute = screen?.route ?: return@TopBrandingBar
+                    if (currentRoute != targetRoute) {
+                        navController.navigate(targetRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -109,8 +110,9 @@ fun AppNavigation(
             GlassmorphicBottomNavBar(
                 currentRoute = currentRoute,
                 onNavigate = { screen ->
-                    if (currentRoute != screen.route) {
-                        navController.navigate(screen.route) {
+                    val targetRoute = screen?.route ?: return@GlassmorphicBottomNavBar
+                    if (currentRoute != targetRoute) {
+                        navController.navigate(targetRoute) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
@@ -330,12 +332,22 @@ private fun GlassmorphicBottomNavBar(
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Screen.items.forEach { screen ->
-                val isSelected = currentRoute == screen.route || currentRoute.startsWith("${screen.route}?")
+            val navScreens = try {
+                Screen.items.filterNotNull().ifEmpty {
+                    listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan)
+                }
+            } catch (_: Throwable) {
+                listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan)
+            }
+
+            navScreens.forEach { screen ->
+                val route = screen.route
+                val isSelected = currentRoute == route || currentRoute.startsWith("$route?")
                 val activeColor = when (screen) {
                     Screen.Hub -> NeonCyan
                     Screen.LocalAnalysis -> NeonGreen
                     Screen.RemoteScan -> NeonCyan
+                    else -> NeonCyan
                 }
 
                 Box(

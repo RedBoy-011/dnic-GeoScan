@@ -11,25 +11,30 @@ sealed class Screen(
     val title: String,
     val icon: ImageVector
 ) {
-    object Hub : Screen(
+    data object Hub : Screen(
         route = "hub",
         title = "Hub",
         icon = Icons.Outlined.Dashboard
     )
 
-    object LocalAnalysis : Screen(
+    data object LocalAnalysis : Screen(
         route = "local_analysis",
         title = "Local Analysis",
         icon = Icons.Outlined.FolderOpen
     )
 
-    object RemoteScan : Screen(
+    data object RemoteScan : Screen(
         route = "remote_scan",
         title = "Remote Scan",
         icon = Icons.Outlined.Bluetooth
     )
 
     companion object {
-        val items = listOf(Hub, LocalAnalysis, RemoteScan)
+        /**
+         * Dynamic getter ensures subclasses are evaluated after class loading,
+         * completely avoiding JVM circular dependency and null references.
+         */
+        val items: List<Screen>
+            get() = listOfNotNull(Hub, LocalAnalysis, RemoteScan)
     }
 }

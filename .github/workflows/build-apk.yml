@@ -44,13 +44,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.5.1.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.5.2.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.5.1.apk
-          test -f release/Dnic-GeoScan-v1.5.1.apk
+          ls -lh release/Dnic-GeoScan-v1.5.2.apk
+          test -f release/Dnic-GeoScan-v1.5.2.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -64,7 +64,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.5.1.apk
+            adb install -r release/Dnic-GeoScan-v1.5.2.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -101,8 +101,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.5.1-apk
-          path: release/Dnic-GeoScan-v1.5.1.apk
+          name: Dnic-GeoScan-v1.5.2-apk
+          path: release/Dnic-GeoScan-v1.5.2.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -110,31 +110,26 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.5.1
-          name: "Dnic-GeoScan v1.5.1 - Anti-Crash Shield & Samsung One UI 6 Stability"
+          tag_name: v1.5.2
+          name: "Dnic-GeoScan v1.5.2 - Critical Navigation Resolution & Android 16/S24 Ultra Fix"
           body: |
-            ## 📱 Dnic-GeoScan v1.5.1 - Anti-Crash Diagnostic Shield & Samsung One UI 6 Stability
+            ## 📱 Dnic-GeoScan v1.5.2 - Critical Navigation Resolution & Android 16/S24 Ultra Fix
             
-            نسخه رسمی ۱.۵.۱ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۵.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و اصلاحات این نسخه:
-            - **سیستم ضد فورس‌کلوز و جعبه سیاه نجات‌بخش (Anti-Crash Diagnostic Shield):**
-              - پیاده‌سازی کلاس سفارشی `DenicApplication` با متد ره‌گیری خطاهای پیش‌بینی نشده (UncaughtExceptionHandler).
-              - در صورت بروز هرگونه خطای راه‌اندازی، برنامه فورس‌کلوز یا بسته نمی‌شود؛ بلکه اکتیویتی بومی ایزوله `DiagnosticActivity` باز شده، مشخصات دقیق دستگاه و StackTrace را نشان می‌دهد و دکمه کپی فوری گزارش خطا را در اختیار کاربر می‌گذارد.
-              - ذخیره خودکار متن کامل خطا در فایل `crash_log.txt` در پوشه اختصاصی برنامه (`/sdcard/Android/data/com.denic.geoscan/files/`).
-            - **سازگاری ۱۰۰٪ با سامسونگ گلکسی S24 Ultra و اندروید ۱۴ (One UI 6.1 Stability):**
-              - رفع تداخل تم‌های XML با ویژگی `enableEdgeToEdge()` در اندروید ۱۴ و حذف ویژگی‌های قدیمی استاتوس‌بار که در رام سامسونگ موجب فورس‌کلوز می‌شدند.
-              - قرار دادن متد بومی `installSplashScreen()` در بلوک ایمن محافظتی جهت جلوگیری از هرگونه خطای لودینگ لایه پنجره WindowManager.
-            - **طراحی کاملاً رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌ها:**
-              - چیدمان دوسطونه در تبلت‌ها و داک ناوبری شناور کپسولی در مرکز پایین صفحه (`widthIn(max = 520.dp)`).
-            - **تست کامل در شبیه‌ساز اندروید گیت‌هاب:**
-              - نصب و اعتبارسنجی خودکار از طریق `adb install` و `am start` در پایپ‌لاین CI.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 30`.
+            ### 🛠️ حل قطعی باگ شناسایی‌شده توسط سپر تشخیصی (Diagnostic Shield):
+            - **حل ریشه‌ای NullPointerException در GlassmorphicBottomNavBar:**
+              - در نسخه‌های قبلی، قرار داشتن `val items = listOf(Hub, LocalAnalysis, RemoteScan)` در `companion object` کلاس `sealed class Screen` به دلیل ترتیب بارگذاری کلاس‌ها در ماشین مجازی JVM/ART، مقادیر اشیاء را `null` برمی‌گرداند.
+              - تبدیل اشیاء ناوبری به `data object` و پیاده‌سازی گتر پویا (`val items: List<Screen> get() = listOfNotNull(...)`) جهت اطمینان ۱۰۰٪ از عدم وجود هرگونه مرجع `null`.
+              - مقاوم‌سازی کامل تابع کامپوز `GlassmorphicBottomNavBar` با فیلتر خودکار، بررسی مقادیر پوچ و تعریف لیست پشتیبان اضطراری.
+            - **تایید موفقیت عملکرد سپر تشخیصی هوشمند (Diagnostic Shield):**
+              - سیستم ضد کرش و لاگر خطای بومی در پروسس مجزا (`:crash_handler`) توانست روی گوشی Samsung S24 Ultra بدون بسته‌شدن کور، خطای دقیق را ذخیره و جهت رفع به نمایش بگذارد.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 31`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.5.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.5.1/Dnic-GeoScan-v1.5.1.apk)**
+            - **[دانلود مستقیم Dnic-GeoScan-v1.5.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.5.2/Dnic-GeoScan-v1.5.2.apk)**
           files: |
-            release/Dnic-GeoScan-v1.5.1.apk
+            release/Dnic-GeoScan-v1.5.2.apk
             release/emulator_phone.png
             release/emulator_tablet.png
         env:

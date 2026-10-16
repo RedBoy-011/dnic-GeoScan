@@ -103,4 +103,21 @@ class AppIntegrityTest {
         assertEquals(95f, col1[1].zValue, 0.001f)
         assertEquals(70f, col1[2].zValue, 0.001f)
     }
+
+    @Test
+    fun testNavigationScreensNonNullAndValid() {
+        val screens = com.denic.geoscan.ui.navigation.Screen.items
+        assertNotNull("Screen.items must not be null", screens)
+        assertEquals("Screen.items must contain exactly 3 items", 3, screens.size)
+        for (screen in screens) {
+            assertNotNull("Screen item must not be null", screen)
+            assertNotNull("Screen route must not be null", screen.route)
+            assertFalse("Screen route must not be blank", screen.route.isBlank())
+            assertNotNull("Screen title must not be null", screen.title)
+            assertFalse("Screen title must not be blank", screen.title.isBlank())
+            assertNotNull("Screen icon must not be null", screen.icon)
+        }
+        val routes = screens.map { it.route }
+        assertEquals("Each route must be unique", routes.distinct().size, routes.size)
+    }
 }
