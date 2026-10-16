@@ -75,9 +75,7 @@ fun AppNavigation(
         mutableStateOf(prefs.getString("start_screen", startDestination) ?: startDestination)
     }
 
-    val remoteViewModel: RemoteScanViewModel = viewModel(
-        viewModelStoreOwner = (activity ?: androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner.current!!)
-    )
+    val remoteViewModel: RemoteScanViewModel = viewModel()
     val remotePoints by remoteViewModel.scannedPoints.collectAsState()
 
     var showExitDialog by remember { mutableStateOf(false) }
