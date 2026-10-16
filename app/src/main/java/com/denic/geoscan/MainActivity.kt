@@ -13,11 +13,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Official Android 12+ Splash Screen handler:
-        // Calling installSplashScreen() before super.onCreate enables the Android 12+ WindowManager
-        // to automatically and smoothly dismiss the splash screen as soon as the first Compose frame renders.
-        // We do NOT register setOnExitAnimationListener without custom animations, as registering it disables
+        // Immediate dismissal via setOnExitAnimationListener ensures OEM ROMs (OneUI, HyperOS, MIUI)
+        // never freeze or wait on animator callbacks when switching to Compose.
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition { false }
+        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+            splashScreenViewProvider.remove()
+        }
         setTheme(R.style.Theme_DenicGeoScan)
         super.onCreate(savedInstanceState)
 

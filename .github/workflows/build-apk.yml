@@ -38,13 +38,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.5.apk
+          cp app/build/outputs/apk/debug/app-debug.apk release/Dnic-GeoScan-v1.3.6.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.3.5-apk
-          path: release/Dnic-GeoScan-v1.3.5.apk
+          name: Dnic-GeoScan-v1.3.6-apk
+          path: release/Dnic-GeoScan-v1.3.6.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -52,25 +52,26 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.3.5
-          name: "Dnic-GeoScan v1.3.5 - Official Release"
+          tag_name: v1.3.6
+          name: "Dnic-GeoScan v1.3.6 - Official Release"
           body: |
-            ## 📱 Dnic-GeoScan v1.3.5 - Configurable Startup & Instant Offline Launch
+            ## 📱 Dnic-GeoScan v1.3.6 - Absolute Zero-Hang Splash & Guaranteed Offline Local Analysis
             
-            نسخه رسمی ۱.۳.۵ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
+            نسخه رسمی ۱.۳.۶ اپلیکیشن تخصصی اسکنر ژئوفیزیک و تحلیل سه‌بعدی داده‌های مغناطیس‌سنج **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و قابلیت‌های اصلی این نسخه:
-            - **قابلیت تعیین صفحه پیش‌فرض شروع (Configurable startDestination):**
-              - امکان ورود مستقیم به حالت تحلیل آفلاین محلی (`Local Analysis`) بلافاصله پس از باز شدن برنامه بدون نیاز به عبور از هاب اصلی.
-              - ذخیره‌سازی دائمی ترجیحات اپراتور میدانی در `SharedPreferences` با کلید `start_screen`.
-            - **چیپ تعاملی تنظیم حالت بوت در سربرگ (Boot Mode Toggle):**
-              - افزودن نشانگر وضعیت و دکمه سوییچ (`Boot: Local` / `Boot: Hub`) در بالای صفحه اصلی هاب جهت تغییر سریع رفتار لود اولیه برنامه.
-            - **حذف قطعی هرگونه تأخیر اسپلش در اندروید ۱۲+:**
-              - باز شدن بی‌درنگ و بدون قفل شدن روی آیکون نئونی، هماهنگ با تسریع رندرینگ Compose.
-            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با کلید دائم معتبر با `versionCode = 21` و سازگاری کامل روی نسخه‌های قبلی.
+            ### ✨ تغییرات و اصلاحات کلیدی این نسخه:
+            - **رفع ریشه‌ای و قطعی گیر کردن روی اسپلش شش‌ضلعی نئونی در اندروید ۱۲+:**
+              - پیاده‌سازی لیسنر خروج فوری `splashScreen.setOnExitAnimationListener { it.remove() }` در `MainActivity` جهت حذف بلادرنگ ویوی اسپلش بدون معطلی برای انیماتورهای سیستمی OEM (مانند سامسونگ OneUI و شیائومی HyperOS/MIUI).
+              - حذف مقدار صلب `windowSplashScreenAnimationDuration = 0` در `themes.xml` جهت هماهنگی کامل با کامپوزیتور گرافیکی سیستم‌عامل.
+            - **اولویت قطعی تحلیل آفلاین محلی (Local Analysis Priority):**
+              - امکان ورود فوری و کار با شبکه‌های کوچک و بزرگ میدانی (۵×۵، ۱۰×۱۰، ۲۰×۲۰، ۳۰×۳۰) و فایل‌های دلخواه بدون نیاز به بلوتوث.
+              - نرمال‌سازی میانه (Median Ground Zero) و درون‌یابی دو مکعبی (Bicubic Spline) کاملاً پایدار و بدون کرش.
+            - **نمایش شفاف و استاندارد وضعیت عدم اتصال سخت‌افزار (Disconnected Status):**
+              - کارت برجسته وضعیت عدم اتصال با متن صریح `STATUS: DISCONNECTED • NO HARDWARE CONNECTED` و دکمه‌های اقدام سریع مستقیم.
+            - **ارتقای یکپارچه درجا (In-place Upgrade):** امضا با همان کلید دائم معتبر با `versionCode = 22`.
 
             ### 📥 فایل نصبی مستقیم:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.3.5.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.5/Dnic-GeoScan-v1.3.5.apk)**
-          files: release/Dnic-GeoScan-v1.3.5.apk
+            - **[دانلود مستقیم Dnic-GeoScan-v1.3.6.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.3.6/Dnic-GeoScan-v1.3.6.apk)**
+          files: release/Dnic-GeoScan-v1.3.6.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
