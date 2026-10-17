@@ -252,7 +252,8 @@ fun EChartsVisualizer(
                                     override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
                                         super.onSizeChanged(w, h, ow, oh)
                                         if (w > 50 && h > 50 && isChartReady) {
-                                            post { sendScanData(this@object) }
+                                            val wv = this
+                                            post { sendScanData(wv) }
                                         }
                                     }
                                 }.apply {

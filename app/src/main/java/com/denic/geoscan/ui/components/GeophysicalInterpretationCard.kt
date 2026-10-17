@@ -77,7 +77,7 @@ fun GeophysicalInterpretationCard(
     if (report == null || report.surfacePoints.isEmpty()) return
 
     val currentLang = LocalAppLanguage.current
-    val isFa = currentLang == AppLanguage.FA
+    val isFa = currentLang == AppLanguage.PERSIAN
     var isExpanded by remember { mutableStateOf(true) }
 
     val classificationTitle = if (isFa) report.targetClassificationFa else report.targetClassificationEn

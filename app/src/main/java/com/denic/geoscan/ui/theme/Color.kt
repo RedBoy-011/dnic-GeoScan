@@ -20,6 +20,7 @@ val NeonGreen = Color(0xFF00FF9D)   // Nominal ground / high stability
 val NeonCyan = Color(0xFF00E5FF)    // Negative magnetic anomaly / cavity / low field
 val NeonRed = Color(0xFFFF2A55)     // Positive magnetic anomaly / ferrous metal / peak
 val NeonYellow = Color(0xFFFFD600)  // Mid-range transitional field
+val NeonAmber = Color(0xFFFFB300)   // High magnetic variance
 val NeonOrange = Color(0xFFFF9100)  // Disconnected / Alert / Warning
 val NeonPurple = Color(0xFFB026FF)  // Deep target identification
 
