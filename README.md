@@ -5,26 +5,26 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20(Material%203)-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
 [![Build Status](https://img.shields.io/badge/GitHub%20Actions-Passing-brightgreen.svg)](https://github.com/RedBoy-011/dnic-GeoScan/actions)
-[![Release](https://img.shields.io/badge/Release-v2.0.0-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.0)
+[![Release](https://img.shields.io/badge/Release-v2.0.1-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.1)
 
-> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار با معماری رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌های صنعتی، پشتیبانی کامل دو زبانه (فارسی و انگلیسی)، جهت‌بندی پویا (RTL/LTR)، هاب منوی اصلی سه‌گزینه‌ای (Local Analysis, Remote Scan, Settings)، سیستم لاگر پیشرفته وقایع (`denic_debug_log.txt`)، موتور هوشمند پیمایش ماتریس (X->Y Auto-Increment)، بازخورد صوتی تله‌متری بلادرنگ (Acoustic Telemetry) و پشتیبانی از فایل‌های `.v3d`، `.csv` و `.txt`، جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز است.
+> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار با معماری رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌های صنعتی، پشتیبانی کامل دو زبانه (فارسی و انگلیسی)، جهت‌بندی پویا (RTL/LTR)، هاب منوی اصلی سه‌گزینه‌ای (Local Analysis, Remote Scan, Settings)، سیستم لاگر پیشرفته وقایع (`denic_debug_log.txt`)، موتور هوشمند پیمایش ماتریس (X->Y Auto-Increment)، انطباق کامل با سیستم مختصات دکارتی تابع `surface3d` در زبان R، باکس جامع تحلیل ژئوفیزیک و برآورد عمق، بازخورد صوتی تله‌متری بلادرنگ (Acoustic Telemetry) و پشتیبانی از فایل‌های `.v3d`، `.csv` و `.txt`، جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز است.
 
 ---
 
 ## 📥 لینک‌های دانلود آخرین نسخه تایید شده (Download Links)
 
-برای دریافت آخرین نسخه رسمی، رسپانسیو و تایید شده برنامه (**Version 2.0.0**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
+برای دریافت آخرین نسخه رسمی، رسپانسیو و تایید شده برنامه (**Version 2.0.1**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
 
-* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v2.0.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/Dnic-GeoScan-v2.0.0.apk)**
-* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v2.0.0)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.0)**
-* **[⛏️ دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.csv)**
-* **[💎 دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.v3d)**
-* **[📊 دانلود دمو گرادیان ۱۰×۱۰ CSV (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.csv)**
-* **[🌐 دانلود دمو گرادیان ۱۰×۱۰ V3D (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.v3d)**
+* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v2.0.1.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.1/Dnic-GeoScan-v2.0.1.apk)**
+* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v2.0.1)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.1)**
+* **[⛏️ دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.1/demo_mine_multidepth.csv)**
+* **[💎 دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.1/demo_mine_multidepth.v3d)**
+* **[📊 دانلود دمو گرادیان ۱۰×۱۰ CSV (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.1/demo_10x10_anomaly.csv)**
+* **[🌐 دانلود دمو گرادیان ۱۰×۱۰ V3D (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.1/demo_10x10_anomaly.v3d)**
 * **[📦 دانلود از آرتیفکت‌های پایپ‌لاین تایید شده GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)**
 * **مسیر فایل محلی (Local APK Path):**
   ```text
-  release/Dnic-GeoScan-v2.0.0.apk
+  release/Dnic-GeoScan-v2.0.1.apk
   app/build/outputs/apk/release/app-release.apk
   ```
 
@@ -83,6 +83,113 @@
    - وارد تب **Remote Scan** شده، دستگاه را انتخاب و روی دکمه **Connect & Scan** کلیک نمایید.
 5. **تحلیل فایل آفلاین (Local Analysis):**
    - به تب **Local Analysis** رفته و دکمه **Open File** را لمس کرده و فایل `.csv` یا `.txt` مورد نظر را انتخاب نمایید تا آنالیز سه‌بعدی فوری نمایش داده شود.
+
+---
+
+## 🔌 راهنمای جامع اتصال سخت‌افزار و برنامه‌نویسان دستگاه (Hardware & Firmware Developer Guide)
+
+> 📘 برای مطالعه داکیومنت کامل فنی به همراه جزییات پایه به پایه‌ها، به فایل [docs/HARDWARE_FIRMWARE_GUIDE.md](docs/HARDWARE_FIRMWARE_GUIDE.md) مراجعه فرمایید.
+
+دستگاه‌های سنسور مگنتومتر، گرادیومتر یا فلزیاب می‌توانند از طریق پروتکل سریال بلوتوث (**Bluetooth Classic SPP**) و با استفاده از ماژول‌های **HC-05** یا چیپ‌های **ESP32** داده‌های اسکن را به اپلیکیشن مخابره کنند.
+
+### ۱. مشخصات پروتکل سریال (Bluetooth SPP Specs)
+* **پروفایل بلوتوث:** Bluetooth Classic Serial Port Profile (RFCOMM)
+* **شناسه سرویس (UUID):** `00001101-0000-1000-8000-00805F9B34FB`
+* **بادریت پیشنهادی (Baud Rate):** `9600` یا `115200` bps (تنظیمات 8-N-1)
+* **پین جفت‌سازی پیش‌فرض (PIN):** `1234` یا `0000`
+
+### ۲. ساختار پکت‌های ارسالی (Packet Protocol)
+فرمت استاندارد پکت‌های دیتای سنسور با شروع `$` و پایان `#\n` ارسال می‌شود:
+$$\$<Payload>\#\backslash n$$
+
+| حالت ارسال | فرمت پکت | مثال | نحوه پردازش در اپلیکیشن |
+| :--- | :--- | :--- | :--- |
+| **تک‌مقداری (توصیه شده)** | `$<Z>#\n` | `$1045.2#\n` | اپلیکیشن با گرید خودکار، $X$ را یکی‌یکی اضافه کرده و در انتهای ردیف، خودکار $Y$ را شیفت می‌دهد. |
+| **مختصات کامل** | `$<X>,<Y>,<Z>#\n` | `$0,0,1045.5#\n` | سخت‌افزار صراحتاً مختصات سطر، ستون و مقدار را تعیین می‌کند. |
+| **جفت $X, Z$** | `$<X>,<Z>#\n` | `$2,1050.0#\n` | مقدار $X$ و سنسور $Z$ ارسال می‌شود. |
+
+### ۳. کدهای نمونه آماده برای میکروکنترلرها
+
+<details>
+<summary><b>🔹 نمونه کد آردوینو (Arduino Uno / Nano + HC-05)</b></summary>
+
+```cpp
+#include <SoftwareSerial.h>
+
+// RX آردوینو به TX ماژول بلوتوث (پایه ۲)
+// TX آردوینو به RX ماژول بلوتوث با تقسیم مقاومتی (پایه ۳)
+SoftwareSerial BTSerial(2, 3); 
+const int BUTTON_PIN = 4; // کلید ثبت گام
+int lastState = HIGH;
+
+void setup() {
+  Serial.begin(115200);
+  BTSerial.begin(9600); // بادریت HC-05
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+}
+
+void sendPoint(float zValue) {
+  BTSerial.print("$");
+  BTSerial.print(zValue, 2);
+  BTSerial.println("#"); // ارسال # و خط جدید
+}
+
+void loop() {
+  int currentState = digitalRead(BUTTON_PIN);
+  if (currentState == LOW && lastState == HIGH) {
+    float reading = 1024.50; // مقدار سنسور گرادیومتر
+    sendPoint(reading);
+    delay(200);
+  }
+  lastState = currentState;
+}
+```
+</details>
+
+<details>
+<summary><b>🔹 نمونه کد ESP32 با بلوتوث داخلی سریال</b></summary>
+
+```cpp
+#include "BluetoothSerial.h"
+BluetoothSerial SerialBT;
+const int TRIGGER_PIN = 0; // کلید BOOT
+int lastState = HIGH;
+
+void setup() {
+  Serial.begin(115200);
+  SerialBT.begin("DNIC-GEOSCAN-DEVICE"); // نام بلوتوث در جستجوی گوشی
+  pinMode(TRIGGER_PIN, INPUT_PULLUP);
+}
+
+void loop() {
+  int currentState = digitalRead(TRIGGER_PIN);
+  if (currentState == LOW && lastState == HIGH) {
+    if (SerialBT.hasClient()) {
+      float z = 1052.80; // سنسور
+      SerialBT.printf("$%.2f#\n", z); // ارسال پکت استاندارد دنیک
+    }
+    delay(200);
+  }
+  lastState = currentState;
+}
+```
+</details>
+
+<details>
+<summary><b>🔹 تخلیه یک‌جای اسکن ذخیره‌شده از حافظه (Batch Scan Dump)</b></summary>
+
+```cpp
+void dumpEntireScan(int totalX, int totalY) {
+  for (int y = 0; y < totalY; y++) {
+    for (int x = 0; x < totalX; x++) {
+      float z = readStoredMemory(x, y);
+      SerialBT.printf("$%.2f#\n", z);
+      delay(30); // تاخیر حداقل ۳۰ میلی‌ثانیه بین پکت‌ها الزامی است
+    }
+  }
+}
+```
+</details>
 
 ---
 
