@@ -345,10 +345,10 @@ fun EChartsVisualizer(
                                 }
                             }
                         },
-                        update = { webView ->
+                        update = { view ->
                             // Guaranteed Compose update callback on live WebView
                             if (isChartReady) {
-                                sendScanData(webView)
+                                sendScanData(view as? WebView)
                             }
                         }
                     )

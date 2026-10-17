@@ -76,10 +76,8 @@ object GeoLogger {
 
             // Load existing lines into memory queue (last 50 lines)
             try {
-                file.useLines { lines ->
-                    lines.takeLast(50).forEach { line ->
-                        memoryLogQueue.offer(line)
-                    }
+                file.readLines().takeLast(50).forEach { line ->
+                    memoryLogQueue.offer(line)
                 }
                 _recentLogs.value = memoryLogQueue.toList()
                 _logCount.value = memoryLogQueue.size
