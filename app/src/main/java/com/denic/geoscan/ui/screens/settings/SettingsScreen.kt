@@ -29,16 +29,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Code
-import androidx.compose.material.icons.outlined.DeleteOutline
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.outlined.GraphicEq
 import androidx.compose.material.icons.outlined.Language
-import androidx.compose.material.icons.outlined.PhoneAndroid
-import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Terminal
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
@@ -202,7 +202,7 @@ fun SettingsScreen(
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Outlined.Terminal,
+                                imageVector = Icons.Filled.Code,
                                 contentDescription = null,
                                 tint = NeonGreen,
                                 modifier = Modifier.size(22.dp)
@@ -268,7 +268,7 @@ fun SettingsScreen(
                             )
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Share,
+                                imageVector = Icons.Filled.Share,
                                 contentDescription = null,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -326,7 +326,7 @@ fun SettingsScreen(
                             border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorder)
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.Code,
+                                imageVector = Icons.Filled.Code,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
                                 tint = NeonCyan
@@ -350,7 +350,7 @@ fun SettingsScreen(
                             border = androidx.compose.foundation.BorderStroke(1.dp, NeonRed.copy(alpha = 0.4f))
                         ) {
                             Icon(
-                                imageVector = Icons.Outlined.DeleteOutline,
+                                imageVector = Icons.Filled.Delete,
                                 contentDescription = null,
                                 modifier = Modifier.size(14.dp),
                                 tint = NeonRed
@@ -475,7 +475,7 @@ fun SettingsScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            imageVector = Icons.Outlined.PhoneAndroid,
+                            imageVector = Icons.Filled.Phone,
                             contentDescription = null,
                             tint = NeonCyan,
                             modifier = Modifier.size(18.dp)

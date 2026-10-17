@@ -1,10 +1,10 @@
 package com.denic.geoscan.ui.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
@@ -33,7 +33,7 @@ sealed class Screen(
     data object Settings : Screen(
         route = "settings",
         title = "Settings",
-        icon = Icons.Outlined.Settings
+        icon = Icons.Default.Settings
     )
 
     companion object {

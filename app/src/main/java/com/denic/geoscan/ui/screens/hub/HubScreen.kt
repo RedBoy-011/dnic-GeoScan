@@ -31,10 +31,10 @@ import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.BluetoothDisabled
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Hub
 import androidx.compose.material.icons.outlined.Sensors
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.ButtonDefaults
@@ -776,7 +776,7 @@ private fun SettingsHeroCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.Settings,
+                            imageVector = Icons.Default.Settings,
                             contentDescription = "Settings",
                             tint = NeonYellow,
                             modifier = Modifier.size(24.dp)
@@ -850,7 +850,7 @@ private fun SettingsHeroCard(
                 border = androidx.compose.foundation.BorderStroke(1.dp, NeonYellow.copy(alpha = 0.6f))
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.Settings,
+                    imageVector = Icons.Default.Settings,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
