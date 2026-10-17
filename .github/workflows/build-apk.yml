@@ -31,11 +31,16 @@ jobs:
 
       - name: Build Signed Release APK
         run: |
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee gradle_build.log || {
-            echo "::error::AssembleRelease failed"
-            tail -n 150 gradle_build.log
-            exit 1
-          }
+          set -o pipefail
+          ./gradlew assembleRelease --stacktrace 2>&1 | tee gradle_build.log
+
+      - name: Debug Output on Build Failure
+        if: failure()
+        run: |
+          echo "=== GRADLE FAILURE LOG (TAIL 120) ==="
+          tail -n 120 gradle_build.log || true
+          echo "=== SEARCHING ALL APKS ==="
+          find app/build -name "*.apk" || true
 
       - name: Run Unit Tests
         run: ./gradlew testReleaseUnitTest --stacktrace
@@ -44,7 +49,20 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v2.0.0.apk
+          echo "=== Locating built APK in app/build/outputs/apk ==="
+          find app/build/outputs/apk -type f || true
+          APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$APK_FILE" ]; then
+            echo "Checking entire app/build for any APK:"
+            find app/build -name "*.apk" || true
+            APK_FILE=$(find app/build -name "*.apk" | head -n 1)
+          fi
+          if [ -z "$APK_FILE" ]; then
+            echo "ERROR: No APK found anywhere in app/build!"
+            exit 1
+          fi
+          echo "SUCCESS: Found APK at $APK_FILE"
+          cp "$APK_FILE" release/Dnic-GeoScan-v2.0.0.apk
 
       - name: Verify Signed APK Integrity
         run: |
