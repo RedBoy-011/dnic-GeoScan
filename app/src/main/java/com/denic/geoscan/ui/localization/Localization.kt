@@ -136,6 +136,13 @@ data class AppStrings(
     val localView3dSurface: String,
     val localView2dHeatmap: String,
 
+    // Visualizer Fullscreen & Snapshot Export
+    val visualizerFullscreen: String,
+    val visualizerExitFullscreen: String,
+    val visualizerExportImage: String,
+    val visualizerExportSuccess: String,
+    val visualizerExportError: String,
+
     // Remote Scan Screen
     val remoteScreenTitle: String,
     val remoteScreenSubtitle: String,
@@ -315,6 +322,13 @@ val EnglishStrings = AppStrings(
     localView3dSurface = "3D Surface",
     localView2dHeatmap = "2D Heatmap",
 
+    // Visualizer Fullscreen & Snapshot Export
+    visualizerFullscreen = "Fullscreen",
+    visualizerExitFullscreen = "Exit Fullscreen",
+    visualizerExportImage = "Export Image",
+    visualizerExportSuccess = "Visualization image saved and ready to share",
+    visualizerExportError = "Could not export image. Please try again.",
+
     // Remote Scan Screen
     remoteScreenTitle = "Remote Live Scanner",
     remoteScreenSubtitle = "Bluetooth Classic SPP Stream (\$X,Y,Z#)",
@@ -493,6 +507,13 @@ val PersianStrings = AppStrings(
     localNoDataDesc = "لطفاً از دکمه‌های بالا یک فایل اسکن انتخاب کنید یا شبکه آزمایشی را اجرا فرمایید.",
     localView3dSurface = "پلات ۳بعدی",
     localView2dHeatmap = "نقشه حرارتی ۲بعدی",
+
+    // Visualizer Fullscreen & Snapshot Export
+    visualizerFullscreen = "تمام‌صفحه",
+    visualizerExitFullscreen = "خروج از تمام‌صفحه",
+    visualizerExportImage = "خروجی تصویر",
+    visualizerExportSuccess = "تصویر تحلیل با موفقیت ذخیره و آماده اشتراک‌گذاری شد",
+    visualizerExportError = "خطا در خروجی تصویر. لطفاً مجدداً تلاش کنید.",
 
     // Remote Scan Screen
     remoteScreenTitle = "اسکن زنده مغناطیس‌سنج",

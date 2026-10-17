@@ -488,7 +488,7 @@ fun SettingsScreen(
                         )
                     }
 
-                    HardwareInfoRow(label = strings.settingsAppVersionLabel, value = "v2.0.1 (Build 41) - 2026 Commercial")
+                    HardwareInfoRow(label = strings.settingsAppVersionLabel, value = "v2.2.0 (Build 43) - 2026 Commercial")
                     HardwareInfoRow(label = "Device Model", value = "${Build.MANUFACTURER} ${Build.MODEL} (${Build.PRODUCT})")
                     HardwareInfoRow(label = "Android Version", value = "Android ${Build.VERSION.RELEASE} (API Level ${Build.VERSION.SDK_INT})")
                     HardwareInfoRow(label = "Hardware Board", value = "${Build.HARDWARE} / ${Build.BOARD}")
@@ -497,6 +497,7 @@ fun SettingsScreen(
             }
 
             // 5. Offline License & Registration Status Card
+            val isLicEnforced = com.denic.geoscan.data.license.LicenseManager.IS_LICENSE_ENFORCEMENT_ENABLED
             val isLicActive = remember { com.denic.geoscan.data.license.LicenseManager.isActivated(context) }
             val devChallenge = remember { com.denic.geoscan.data.license.LicenseManager.getDeviceChallenge(context) }
 
@@ -532,13 +533,27 @@ fun SettingsScreen(
                                 .border(1.dp, (if (isLicActive) NeonGreen else NeonOrange).copy(alpha = 0.5f), RoundedCornerShape(6.dp))
                                 .padding(horizontal = 8.dp, vertical = 3.dp)
                         ) {
+                            val statusBadgeText = when {
+                                !isLicEnforced -> "UNLOCKED (DEV MODE)"
+                                isLicActive -> strings.activationStatusActive
+                                else -> strings.activationStatusInactive
+                            }
                             Text(
-                                text = if (isLicActive) strings.activationStatusActive else strings.activationStatusInactive,
+                                text = statusBadgeText,
                                 style = Typography.labelSmall,
                                 color = if (isLicActive) NeonGreen else NeonOrange,
                                 fontSize = 10.sp
                             )
                         }
+                    }
+
+                    if (!isLicEnforced) {
+                        Text(
+                            text = "Activation enforcement is bypassed for rapid updates. Device ID remains active for generator testing.",
+                            style = Typography.bodySmall,
+                            color = TextMuted,
+                            fontSize = 11.sp
+                        )
                     }
 
                     HardwareInfoRow(label = strings.activationDeviceChallengeLabel, value = devChallenge)

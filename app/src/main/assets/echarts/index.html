@@ -449,6 +449,44 @@
             }
         }
 
+        /**
+         * Exports high-resolution snapshot DataURL and passes it to AndroidBridge
+         */
+        function exportChartImage() {
+            try {
+                console.log("[ECharts] Exporting snapshot data...");
+                let dataUrl = "";
+                if (useWebGL && myChart) {
+                    try {
+                        dataUrl = myChart.getDataURL({
+                            type: 'png',
+                            pixelRatio: 2,
+                            backgroundColor: '#070A12'
+                        });
+                    } catch (e) {
+                        console.warn("[ECharts] myChart.getDataURL error, falling back to canvas", e);
+                    }
+                }
+                if (!dataUrl && canvas) {
+                    try {
+                        dataUrl = canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.warn("[ECharts] canvas.toDataURL error", e);
+                    }
+                }
+                if (dataUrl && window.AndroidBridge && window.AndroidBridge.onSnapshotExported) {
+                    window.AndroidBridge.onSnapshotExported(dataUrl);
+                } else if (window.AndroidBridge && window.AndroidBridge.onSnapshotExportError) {
+                    window.AndroidBridge.onSnapshotExportError("No canvas content available");
+                }
+            } catch (err) {
+                console.error("[ECharts] exportChartImage fatal error", err);
+                if (window.AndroidBridge && window.AndroidBridge.onSnapshotExportError) {
+                    window.AndroidBridge.onSnapshotExportError(err.message || "Export error");
+                }
+            }
+        }
+
         function processPoints(points) {
             rawPoints = [];
             minX = Infinity; maxX = -Infinity;

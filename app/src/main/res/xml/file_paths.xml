@@ -2,6 +2,8 @@
 <paths>
     <!-- Cache directory for shared scan files -->
     <cache-path name="shared_scans" path="shared_scans/" />
+    <cache-path name="snapshots" path="snapshots/" />
+    <cache-path name="shared_cache" path="." />
     <!-- App external files directory -->
     <external-files-path name="external_files" path="." />
     <!-- App internal files directory -->

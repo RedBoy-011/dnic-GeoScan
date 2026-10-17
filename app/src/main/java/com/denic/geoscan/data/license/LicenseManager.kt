@@ -20,6 +20,16 @@ import javax.crypto.spec.SecretKeySpec
  */
 object LicenseManager {
 
+    /**
+     * Master toggle for offline license enforcement.
+     * When FALSE:
+     *   The app skips activation checks, allowing instant access to Hub, Local Analysis,
+     *   Remote Scan, and Settings during rapid updates and testing.
+     * When TRUE:
+     *   Strict offline HMAC-SHA256 hardware challenge-response is enforced.
+     */
+    const val IS_LICENSE_ENFORCEMENT_ENABLED = false
+
     private const val PREFS_NAME = "dnic_offline_license_store"
     private const val KEY_IS_ACTIVATED = "is_app_activated"
     private const val KEY_SAVED_CHALLENGE = "device_challenge_code"
@@ -52,8 +62,13 @@ object LicenseManager {
     /**
      * Checks whether the application is permanently activated.
      * Includes anti-tamper signature verification against SharedPreferences XML manipulation.
+     * If IS_LICENSE_ENFORCEMENT_ENABLED is false, returns true immediately (fast development mode).
      */
     fun isActivated(context: Context): Boolean {
+        if (!IS_LICENSE_ENFORCEMENT_ENABLED) {
+            return true
+        }
+
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val isActivatedFlag = prefs.getBoolean(KEY_IS_ACTIVATED, false)
         if (!isActivatedFlag) return false
