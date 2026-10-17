@@ -99,22 +99,28 @@ fun AppNavigation(
 
     var showExitDialog by remember { mutableStateOf(false) }
 
-    val initialRoute = when (startDestination) {
+    var isActivated by remember { mutableStateOf(com.denic.geoscan.data.license.LicenseManager.isActivated(context)) }
+
+    val initialRoute = if (!isActivated) {
+        Screen.Activation.route
+    } else when (startDestination) {
         Screen.LocalAnalysis.route, "local", "local_analysis" -> Screen.LocalAnalysis.route
         else -> Screen.Hub.route
     }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route ?: Screen.Hub.route
+    val currentRoute = navBackStackEntry?.destination?.route ?: if (!isActivated) Screen.Activation.route else Screen.Hub.route
 
     CompositionLocalProvider(
         LocalLayoutDirection provides layoutDirection,
         LocalAppLanguage provides currentLanguage,
         LocalAppStrings provides currentStrings
     ) {
-        // Handle system back navigation (press Back on Hub triggers Exit confirmation, elsewhere returns to Hub)
+        // Handle system back navigation (press Back on Hub or Activation triggers Exit confirmation, elsewhere returns to Hub)
         BackHandler(enabled = true) {
-            if (currentRoute != Screen.Hub.route) {
+            if (currentRoute == Screen.Activation.route) {
+                showExitDialog = true
+            } else if (currentRoute != Screen.Hub.route) {
                 navController.navigate(Screen.Hub.route) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
@@ -168,49 +174,55 @@ fun AppNavigation(
                     currentRoute = currentRoute,
                     currentLanguage = currentLanguage,
                     onOpenLanguagePicker = { showLanguageDialog = true },
-                    onLogoClick = {
-                        if (currentRoute != Screen.Hub.route) {
-                            navController.navigate(Screen.Hub.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                    onLogoClick = if (currentRoute != Screen.Activation.route) {
+                        {
+                            if (currentRoute != Screen.Hub.route) {
+                                navController.navigate(Screen.Hub.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
                             }
                         }
-                    },
-                onNavigate = { screen: Screen ->
-                    val targetRoute = screen.route
-                    if (currentRoute != targetRoute) {
-                        navController.navigate(targetRoute) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
+                    } else null,
+                    onNavigate = if (currentRoute != Screen.Activation.route) {
+                        { screen: Screen ->
+                            val targetRoute = screen.route
+                            if (currentRoute != targetRoute) {
+                                navController.navigate(targetRoute) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-                            launchSingleTop = true
-                            restoreState = true
                         }
-                    }
+                    } else null
+                )
+            },
+            bottomBar = {
+                if (currentRoute != Screen.Activation.route) {
+                    GlassmorphicBottomNavBar(
+                        currentRoute = currentRoute,
+                        onNavigate = { screen: Screen ->
+                            val targetRoute = screen.route
+                            if (currentRoute != targetRoute) {
+                                navController.navigate(targetRoute) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            }
+                        }
+                    )
                 }
-            )
-        },
-        bottomBar = {
-            GlassmorphicBottomNavBar(
-                currentRoute = currentRoute,
-                onNavigate = { screen: Screen ->
-                    val targetRoute = screen.route
-                    if (currentRoute != targetRoute) {
-                        navController.navigate(targetRoute) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
+            }
+        ) { innerPadding ->
         NavHost(
             navController = navController,
             startDestination = initialRoute,
@@ -283,6 +295,16 @@ fun AppNavigation(
                             .putString("app_language", lang.code)
                             .putBoolean("language_selected", true)
                             .apply()
+                    }
+                )
+            }
+            composable(Screen.Activation.route) {
+                com.denic.geoscan.ui.screens.activation.ActivationScreen(
+                    onActivationSuccess = {
+                        isActivated = true
+                        navController.navigate(Screen.Hub.route) {
+                            popUpTo(Screen.Activation.route) { inclusive = true }
+                        }
                     }
                 )
             }

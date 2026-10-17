@@ -36,6 +36,12 @@ sealed class Screen(
         icon = Icons.Default.Settings
     )
 
+    data object Activation : Screen(
+        route = "activation",
+        title = "Activation",
+        icon = Icons.Default.Settings
+    )
+
     companion object {
         /**
          * Dynamic getter ensures subclasses are evaluated after class loading,

@@ -488,11 +488,60 @@ fun SettingsScreen(
                         )
                     }
 
-                    HardwareInfoRow(label = strings.settingsAppVersionLabel, value = "v2.0.0 (Build 40) - 2026 Commercial")
+                    HardwareInfoRow(label = strings.settingsAppVersionLabel, value = "v2.0.1 (Build 41) - 2026 Commercial")
                     HardwareInfoRow(label = "Device Model", value = "${Build.MANUFACTURER} ${Build.MODEL} (${Build.PRODUCT})")
                     HardwareInfoRow(label = "Android Version", value = "Android ${Build.VERSION.RELEASE} (API Level ${Build.VERSION.SDK_INT})")
                     HardwareInfoRow(label = "Hardware Board", value = "${Build.HARDWARE} / ${Build.BOARD}")
                     HardwareInfoRow(label = "Supported ABIs", value = Build.SUPPORTED_ABIS.joinToString(", "))
+                }
+            }
+
+            // 5. Offline License & Registration Status Card
+            val isLicActive = remember { com.denic.geoscan.data.license.LicenseManager.isActivated(context) }
+            val devChallenge = remember { com.denic.geoscan.data.license.LicenseManager.getDeviceChallenge(context) }
+
+            GlassmorphicCard(
+                modifier = Modifier.fillMaxWidth(),
+                borderColor = if (isLicActive) NeonGreen.copy(alpha = 0.5f) else NeonOrange.copy(alpha = 0.5f)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.Check,
+                                contentDescription = null,
+                                tint = if (isLicActive) NeonGreen else NeonOrange,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = strings.activationLicenseSection,
+                                style = Typography.titleSmall,
+                                color = TextPrimary
+                            )
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(6.dp))
+                                .background((if (isLicActive) NeonGreen else NeonOrange).copy(alpha = 0.15f))
+                                .border(1.dp, (if (isLicActive) NeonGreen else NeonOrange).copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                                .padding(horizontal = 8.dp, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = if (isLicActive) strings.activationStatusActive else strings.activationStatusInactive,
+                                style = Typography.labelSmall,
+                                color = if (isLicActive) NeonGreen else NeonOrange,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
+
+                    HardwareInfoRow(label = strings.activationDeviceChallengeLabel, value = devChallenge)
                 }
             }
 

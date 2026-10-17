@@ -69,6 +69,25 @@ data class AppStrings(
     val settingsHardwareSection: String,
     val settingsAppVersionLabel: String,
 
+    // Activation & Offline Licensing
+    val activationTitle: String,
+    val activationSubtitle: String,
+    val activationDeviceChallengeLabel: String,
+    val activationDeviceChallengeDesc: String,
+    val activationCopyIdBtn: String,
+    val activationIdCopiedNotice: String,
+    val activationInputKeyLabel: String,
+    val activationInputKeyPlaceholder: String,
+    val activationPasteBtn: String,
+    val activationSubmitBtn: String,
+    val activationSuccessTitle: String,
+    val activationSuccessDesc: String,
+    val activationInvalidKeyError: String,
+    val activationHelpNotice: String,
+    val activationStatusActive: String,
+    val activationStatusInactive: String,
+    val activationLicenseSection: String,
+
     // Hub Screen
     val hubMissionControl: String,
     val hubSubtitle: String,
@@ -229,6 +248,25 @@ val EnglishStrings = AppStrings(
     settingsHardwareSection = "Device Architecture & Hardware Info",
     settingsAppVersionLabel = "Dnic-GeoScan Version",
 
+    // Activation & Offline Licensing
+    activationTitle = "App Activation",
+    activationSubtitle = "Enter your unique activation key to unlock Dnic-GeoScan",
+    activationDeviceChallengeLabel = "Your Unique Device ID",
+    activationDeviceChallengeDesc = "Send this unique Device ID to your system administrator to receive your official offline activation license.",
+    activationCopyIdBtn = "Copy Device ID",
+    activationIdCopiedNotice = "Device ID copied to clipboard!",
+    activationInputKeyLabel = "Enter Activation Key",
+    activationInputKeyPlaceholder = "ACT-XXXX-YYYY-ZZZZ",
+    activationPasteBtn = "Paste",
+    activationSubmitBtn = "Activate Application",
+    activationSuccessTitle = "Activation Successful!",
+    activationSuccessDesc = "Your copy of Dnic-GeoScan is permanently licensed.",
+    activationInvalidKeyError = "Invalid Activation Key. Please verify and try again.",
+    activationHelpNotice = "This software requires an offline cryptographic license tied to this device's hardware.",
+    activationStatusActive = "License Status: Active (Permanent Lifetime)",
+    activationStatusInactive = "License Status: Inactive (Unregistered)",
+    activationLicenseSection = "Offline License & Registration",
+
     // Hub Screen
     hubMissionControl = "MISSION CONTROL HUB",
     hubSubtitle = "Digital Electronic 3D Geophysical Visualizer",
@@ -388,6 +426,25 @@ val PersianStrings = AppStrings(
     settingsLiveLogEmpty = "هنوز رویدادی ثبت نشده است.",
     settingsHardwareSection = "مشخصات سخت‌افزاری و معماری دستگاه",
     settingsAppVersionLabel = "نسخه برنامه دنیک ژئواسکن",
+
+    // Activation & Offline Licensing
+    activationTitle = "فعال‌سازی نرم‌افزار",
+    activationSubtitle = "جهت استفاده از دنیک ژئواسکن کد فعال‌سازی دستگاه خود را وارد کنید",
+    activationDeviceChallengeLabel = "شناسه سخت‌افزاری اختصاصی دستگاه شما",
+    activationDeviceChallengeDesc = "این کد را کپی کرده و برای پشتیبانی یا مدیر سیستم ارسال نمایید تا کد فعال‌سازی اختصاصی دستگاه شما صادر شود.",
+    activationCopyIdBtn = "کپی شناسه دستگاه",
+    activationIdCopiedNotice = "شناسه دستگاه در حافظه کپی شد!",
+    activationInputKeyLabel = "کد فعال‌سازی لایسنس",
+    activationInputKeyPlaceholder = "ACT-XXXX-YYYY-ZZZZ",
+    activationPasteBtn = "جای‌گذاری",
+    activationSubmitBtn = "فعال‌سازی و ورود به برنامه",
+    activationSuccessTitle = "فعال‌سازی موفقیت‌آمیز بود!",
+    activationSuccessDesc = "لایسنس نرم‌افزار دنیک با موفقیت بر روی این دستگاه فعال و ثبت گردید.",
+    activationInvalidKeyError = "کد فعال‌سازی نامعتبر است! لطفاً کد را با دقت بررسی نمایید.",
+    activationHelpNotice = "فعال‌سازی کاملاً آفلاین بوده و بر اساس مشخصات سخت‌افزاری همین گوشی انجام می‌شود.",
+    activationStatusActive = "وضعیت لایسنس: فعال شده (دائمی)",
+    activationStatusInactive = "وضعیت لایسنس: غیرفعال (نیاز به کد فعال‌سازی)",
+    activationLicenseSection = "لایسنس آفلاین و وضعیت فعال‌سازی",
 
     // Hub Screen
     hubMissionControl = "مرکز کنترل عملیات ژئوفیزیک",

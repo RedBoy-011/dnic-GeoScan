@@ -14,3 +14,10 @@
 .cxx
 local.properties
 /release/
+
+# Local Offline License Generator & Admin Keys (NEVER PUSH TO GIT)
+/tools/
+/tools/license_generator/
+/license_generator/
+*.license_secret*
+*LicenseGenerator*
