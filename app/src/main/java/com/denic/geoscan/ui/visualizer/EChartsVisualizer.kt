@@ -78,9 +78,7 @@ fun EChartsVisualizer(
         isEngineMounted = true
     }
 
-    // Update WebView whenever points or projection view mode changes
-    LaunchedEffect(points, viewMode, isChartReady, isEngineMounted) {
-        val webView = webViewInstance
+    fun sendScanData(webView: WebView?) {
         if (webView != null && isChartReady && isEngineMounted) {
             try {
                 val jsonBuilder = StringBuilder("[")
@@ -91,12 +89,17 @@ fun EChartsVisualizer(
                 jsonBuilder.append("]")
 
                 val is3D = viewMode == VisualizerViewMode.SURFACE_3D
-                val script = "renderScanData($jsonBuilder, $is3D, $baseline);"
+                val script = "if (typeof renderScanData === 'function') { renderScanData($jsonBuilder, $is3D, $baseline); }"
                 webView.evaluateJavascript(script, null)
             } catch (e: Throwable) {
                 android.util.Log.w("EChartsVisualizer", "evaluateJavascript error", e)
             }
         }
+    }
+
+    // Update WebView whenever points or projection view mode changes
+    LaunchedEffect(points, viewMode, isChartReady, isEngineMounted) {
+        sendScanData(webViewInstance)
     }
 
     Column(
@@ -214,7 +217,12 @@ fun EChartsVisualizer(
                                             setLayerType(View.LAYER_TYPE_NONE, null)
                                         } catch (_: Throwable) {}
                                     }
-                                    setBackgroundColor(0x00000000)
+                                    setBackgroundColor(android.graphics.Color.parseColor("#070A12"))
+
+                                    setOnTouchListener { v, _ ->
+                                        v.parent?.requestDisallowInterceptTouchEvent(true)
+                                        false
+                                    }
 
                                     try { settings.javaScriptEnabled = true } catch (_: Throwable) {}
                                     try { settings.domStorageEnabled = true } catch (_: Throwable) {}
@@ -238,6 +246,7 @@ fun EChartsVisualizer(
                                             fun onChartReady() {
                                                 post {
                                                     isChartReady = true
+                                                    sendScanData(this@apply)
                                                 }
                                             }
                                         },
@@ -249,6 +258,7 @@ fun EChartsVisualizer(
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
                                             isChartReady = true
+                                            sendScanData(this@apply)
                                         }
 
                                         override fun onReceivedError(
@@ -269,7 +279,7 @@ fun EChartsVisualizer(
                                 android.util.Log.e("EChartsVisualizer", "Failed to create WebView", e)
                                 engineError = e.localizedMessage ?: "WebView initialization error"
                                 View(context).apply {
-                                    setBackgroundColor(0x00000000)
+                                    setBackgroundColor(android.graphics.Color.parseColor("#070A12"))
                                 }
                             }
                         },

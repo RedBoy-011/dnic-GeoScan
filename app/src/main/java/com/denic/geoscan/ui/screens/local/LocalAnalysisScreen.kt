@@ -103,15 +103,7 @@ fun LocalAnalysisScreen(
     }
 
     val openPicker = {
-        filePickerLauncher.launch(
-            arrayOf(
-                "text/plain",
-                "text/csv",
-                "text/comma-separated-values",
-                "application/octet-stream",
-                "*/*"
-            )
-        )
+        filePickerLauncher.launch(arrayOf("*/*"))
     }
 
     BoxWithConstraints(
@@ -155,6 +147,9 @@ fun LocalAnalysisScreen(
                         onToggleSmoothing = { viewModel.toggleSmoothing() },
                         onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
                         onLoadMiningSimulation = { viewModel.loadMiningSimulation(15, 15) },
+                        onLoadAnomalyDemo = { isV3d -> viewModel.loadDemoAnomaly10x10(isV3d) },
+                        onLoadMiningDemo = { isV3d -> viewModel.loadDemoMiningMultidepth(isV3d) },
+                        onSaveDemosToDownloads = { viewModel.saveDemoFilesToDownloads() },
                         onExportProcessed = { viewModel.exportProcessedDataset() }
                     )
 
@@ -189,7 +184,7 @@ fun LocalAnalysisScreen(
                 }
             }
         } else {
-            // Standard Single-Column Stack for Mobile Screens
+            // Standard Single-Column Stack for Mobile Screens (Phone View)
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -215,7 +210,20 @@ fun LocalAnalysisScreen(
                     onToggleSmoothing = { viewModel.toggleSmoothing() },
                     onLoadSampleGrid = { w, h -> viewModel.loadSampleGrid(w, h) },
                     onLoadMiningSimulation = { viewModel.loadMiningSimulation(15, 15) },
+                    onLoadAnomalyDemo = { isV3d -> viewModel.loadDemoAnomaly10x10(isV3d) },
+                    onLoadMiningDemo = { isV3d -> viewModel.loadDemoMiningMultidepth(isV3d) },
+                    onSaveDemosToDownloads = { viewModel.saveDemoFilesToDownloads() },
                     onExportProcessed = { viewModel.exportProcessedDataset() }
+                )
+
+                // High-Priority Placement: 3D Surface / 2D Heatmap Visualizer is immediately visible at top of mobile screen
+                EChartsVisualizer(
+                    points = visualizerPoints,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(370.dp),
+                    initialMode = VisualizerViewMode.SURFACE_3D,
+                    baseline = 0f
                 )
 
                 dataset?.let { data ->
@@ -232,15 +240,6 @@ fun LocalAnalysisScreen(
                 }
 
                 SpectrumPaletteCard()
-
-                EChartsVisualizer(
-                    points = visualizerPoints,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(350.dp),
-                    initialMode = VisualizerViewMode.SURFACE_3D,
-                    baseline = 0f
-                )
             }
         }
     }
@@ -381,6 +380,9 @@ private fun FileSourceCard(
     onToggleSmoothing: () -> Unit,
     onLoadSampleGrid: (Int, Int) -> Unit,
     onLoadMiningSimulation: () -> Unit,
+    onLoadAnomalyDemo: (Boolean) -> Unit,
+    onLoadMiningDemo: (Boolean) -> Unit,
+    onSaveDemosToDownloads: () -> Unit,
     onExportProcessed: () -> Unit
 ) {
     val strings = LocalAppStrings.current
@@ -425,7 +427,7 @@ private fun FileSourceCard(
                         )
                     }
                 } else {
-                    Text(text = "TXT / CSV", style = Typography.labelSmall, color = TextMuted)
+                    Text(text = "TXT / CSV / V3D", style = Typography.labelSmall, color = TextMuted)
                 }
             }
 
@@ -452,7 +454,7 @@ private fun FileSourceCard(
                             text = if (dataset != null) {
                                 "${dataset.fileSizeFormatted} • ${dataset.statistics.totalPoints} pts • ${dataset.statistics.gridWidth}×${dataset.statistics.gridHeight}"
                             } else {
-                                "Expected format: X,Y,Z triplets or 2D matrix"
+                                "Expected format: X,Y,Z triplets, V3D, or 2D matrix"
                             },
                             style = Typography.labelSmall,
                             color = TextMuted
@@ -488,7 +490,7 @@ private fun FileSourceCard(
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
                                 border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.5f))
                             ) {
-                                Text(text = "Change", style = Typography.labelSmall)
+                                Text(text = "باز کردن فایل دیگر", style = Typography.labelSmall)
                             }
                             Spacer(modifier = Modifier.width(4.dp))
                             IconButton(onClick = onClearDataset, modifier = Modifier.size(30.dp)) {
@@ -504,99 +506,176 @@ private fun FileSourceCard(
                 }
             }
 
-            // Quick Demo / Preset Survey Grids (Always accessible for offline field testing)
+            // Quick Demo / Preset Survey Grids
             if (!isLoading) {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = strings.localSampleGrid,
+                            text = "فایل‌های دمو و تست میدانی:",
                             style = Typography.labelSmall,
                             color = TextMuted,
                             letterSpacing = 0.8.sp
                         )
-                        if (dataset != null && dataset.fileName.startsWith("demo_survey_")) {
+                        if (dataset != null) {
                             Text(
-                                text = "Active: ${dataset.statistics.gridWidth}×${dataset.statistics.gridHeight}",
+                                text = "فعال: ${dataset.statistics.gridWidth}×${dataset.statistics.gridHeight}",
                                 style = Typography.labelSmall,
                                 color = NeonGreen
                             )
                         }
                     }
-                    // Multi-Depth Mining & Metal Survey Preset
+
+                    // 1. Multi-Depth Mine & Underground Metal Preset (15x15)
                     val isMiningDemo = dataset?.fileName?.contains("demo_mine_") == true
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isMiningDemo) NeonGreen.copy(alpha = 0.12f) else DarkSurface)
+                            .border(1.dp, if (isMiningDemo) NeonGreen else GlassBorderHighlighted, RoundedCornerShape(8.dp))
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                Icon(imageVector = Icons.Outlined.ViewInAr, contentDescription = null, modifier = Modifier.size(16.dp), tint = NeonGreen)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "⛏️ دمو معدن و فلز چندعمقی (۱۵×۱۵)", style = Typography.labelSmall, color = NeonGreen)
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                OutlinedButton(
+                                    onClick = { onLoadMiningDemo(false) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonGreen),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.6f)),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "CSV", fontSize = 10.sp)
+                                }
+                                OutlinedButton(
+                                    onClick = { onLoadMiningDemo(true) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonGreen),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonGreen.copy(alpha = 0.6f)),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "V3D", fontSize = 10.sp)
+                                }
+                            }
+                        }
+                        Text(
+                            text = "شامل رگه مگنتیت عمیق (~۴.۵m)، فلز سطحی (~۱.۲m) و تونل زیرسطحی (~۳m)",
+                            style = Typography.labelSmall,
+                            color = TextMuted,
+                            fontSize = 9.sp
+                        )
+                    }
+
+                    // 2. Standard 10x10 Anomaly Demo (1000 to 1010 uT)
+                    val is10x10Demo = dataset?.fileName?.contains("demo_10x10_") == true
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (is10x10Demo) NeonCyan.copy(alpha = 0.12f) else DarkSurface)
+                            .border(1.dp, if (is10x10Demo) NeonCyan else GlassBorderCyan, RoundedCornerShape(8.dp))
+                            .padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                                Icon(imageVector = Icons.Outlined.Grid3x3, contentDescription = null, modifier = Modifier.size(16.dp), tint = NeonCyan)
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(text = "📊 دمو گرادیان و آنومالی (۱۰×۱۰)", style = Typography.labelSmall, color = NeonCyan)
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                OutlinedButton(
+                                    onClick = { onLoadAnomalyDemo(false) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.6f)),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "CSV", fontSize = 10.sp)
+                                }
+                                OutlinedButton(
+                                    onClick = { onLoadAnomalyDemo(true) },
+                                    shape = RoundedCornerShape(6.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
+                                    border = androidx.compose.foundation.BorderStroke(1.dp, NeonCyan.copy(alpha = 0.6f)),
+                                    contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(text = "V3D", fontSize = 10.sp)
+                                }
+                            }
+                        }
+                        Text(
+                            text = "گرادیان ۱۰۰۰ تا ۱۰۱۰ µT با پیک فلز فرومغناطیس و حفره زیرزمینی",
+                            style = Typography.labelSmall,
+                            color = TextMuted,
+                            fontSize = 9.sp
+                        )
+                    }
+
+                    // 3. Save Demo Files to Storage Button
                     OutlinedButton(
-                        onClick = onLoadMiningSimulation,
+                        onClick = onSaveDemosToDownloads,
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = NeonGreen,
-                            containerColor = if (isMiningDemo) NeonGreen.copy(alpha = 0.22f) else NeonGreen.copy(alpha = 0.06f)
+                            contentColor = NeonYellow,
+                            containerColor = NeonYellow.copy(alpha = 0.06f)
                         ),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isMiningDemo) NeonGreen else GlassBorderHighlighted)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, NeonYellow.copy(alpha = 0.5f))
                     ) {
-                        Icon(imageVector = Icons.Outlined.ViewInAr, contentDescription = null, modifier = Modifier.size(15.dp), tint = NeonGreen)
+                        Icon(imageVector = Icons.Outlined.SaveAlt, contentDescription = null, modifier = Modifier.size(15.dp), tint = NeonYellow)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "⛏️ Multi-Depth Mine & Metal Simulation (15×15)", style = Typography.labelSmall)
+                        Text(text = "💾 ذخیره فایل‌های دمو (CSV و V3D) در Downloads گوشی", style = Typography.labelSmall)
                     }
 
+                    // Quick synthetic dimension selectors
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        val activeW = dataset?.statistics?.gridWidth
-                        val isDemo = dataset?.fileName?.startsWith("demo_survey_") == true
-
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(5, 5) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = NeonCyan,
-                                containerColor = if (isDemo && activeW == 5) NeonCyan.copy(alpha = 0.22f) else NeonCyan.copy(alpha = 0.05f)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 5) NeonCyan else GlassBorderCyan)
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
                         ) {
-                            Text(text = "5×5", style = Typography.labelSmall)
+                            Text(text = "۵×۵", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(10, 10) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = NeonCyan,
-                                containerColor = if (isDemo && activeW == 10) NeonCyan.copy(alpha = 0.22f) else NeonCyan.copy(alpha = 0.05f)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 10) NeonCyan else GlassBorderCyan)
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonCyan),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderCyan)
                         ) {
-                            Text(text = "10×10", style = Typography.labelSmall)
+                            Text(text = "۱۰×۱۰", style = Typography.labelSmall)
                         }
                         OutlinedButton(
                             onClick = { onLoadSampleGrid(20, 20) },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = NeonYellow,
-                                containerColor = if (isDemo && activeW == 20) NeonYellow.copy(alpha = 0.22f) else NeonYellow.copy(alpha = 0.05f)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 20) NeonYellow else GlassBorderHighlighted)
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = NeonYellow),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, GlassBorderHighlighted)
                         ) {
-                            Text(text = "20×20", style = Typography.labelSmall)
-                        }
-                        OutlinedButton(
-                            onClick = { onLoadSampleGrid(30, 30) },
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = NeonGreen,
-                                containerColor = if (isDemo && activeW == 30) NeonGreen.copy(alpha = 0.22f) else NeonGreen.copy(alpha = 0.05f)
-                            ),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, if (isDemo && activeW == 30) NeonGreen else NeonGreen.copy(alpha = 0.5f))
-                        ) {
-                            Text(text = "30×30", style = Typography.labelSmall)
+                            Text(text = "۲۰×۲۰", style = Typography.labelSmall)
                         }
                     }
                 }

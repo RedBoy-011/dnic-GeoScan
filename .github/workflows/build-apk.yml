@@ -39,13 +39,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.8.2.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.8.3.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.8.2.apk
-          test -f release/Dnic-GeoScan-v1.8.2.apk
+          ls -lh release/Dnic-GeoScan-v1.8.3.apk
+          test -f release/Dnic-GeoScan-v1.8.3.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -59,7 +59,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.8.2.apk
+            adb install -r release/Dnic-GeoScan-v1.8.3.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -96,8 +96,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.8.2-apk
-          path: release/Dnic-GeoScan-v1.8.2.apk
+          name: Dnic-GeoScan-v1.8.3-apk
+          path: release/Dnic-GeoScan-v1.8.3.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -105,8 +105,8 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.8.2
-          name: "Dnic-GeoScan v1.8.2 - Fail-Safe 3D/2D Visualizer Engine & Multi-Depth Mine Simulation"
+          tag_name: v1.8.3
+          name: "Dnic-GeoScan v1.8.3 - Top-Priority 3D Surface Display, Bulletproof File Parser & One-Click Demo Suite"
           body: |
             ## 📊 Dnic-GeoScan v1.8.2 - Fail-Safe 3D/2D Visualizer Engine & Multi-Depth Mine Simulation
 
@@ -126,13 +126,13 @@ jobs:
               - پیاده‌سازی `requestDisallowInterceptTouchEvent` برای تضمین کنترل نرم و بدون لکنت ۳بعدی در موبایل.
 
             ### 📥 فایل نصبی و فایل‌های دمو:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.8.2.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.2/Dnic-GeoScan-v1.8.2.apk)**
-            - **[دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.2/demo_mine_multidepth.csv)**
-            - **[دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.2/demo_mine_multidepth.v3d)**
-            - **[دانلود دمو CSV ۱۰×۱۰ (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.2/demo_10x10_anomaly.csv)**
-            - **[دانلود دمو V3D ۱۰×۱۰ (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.2/demo_10x10_anomaly.v3d)**
+            - **[دانلود مستقیم Dnic-GeoScan-v1.8.3.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/Dnic-GeoScan-v1.8.3.apk)**
+            - **[دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.csv)**
+            - **[دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.v3d)**
+            - **[دانلود دمو CSV ۱۰×۱۰ (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.csv)**
+            - **[دانلود دمو V3D ۱۰×۱۰ (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.v3d)**
           files: |
-            release/Dnic-GeoScan-v1.8.2.apk
+            release/Dnic-GeoScan-v1.8.3.apk
             demo_scans/demo_mine_multidepth.csv
             demo_scans/demo_mine_multidepth.v3d
             demo_scans/demo_10x10_anomaly.csv

@@ -6,10 +6,13 @@ import java.io.InputStream
 import java.io.InputStreamReader
 
 /**
- * Robust parser for magnetometer survey datasets loaded from offline storage.
- * Supports comma/semicolon/tab delimited CSV and TXT files in two primary formats:
+ * Ultra-robust parser for magnetometer survey datasets loaded from offline storage.
+ * Supports comma/semicolon/tab/space delimited CSV, TXT, and V3D files in three formats:
  * 1. Triplet format: X, Y, Z coordinates per line (e.g. "0, 1, 1045.5" or "$0,1,1045.5#")
  * 2. 2D Matrix format: Gridded matrix of magnetic field values across columns and rows.
+ * 3. 1D Sequential stream: Single field reading per line with grid dimension metadata.
+ *
+ * Fully supports Persian/Arabic numerals, UTF-8 BOM stripping, and Visualizer 3D tags.
  */
 class LocalFileParser {
 
@@ -30,25 +33,25 @@ class LocalFileParser {
 
         // Check for metadata like Width=10, SamplesPerLine=10, Matrix, V3D
         for (line in rawLines) {
-            val lower = line.trim().lowercase()
-            if (lower.contains("samplesperline=") || lower.contains("width=") || lower.contains("points_x=")) {
-                val valuePart = lower.substringAfter("=").trim()
+            val sanitized = sanitize(line).trim().lowercase()
+            if (sanitized.contains("samplesperline=") || sanitized.contains("width=") || sanitized.contains("points_x=")) {
+                val valuePart = sanitized.substringAfter("=").trim()
                 valuePart.toIntOrNull()?.let { explicitWidth = it }
-            } else if (lower.contains("dim=") || lower.contains("dimension=")) {
-                val dimStr = lower.substringAfter("=").trim()
+            } else if (sanitized.contains("dim=") || sanitized.contains("dimension=")) {
+                val dimStr = sanitized.substringAfter("=").trim()
                 val parts = dimStr.split("x", "*", ",", " ")
                 parts.firstOrNull()?.toIntOrNull()?.let { explicitWidth = it }
             }
         }
 
         val isExplicitMatrix = rawLines.any { line ->
-            val trimmed = line.trim().lowercase()
+            val trimmed = sanitize(line).trim().lowercase()
             (trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith(";")) && trimmed.contains("matrix")
         }
 
-        val cleanLines = rawLines.map { it.trim() }.filter { line ->
-            !isCommentOrMetadata(line)
-        }
+        val cleanLines = rawLines
+            .map { sanitize(it).trim() }
+            .filter { line -> !isCommentOrMetadata(line) }
 
         if (cleanLines.isEmpty()) return emptyList()
 
@@ -59,19 +62,36 @@ class LocalFileParser {
         val hasProtocolEnvelope = cleanLines.any { it.startsWith("$") && it.contains("#") }
         val hasTripletHeader = rawLines.any { isHeader(it) }
 
-        // Check if file uses triplet coordinate format (X, Y, Z per line)
-        val sampleLine = cleanLines.firstOrNull() ?: return emptyList()
-        val tokens = tokenizeLine(sampleLine)
+        // Determine if file uses triplet coordinate format (X, Y, Z)
+        // Statistical majority sampling: checks up to first 25 non-comment lines
+        val testLines = cleanLines.take(25)
+        var tripletMatches = 0
+        for (tLine in testLines) {
+            val tokens = tokenizeLine(tLine)
+            if (tokens.size >= 3) {
+                val x = tokens[0].toIntOrNull()
+                val y = tokens[1].toIntOrNull()
+                val z = tokens[2].toFloatOrNull()
+                if (x != null && y != null && z != null && x in 0..5000 && y in 0..5000) {
+                    tripletMatches++
+                }
+            }
+        }
 
-        val isTriplet = hasProtocolEnvelope || (hasTripletHeader && tokens.size >= 3) ||
-                (tokens.size == 3 && cleanLines.all { tokenizeLine(it).size == 3 } && isProbableCoordinate(tokens[0], tokens[1]))
+        val isTriplet = hasProtocolEnvelope ||
+                (hasTripletHeader && cleanLines.firstOrNull()?.let { tokenizeLine(it).size in 3..6 } == true) ||
+                (tripletMatches >= (testLines.size + 1) / 2 && tripletMatches > 0)
 
         if (isTriplet) {
-            return parseTripletLines(cleanLines)
+            val points = parseTripletLines(cleanLines)
+            if (points.isNotEmpty()) return points
         }
 
         // Check if file is a 1D sequential stream of values (1 value per line)
-        val isSingleValueStream = cleanLines.size >= 4 && cleanLines.all { tokenizeLine(it).size == 1 && it.toFloatOrNull() != null }
+        val isSingleValueStream = cleanLines.size >= 4 && cleanLines.all { line ->
+            val tok = tokenizeLine(line)
+            tok.size == 1 && tok[0].toFloatOrNull() != null
+        }
         if (isSingleValueStream) {
             val total = cleanLines.size
             val width = explicitWidth ?: run {
@@ -80,7 +100,8 @@ class LocalFileParser {
             }
             val points = mutableListOf<ScanPoint>()
             cleanLines.forEachIndexed { index, line ->
-                line.toFloatOrNull()?.let { z ->
+                val tok = tokenizeLine(line)
+                tok.firstOrNull()?.toFloatOrNull()?.let { z ->
                     val x = index % width
                     val y = index / width
                     points.add(ScanPoint(x = x, y = y, zValue = z))
@@ -94,34 +115,64 @@ class LocalFileParser {
     }
 
     private fun isCommentOrMetadata(line: String): Boolean {
-        val trimmed = line.trim()
+        val trimmed = sanitize(line).trim().lowercase()
         if (trimmed.isEmpty()) return true
-        if (trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith(";") || trimmed.startsWith("!")) return true
+        if (trimmed.startsWith("#") || trimmed.startsWith("//") || trimmed.startsWith(";") ||
+            trimmed.startsWith("!") || trimmed.startsWith("%") || trimmed.startsWith("*")) return true
         if (trimmed.startsWith("[") && trimmed.endsWith("]")) return true // INI/V3D section headers e.g. [Data], [Header]
-        if (trimmed.contains("=") && !trimmed.contains(",") && !trimmed.contains("$")) return true // Metadata key=value
+
+        if (trimmed.contains("=")) {
+            // Check if it's metadata key=value (e.g. Version=3.0, Width=10, ShallowTarget=X:4,Y:4...)
+            val tokens = tokenizeLine(trimmed)
+            val numericCount = tokens.count { it.toFloatOrNull() != null }
+            if (numericCount < 3) return true
+        }
+
         return isHeader(trimmed)
     }
 
-    private fun isProbableCoordinate(token0: String, token1: String): Boolean {
-        val x = token0.toIntOrNull() ?: return false
-        val y = token1.toIntOrNull() ?: return false
-        return x in 0..500 && y in 0..500
-    }
-
     private fun isHeader(line: String): Boolean {
-        val lower = line.lowercase().trim()
+        val lower = sanitize(line).lowercase().trim()
         return (lower.contains("x") && lower.contains("y") && lower.contains("z")) ||
                 lower.startsWith("date") || lower.startsWith("scan") || lower.startsWith("device") ||
-                lower.startsWith("visualizer") || lower.startsWith("v3d") || lower.startsWith("version")
+                lower.startsWith("visualizer") || lower.startsWith("v3d") || lower.startsWith("version") ||
+                lower.startsWith("survey") || lower.startsWith("unit") || lower.startsWith("lines") ||
+                lower.startsWith("samples") || lower.startsWith("points") || lower.startsWith("width") ||
+                lower.startsWith("height") || lower.startsWith("header") || lower.startsWith("data")
+    }
+
+    private fun sanitize(text: String): String {
+        return text
+            .replace("\uFEFF", "") // UTF-8 BOM
+            .replace("\u200B", "") // Zero-width space
+            .replace("\u200C", "") // Zero-width non-joiner
+            .replace("\u00A0", " ") // Non-breaking space
+            .map { ch ->
+                when (ch) {
+                    '۰', '٠' -> '0'
+                    '۱', '١' -> '1'
+                    '۲', '٢' -> '2'
+                    '۳', '٣' -> '3'
+                    '۴', '٤' -> '4'
+                    '۵', '٥' -> '5'
+                    '۶', '٦' -> '6'
+                    '۷', '٧' -> '7'
+                    '۸', '٨' -> '8'
+                    '۹', '٩' -> '9'
+                    '٫' -> '.'
+                    else -> ch
+                }
+            }.joinToString("")
     }
 
     private fun tokenizeLine(line: String): List<String> {
-        var clean = line
+        var clean = sanitize(line).trim()
         if (clean.startsWith("$")) clean = clean.substring(1)
         if (clean.endsWith("#")) clean = clean.substring(0, clean.length - 1)
+        clean = clean.replace("\"", "").replace("'", "")
 
-        // Split by comma, semicolon, tab, or whitespace sequence
-        return clean.split(Regex("[,;\\t\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
+        // Split by comma, semicolon, tab, pipe, or whitespace sequence
+        return clean.split(Regex("[,;\\t|\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
     }
 
     private fun parseTripletLines(lines: List<String>): List<ScanPoint> {
@@ -131,13 +182,11 @@ class LocalFileParser {
             if (isCommentOrMetadata(line)) continue
             val tokens = tokenizeLine(line)
             if (tokens.size >= 3) {
-                try {
-                    val x = tokens[0].toInt()
-                    val y = tokens[1].toInt()
-                    val z = tokens[2].toFloat()
+                val x = tokens[0].toIntOrNull()
+                val y = tokens[1].toIntOrNull()
+                val z = tokens[2].toFloatOrNull()
+                if (x != null && y != null && z != null) {
                     points.add(ScanPoint(x = x, y = y, zValue = z))
-                } catch (_: NumberFormatException) {
-                    // Skip malformed line
                 }
             }
         }
@@ -151,7 +200,8 @@ class LocalFileParser {
             if (isCommentOrMetadata(line)) return@forEachIndexed
             val tokens = tokenizeLine(line)
 
-            tokens.forEachIndexed { colIndex, token ->
+            var colIndex = 0
+            for (token in tokens) {
                 token.toFloatOrNull()?.let { zValue ->
                     points.add(
                         ScanPoint(
@@ -160,6 +210,7 @@ class LocalFileParser {
                             zValue = zValue
                         )
                     )
+                    colIndex++
                 }
             }
         }

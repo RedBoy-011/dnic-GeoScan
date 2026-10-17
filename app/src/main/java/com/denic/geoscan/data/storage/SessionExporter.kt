@@ -187,4 +187,65 @@ class SessionExporter(
             Result.failure(e)
         }
     }
+
+    /**
+     * Exports bundled demo scans (CSV and V3D) directly to the device's public Downloads directory.
+     */
+    suspend fun saveAssetDemoFiles(): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val assetManager = context.assets
+            val demoFiles = listOf(
+                "demo_10x10_anomaly.csv",
+                "demo_10x10_anomaly.v3d",
+                "demo_10x10_matrix.csv",
+                "demo_mine_multidepth.csv",
+                "demo_mine_multidepth.v3d"
+            )
+            var savedCount = 0
+
+            for (fileName in demoFiles) {
+                try {
+                    val input = assetManager.open("demo_scans/$fileName")
+                    val content = input.bufferedReader().use { it.readText() }
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val contentValues = ContentValues().apply {
+                            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+                            put(
+                                MediaStore.MediaColumns.MIME_TYPE,
+                                if (fileName.endsWith(".v3d")) "application/octet-stream" else "text/csv"
+                            )
+                            put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/Dnic-GeoScan")
+                        }
+                        val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+                        uri?.let { targetUri ->
+                            context.contentResolver.openOutputStream(targetUri)?.use { out ->
+                                out.write(content.toByteArray(Charsets.UTF_8))
+                                out.flush()
+                            }
+                            savedCount++
+                        }
+                    } else {
+                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        val targetDir = File(downloadsDir, "Dnic-GeoScan")
+                        if (!targetDir.exists()) targetDir.mkdirs()
+                        val file = File(targetDir, fileName)
+                        file.writeText(content, Charsets.UTF_8)
+                        savedCount++
+                    }
+                } catch (e: Exception) {
+                    android.util.Log.w("SessionExporter", "Failed to copy demo asset: $fileName", e)
+                }
+            }
+
+            if (savedCount > 0) {
+                Result.success("Download/Dnic-GeoScan ($savedCount فایل دمو ذخیره شد)")
+            } else {
+                Result.failure(IllegalStateException("امکان ذخیره فایل‌های دمو وجود نداشت."))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
+

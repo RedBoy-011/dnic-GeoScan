@@ -81,13 +81,73 @@ class LocalAnalysisViewModel(
     }
 
     init {
-        // Pre-load a realistic 15x15 multi-depth mining & metal survey grid on launch
-        // Features deep ore vein, shallow metal dipole, and tunnel cavity
-        loadMiningSimulation(15, 15)
+        // Pre-load bundled 15x15 multi-depth mining scan on launch
+        loadAssetScan("demo_scans/demo_mine_multidepth.csv", "demo_mine_multidepth.csv")
     }
 
     fun toggleSmoothing() {
         _isSmoothingEnabled.value = !_isSmoothingEnabled.value
+    }
+
+    /**
+     * Loads a bundled demo scan from app assets (CSV or V3D).
+     */
+    fun loadAssetScan(assetPath: String, displayName: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val context = getApplication<Application>()
+                val normalizedData = withContext(Dispatchers.IO) {
+                    val stream = context.assets.open(assetPath)
+                    stream.use { inputStream ->
+                        val rawPoints = fileParser.parse(inputStream)
+                        if (rawPoints.isEmpty()) {
+                            throw IllegalArgumentException("Asset scan contains no valid data points")
+                        }
+                        normalizer.normalize(
+                            rawPoints = rawPoints,
+                            fileName = displayName,
+                            fileSizeFormatted = "${rawPoints.size * 20} B"
+                        )
+                    }
+                }
+                _dataset.value = normalizedData
+                _exportStatusMessage.value = "فایل دمو $displayName با موفقیت بارگذاری و تحلیل شد (${normalizedData.statistics.totalPoints} نقطه)."
+            } catch (e: Exception) {
+                // Fallback to procedural generator if asset access fails
+                if (assetPath.contains("10x10")) {
+                    loadSampleGrid(10, 10)
+                } else {
+                    loadMiningSimulation(15, 15)
+                }
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadDemoAnomaly10x10(isV3d: Boolean = false) {
+        val ext = if (isV3d) "v3d" else "csv"
+        loadAssetScan("demo_scans/demo_10x10_anomaly.$ext", "demo_10x10_anomaly.$ext")
+    }
+
+    fun loadDemoMiningMultidepth(isV3d: Boolean = false) {
+        val ext = if (isV3d) "v3d" else "csv"
+        loadAssetScan("demo_scans/demo_mine_multidepth.$ext", "demo_mine_multidepth.$ext")
+    }
+
+    fun saveDemoFilesToDownloads() {
+        viewModelScope.launch {
+            _isExporting.value = true
+            val result = sessionExporter.saveAssetDemoFiles()
+            result.onSuccess { path ->
+                _exportStatusMessage.value = "فایل‌های دمو در $path ذخیره شدند. اکنون می‌توانید از دکمه باز کردن فایل آن‌ها را تست کنید."
+            }.onFailure { err ->
+                _exportStatusMessage.value = "خطا در ذخیره فایل‌های دمو: ${err.message}"
+            }
+            _isExporting.value = false
+        }
     }
 
     /**
@@ -122,12 +182,12 @@ class LocalAnalysisViewModel(
 
                 val normalizedData = withContext(Dispatchers.IO) {
                     val stream = contentResolver.openInputStream(uri)
-                        ?: throw IllegalStateException("Unable to open input stream for selected file")
+                        ?: throw IllegalStateException("امکان باز کردن فایل انتخاب‌شده وجود ندارد.")
 
                     stream.use { inputStream ->
                         val rawPoints = fileParser.parse(inputStream)
                         if (rawPoints.isEmpty()) {
-                            throw IllegalArgumentException("The selected file does not contain valid magnetometer coordinates or data points.")
+                            throw IllegalArgumentException("داده‌های معتبر مختصات یا ماتریس مغناطیس‌سنج در فایل یافت نشد.")
                         }
                         normalizer.normalize(
                             rawPoints = rawPoints,
@@ -138,8 +198,9 @@ class LocalAnalysisViewModel(
                 }
 
                 _dataset.value = normalizedData
+                _exportStatusMessage.value = "فایل $fileName با موفقیت بارگذاری و تحلیل شد (${normalizedData.statistics.totalPoints} نقطه)."
             } catch (e: Exception) {
-                _errorMessage.value = e.localizedMessage ?: "Failed to parse magnetometer file"
+                _errorMessage.value = "خطا در بارگذاری فایل: ${e.localizedMessage ?: "فرمت نامعتبر است"}. لطفاً از فایل‌های استاندارد CSV، TXT یا V3D استفاده کنید."
             } finally {
                 _isLoading.value = false
             }

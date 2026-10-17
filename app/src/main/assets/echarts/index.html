@@ -209,7 +209,18 @@
         function init() {
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
+            if (window.ResizeObserver) {
+                try {
+                    const ro = new ResizeObserver(() => resizeCanvas());
+                    ro.observe(document.body);
+                    ro.observe(canvas);
+                } catch (e) {}
+            }
             setupGestures();
+
+            if (rawPoints.length > 0) {
+                render();
+            }
 
             // Notify Android Bridge that visualizer is initialized and ready
             if (window.AndroidBridge && window.AndroidBridge.onChartReady) {
@@ -221,11 +232,19 @@
             }
         }
 
-        function resizeCanvas() {
+        function ensureCanvasDimensions() {
             const rect = canvas.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
-            canvas.width = Math.max(100, Math.floor(rect.width * dpr));
-            canvas.height = Math.max(100, Math.floor(rect.height * dpr));
+            const w = Math.floor((rect.width || window.innerWidth || 360) * dpr);
+            const h = Math.floor((rect.height || window.innerHeight || 320) * dpr);
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = Math.max(100, w);
+                canvas.height = Math.max(100, h);
+            }
+        }
+
+        function resizeCanvas() {
+            ensureCanvasDimensions();
             render();
         }
 
@@ -274,6 +293,7 @@
 
             if (overlay) overlay.style.display = 'none';
             processPoints(points);
+            resizeCanvas();
             render();
         }
 
@@ -382,10 +402,13 @@
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#070A12";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.restore();
         }
 
         function render() {
+            ensureCanvasDimensions();
             clearCanvas();
             if (rawPoints.length === 0 || gridWidth < 2 || gridHeight < 2) return;
 
@@ -476,7 +499,7 @@
                 }
             }
 
-            quads.sort((a, b) => a.avgDepth - b.avgDepth);
+            quads.sort((a, b) => b.avgDepth - a.avgDepth);
 
             // Draw shaded 3D surface quads
             ctx.save();
