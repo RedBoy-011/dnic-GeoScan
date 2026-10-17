@@ -17,14 +17,21 @@
             touch-action: none;
         }
         html, body {
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            min-width: 100%;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
             overflow: hidden;
+            position: fixed;
+            inset: 0;
             background-color: #070A12;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         }
         #master-container {
-            position: relative;
+            position: absolute;
+            inset: 0;
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 50% 45%, #0F172A 0%, #070A12 100%);
@@ -32,18 +39,20 @@
         }
         #echarts-container {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
+            min-width: 250px;
+            min-height: 250px;
             z-index: 1;
         }
         #canvas-container {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
+            min-width: 250px;
+            min-height: 250px;
             display: none;
             z-index: 2;
         }
@@ -245,19 +254,39 @@
             }
         }
 
+        function getContainerDimensions() {
+            let w = echartsDom.clientWidth;
+            let h = echartsDom.clientHeight;
+            if (!w || w <= 0) w = window.innerWidth;
+            if (!h || h <= 0) h = window.innerHeight;
+            if (!w || w <= 0) w = document.documentElement.clientWidth;
+            if (!h || h <= 0) h = document.documentElement.clientHeight;
+            if (!w || w <= 0) w = 360;
+            if (!h || h <= 0) h = 340;
+            return { width: Math.floor(w), height: Math.floor(h) };
+        }
+
         function init() {
             console.log("[ECharts] Initializing Visualizer Hub...");
+            const dims = getContainerDimensions();
+            echartsDom.style.width = dims.width + 'px';
+            echartsDom.style.height = dims.height + 'px';
+
             const hasGL = checkWebGLSupport();
-            console.log("[ECharts] WebGL Support Detected: " + hasGL);
+            console.log("[ECharts] WebGL Support Detected: " + hasGL + ", Initial Dims: " + dims.width + "x" + dims.height);
 
             if (hasGL && typeof echarts !== 'undefined') {
                 try {
-                    myChart = echarts.init(echartsDom, null, { renderer: 'canvas' });
+                    myChart = echarts.init(echartsDom, null, {
+                        renderer: 'canvas',
+                        width: dims.width,
+                        height: dims.height
+                    });
                     useWebGL = true;
                     echartsDom.style.display = 'block';
                     canvasContainer.style.display = 'none';
                     if (hudStatus) hudStatus.innerText = "ENGINE: ECHARTS GL (WEBGL) • READY";
-                    console.log("[ECharts] ECharts WebGL instance initialized successfully");
+                    console.log("[ECharts] ECharts WebGL instance initialized successfully (" + dims.width + "x" + dims.height + ")");
                 } catch (err) {
                     console.warn("[ECharts] Failed to init ECharts GL, falling back to Canvas engine:", err);
                     initCanvasFallback();
@@ -360,10 +389,25 @@
         /**
          * Core data ingestion interface called from Kotlin via evaluateJavascript
          */
-        function renderScanData(pointsJson, is3D, baseline = 0) {
-            console.log("[ECharts] Ingesting scan data: is3D=" + is3D + ", baseline=" + baseline);
+        function renderScanData(pointsJson, is3D, baseline = 0, widthPx = 0, heightPx = 0) {
+            console.log("[ECharts] Ingesting scan data: is3D=" + is3D + ", baseline=" + baseline + ", dims=" + widthPx + "x" + heightPx);
             currentModeIs3D = !!is3D;
             currentBaseline = (typeof baseline === 'number' && !isNaN(baseline)) ? baseline : 0;
+
+            let dims = getContainerDimensions();
+            if (typeof widthPx === 'number' && widthPx > 50) dims.width = Math.floor(widthPx);
+            if (typeof heightPx === 'number' && heightPx > 50) dims.height = Math.floor(heightPx);
+
+            echartsDom.style.width = dims.width + 'px';
+            echartsDom.style.height = dims.height + 'px';
+
+            if (myChart) {
+                try {
+                    myChart.resize({ width: dims.width, height: dims.height });
+                } catch (e) {
+                    console.warn("[ECharts] Initial resize warning:", e);
+                }
+            }
 
             let points = [];
             if (typeof pointsJson === 'string') {
@@ -468,7 +512,38 @@
         // Engine 1: Apache ECharts & ECharts-GL (WebGL)
         // ==========================================
         function renderECharts() {
-            if (!myChart) return;
+            const dims = getContainerDimensions();
+            echartsDom.style.width = dims.width + 'px';
+            echartsDom.style.height = dims.height + 'px';
+
+            if (!myChart) {
+                try {
+                    myChart = echarts.init(echartsDom, null, {
+                        renderer: 'canvas',
+                        width: dims.width,
+                        height: dims.height
+                    });
+                } catch (e) {
+                    console.warn("[ECharts] Lazy init failed, fallback to Canvas:", e);
+                    initCanvasFallback();
+                    renderCanvas();
+                    return;
+                }
+            } else {
+                try {
+                    myChart.resize({ width: dims.width, height: dims.height });
+                } catch (e) {}
+            }
+
+            try {
+                const zr = myChart.getZr();
+                if (!zr || !zr.getWidth() || !zr.getHeight()) {
+                    console.warn("[ECharts] ZRender dimensions not ready, switching to Canvas engine");
+                    initCanvasFallback();
+                    renderCanvas();
+                    return;
+                }
+            } catch (_) {}
 
             const chartData = rawPoints.map(p => [p.x, p.y, p.z]);
 

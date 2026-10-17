@@ -80,9 +80,12 @@ class LocalAnalysisViewModel(
         _selectedFilter.value = filter
     }
 
+    private val rSurfaceEngine = com.denic.geoscan.data.engine.RSurface3DEngine()
+    private val _rSurfaceReport = MutableStateFlow<com.denic.geoscan.data.engine.RSurfaceReport?>(null)
+    val rSurfaceReport: StateFlow<com.denic.geoscan.data.engine.RSurfaceReport?> = _rSurfaceReport.asStateFlow()
+
     init {
-        // Pre-load bundled 15x15 multi-depth mining scan on launch
-        loadAssetScan("demo_scans/demo_mine_multidepth.csv", "demo_mine_multidepth.csv")
+        // Application launches 100% clean/blank ("خام") - waiting for user to open file from phone storage
     }
 
     fun toggleSmoothing() {
@@ -180,24 +183,28 @@ class LocalAnalysisViewModel(
                     }
                 }
 
-                val normalizedData = withContext(Dispatchers.IO) {
+                val (normalizedData, rReport) = withContext(Dispatchers.IO) {
                     val stream = contentResolver.openInputStream(uri)
                         ?: throw IllegalStateException("امکان باز کردن فایل انتخاب‌شده وجود ندارد.")
 
                     stream.use { inputStream ->
-                        val rawPoints = fileParser.parse(inputStream)
+                        val lines = inputStream.bufferedReader().readLines()
+                        val rawPoints = fileParser.parseLines(lines)
                         if (rawPoints.isEmpty()) {
                             throw IllegalArgumentException("داده‌های معتبر مختصات یا ماتریس مغناطیس‌سنج در فایل یافت نشد.")
                         }
-                        normalizer.normalize(
+                        val norm = normalizer.normalize(
                             rawPoints = rawPoints,
                             fileName = fileName,
                             fileSizeFormatted = fileSizeFormatted
                         )
+                        val report = rSurfaceEngine.processSurface3DLines(lines)
+                        Pair(norm, report)
                     }
                 }
 
                 _dataset.value = normalizedData
+                _rSurfaceReport.value = rReport
                 _exportStatusMessage.value = "فایل $fileName با موفقیت بارگذاری و تحلیل شد (${normalizedData.statistics.totalPoints} نقطه)."
             } catch (e: Exception) {
                 _errorMessage.value = "خطا در بارگذاری فایل: ${e.localizedMessage ?: "فرمت نامعتبر است"}. لطفاً از فایل‌های استاندارد CSV، TXT یا V3D استفاده کنید."
@@ -209,7 +216,9 @@ class LocalAnalysisViewModel(
 
     fun clearDataset() {
         _dataset.value = null
+        _rSurfaceReport.value = null
         _errorMessage.value = null
+        _exportStatusMessage.value = null
     }
 
     /**

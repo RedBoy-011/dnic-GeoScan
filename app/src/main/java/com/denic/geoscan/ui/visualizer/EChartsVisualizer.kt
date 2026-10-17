@@ -99,9 +99,13 @@ fun EChartsVisualizer(
             val is3D = viewMode == VisualizerViewMode.SURFACE_3D
             val safeBaseline = if (baseline.isNaN() || baseline.isInfinite()) 0.0f else baseline
 
+            val density = webView.resources.displayMetrics.density
+            val widthPx = if (webView.width > 50) (webView.width / density).toInt() else 360
+            val heightPx = if (webView.height > 50) (webView.height / density).toInt() else 340
+
             val script = if (points.isEmpty()) {
                 GeoLogger.d("EChartsVisualizer", "Dispatching empty scan array (Awaiting data)")
-                "if (typeof renderScanData === 'function') { renderScanData([], $is3D, $safeBaseline); }"
+                "if (typeof renderScanData === 'function') { renderScanData([], $is3D, $safeBaseline, $widthPx, $heightPx); }"
             } else {
                 val jsonBuilder = StringBuilder(points.size * 22 + 10)
                 jsonBuilder.append("[")
@@ -111,10 +115,10 @@ fun EChartsVisualizer(
                     if (index < points.size - 1) jsonBuilder.append(",")
                 }
                 jsonBuilder.append("]")
-                "if (typeof renderScanData === 'function') { renderScanData($jsonBuilder, $is3D, $safeBaseline); }"
+                "if (typeof renderScanData === 'function') { renderScanData($jsonBuilder, $is3D, $safeBaseline, $widthPx, $heightPx); }"
             }
 
-            GeoLogger.d("EChartsVisualizer", "Evaluating JS renderScanData (${points.size} points, is3D=$is3D, baseline=$safeBaseline)")
+            GeoLogger.d("EChartsVisualizer", "Evaluating JS renderScanData (${points.size} points, is3D=$is3D, baseline=$safeBaseline, size=${widthPx}x${heightPx})")
             webView.evaluateJavascript(script) { result ->
                 GeoLogger.d("EChartsVisualizer", "JS evaluation completed: $result")
             }
@@ -244,7 +248,14 @@ fun EChartsVisualizer(
                         factory = { context ->
                             try {
                                 GeoLogger.d("EChartsVisualizer", "Creating Android WebView instance")
-                                WebView(context).apply {
+                                object : WebView(context) {
+                                    override fun onSizeChanged(w: Int, h: Int, ow: Int, oh: Int) {
+                                        super.onSizeChanged(w, h, ow, oh)
+                                        if (w > 50 && h > 50 && isChartReady) {
+                                            post { sendScanData(this@object) }
+                                        }
+                                    }
+                                }.apply {
                                     // 1. Enable Hardware Acceleration
                                     try {
                                         setLayerType(View.LAYER_TYPE_HARDWARE, null)

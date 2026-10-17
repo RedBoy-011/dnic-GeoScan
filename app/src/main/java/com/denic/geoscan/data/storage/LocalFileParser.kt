@@ -204,19 +204,23 @@ class LocalFileParser {
     }
 
     private fun parseMatrixLines(lines: List<String>): List<ScanPoint> {
+        val nonCommentLines = lines.filter { !isCommentOrMetadata(it) }
+        val rowsCount = nonCommentLines.size
         val points = mutableListOf<ScanPoint>()
 
-        lines.forEachIndexed { rowIndex, line ->
-            if (isCommentOrMetadata(line)) return@forEachIndexed
+        nonCommentLines.forEachIndexed { rowIndex, line ->
             val tokens = tokenizeLine(line)
 
             var colIndex = 0
             for (token in tokens) {
                 token.toFloatOrNull()?.let { zValue ->
+                    // R surface3d Cartesian calibration: (0,0) is bottom-left
+                    // Invert Y axis so top row in text maps to highest Y in Cartesian space
+                    val cartesianY = if (rowsCount > 1) (rowsCount - 1 - rowIndex) else rowIndex
                     points.add(
                         ScanPoint(
                             x = colIndex,
-                            y = rowIndex,
+                            y = cartesianY,
                             zValue = zValue
                         )
                     )
