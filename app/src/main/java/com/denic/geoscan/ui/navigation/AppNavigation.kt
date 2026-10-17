@@ -518,6 +518,7 @@ private fun GlassmorphicBottomNavBar(
                     Screen.LocalAnalysis -> NeonGreen
                     Screen.RemoteScan -> NeonCyan
                     Screen.Settings -> NeonYellow
+                    Screen.Activation -> NeonCyan
                 }
 
                 val title = when (screen) {
@@ -525,6 +526,7 @@ private fun GlassmorphicBottomNavBar(
                     Screen.LocalAnalysis -> strings.navLocalAnalysis
                     Screen.RemoteScan -> strings.navRemoteScan
                     Screen.Settings -> strings.navSettings
+                    Screen.Activation -> strings.activationTitle
                 }
 
                 Box(
