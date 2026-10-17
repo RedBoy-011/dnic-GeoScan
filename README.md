@@ -5,26 +5,26 @@
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20(Material%203)-blue.svg)](https://developer.android.com/jetpack/compose)
 [![Visualizer](https://img.shields.io/badge/3D%20Engine-Apache%20ECharts%203D-red.svg)](https://echarts.apache.org)
 [![Build Status](https://img.shields.io/badge/GitHub%20Actions-Passing-brightgreen.svg)](https://github.com/RedBoy-011/dnic-GeoScan/actions)
-[![Release](https://img.shields.io/badge/Release-v1.8.3-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.8.3)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-gold.svg)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.0)
 
-> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار با معماری رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌های صنعتی، پشتیبانی کامل دو زبانه (فارسی و انگلیسی)، جهت‌بندی پویا (RTL/LTR)، موتور هوشمند پیمایش ماتریس (X->Y Auto-Increment)، بازخورد صوتی تله‌متری بلادرنگ (Acoustic Telemetry) و پشتیبانی از فایل‌های `.v3d`، `.csv` و `.txt`، جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز است.
+> **Dnic-GeoScan** یک اپلیکیشن حرفه‌ای، مدرن و صنعتی اندروید برای ثبت داده‌ها (Data Logger) و تصویرسازی سه‌بعدی داده‌های مغناطیس‌سنج‌ها و اسکنرهای ژئوفیزیک (Magnetometer / Gradiometer) است. این نرم‌افزار با معماری رسپانسیو تطبیقی برای گوشی‌های هوشمند و تبلت‌های صنعتی، پشتیبانی کامل دو زبانه (فارسی و انگلیسی)، جهت‌بندی پویا (RTL/LTR)، هاب منوی اصلی سه‌گزینه‌ای (Local Analysis, Remote Scan, Settings)، سیستم لاگر پیشرفته وقایع (`denic_debug_log.txt`)، موتور هوشمند پیمایش ماتریس (X->Y Auto-Increment)، بازخورد صوتی تله‌متری بلادرنگ (Acoustic Telemetry) و پشتیبانی از فایل‌های `.v3d`، `.csv` و `.txt`، جایگزین کامل و پیشرفته‌ای برای نرم‌افزارهای قدیمی تحت ویندوز است.
 
 ---
 
 ## 📥 لینک‌های دانلود آخرین نسخه تایید شده (Download Links)
 
-برای دریافت آخرین نسخه رسمی، رسپانسیو و تایید شده برنامه (**Version 1.8.3**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
+برای دریافت آخرین نسخه رسمی، رسپانسیو و تایید شده برنامه (**Version 2.0.0**) می‌توانید از لینک‌های مستقیم زیر استفاده کنید:
 
-* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v1.8.3.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/Dnic-GeoScan-v1.8.3.apk)**
-* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v1.8.3)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v1.8.3)**
-* **[⛏️ دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.csv)**
-* **[💎 دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.v3d)**
-* **[📊 دانلود دمو گرادیان ۱۰×۱۰ CSV (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.csv)**
-* **[🌐 دانلود دمو گرادیان ۱۰×۱۰ V3D (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.v3d)**
+* **[🚀 دانلود مستقیم فایل نصبی رسمی Dnic-GeoScan-v2.0.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/Dnic-GeoScan-v2.0.0.apk)**
+* **[🏷️ صفحه رسمی انتشار نسخه جدید در گیت‌هاب (GitHub Releases v2.0.0)](https://github.com/RedBoy-011/dnic-GeoScan/releases/tag/v2.0.0)**
+* **[⛏️ دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.csv)**
+* **[💎 دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.v3d)**
+* **[📊 دانلود دمو گرادیان ۱۰×۱۰ CSV (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.csv)**
+* **[🌐 دانلود دمو گرادیان ۱۰×۱۰ V3D (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.v3d)**
 * **[📦 دانلود از آرتیفکت‌های پایپ‌لاین تایید شده GitHub Actions](https://github.com/RedBoy-011/dnic-GeoScan/actions)**
 * **مسیر فایل محلی (Local APK Path):**
   ```text
-  release/Dnic-GeoScan-v1.8.3.apk
+  release/Dnic-GeoScan-v2.0.0.apk
   app/build/outputs/apk/release/app-release.apk
   ```
 
@@ -123,15 +123,20 @@ denic-GeoScan/
 │   │   │       │   ├── Screen.kt
 │   │   │       │   └── AppNavigation.kt
 │   │   │       ├── screens/
-│   │   │       │   ├── remote/                  # صفحه اسکن زنده با بلوتوث
-│   │   │       │   └── local/                   # صفحه آنالیز فایل‌های ذخیره شده
+│   │   │       │   ├── hub/                     # داشبورد هاب منوی اصلی (۳ گزینه اصلی)
+│   │   │       │   ├── remote/                  # صفحه اسکن زنده با بلوتوث SPP
+│   │   │       │   ├── local/                   # صفحه آنالیز فایل‌های محلی
+│   │   │       │   └── settings/                # صفحه تنظیمات، تغییر زبان و لاگر
 │   │   │       ├── theme/                       # پالت رنگ نئونی، تایپوگرافی و تم تاریک
+│   │   │       ├── util/
+│   │   │       │   └── GeoLogger.kt             # سیستم ثبت لاگ پایدار در فیزیکال فایل
 │   │   │       └── visualizer/
-│   │   │           ├── EChartsVisualizer.kt     # کنترلر WebView و پل ارتباطی ECharts
+│   │   │           ├── EChartsVisualizer.kt     # کنترلر WebView و پل ارتباطی WebGL/Canvas
 │   │   │           └── VisualizerViewMode.kt    # وضعیت‌های نمایش سه‌بعدی و دوبعدی
 │   │   └── res/
 │   │       ├── drawable/                        # وکتور آیکون اختصاصی دنیک (Mesh + PCB)
-│   │       └── values/                          # مقادیر نام‌ها، تم‌ها و استایل‌ها
+│   │       ├── values/                          # متن‌های انگلیسی و استایل‌ها
+│   │       └── values-fa/                       # متن‌های بومی فارسی (i18n)
 │   └── build.gradle.kts
 ├── .github/
 │   └── workflows/
@@ -148,10 +153,8 @@ denic-GeoScan/
 
 ## 🛡 وضعیت تایید نسخه‌ها (Verification Status)
 
-- [x] **تکمیل فاز ۱:** پیاده‌سازی معماری Jetpack Compose، تم تاریک Glassmorphism و ناوبری صفحات.
-- [x] **تکمیل فاز ۲:** پیاده‌سازی درایور سوکت بلوتوث SPP و پارسر خطاناپذیر `$X,Y,Z#\n`.
-- [x] **تکمیل فاز ۳:** پیاده‌سازی لایه انتخاب فایل محلی (SAF) و نرمال‌سازی بر پایه میانه مبنای زمین.
-- [x] **تکمیل فاز ۴:** پیاده‌سازی رندرر سه‌بعدی Apache ECharts-GL با شتاب‌دهنده گرافیکی و نگاشت رنگی.
-- [x] **تکمیل فاز ۵:** پیاده‌سازی الگوریتم درون‌یابی دوبعدی-دومکعبی و صدور گزارش‌های CSV.
-- [x] **تکمیل ریفکتور جامع:** تغییر کامل نام برند به **denic** و شناسه پکیج به `com.denic.geoscan`.
-- [x] **تایید خودکار بیلد (Self-Healing Build):** پیکربندی کامل اسکریپت رپر گریدل و گردش کار GitHub Actions جهت تولید فایل نصبی رسمی.
+- [x] **تکمیل فاز ۱ (v2.0.0):** رفع اساسی باگ صفحه ۳بعدی WebGL، موتور دوگانه Canvas Fallback، شتاب سخت‌افزاری و همگام‌سازی چرخه حیات Compose.
+- [x] **تکمیل فاز ۲ (v2.0.0):** پیاده‌سازی سیستم لاگ پایدار فایل‌محور (`GeoLogger`) در فایل `denic_debug_log.txt` همراه با اشتراک‌گذاری و ذخیره در پوشه دانلودها.
+- [x] **تکمیل فاز ۳ (v2.0.0):** معماری ناوبری هاب سه‌گزینه‌ای (Local Analysis, Remote Scan, Settings) و بومی‌سازی کامل دوزبانه (فارسی و انگلیسی) با RTL.
+- [x] **تکمیل فاز ۴ (v2.0.0):** نوسازی رابط کاربری Glassmorphism ۲۰۲۶ با طیف رنگ نئونی مغناطیسی و حالات صوتی تله‌متری بلادرنگ.
+- [x] **تایید خودکار بیلد (Self-Healing Build):** پایپ‌لاین یکپارچه‌سازی مداوم GitHub Actions، اجرای تست‌های واحد و تست خودکار نصب و اجرای APK روی ایمولاتور اندروید ۱۲ و تبلت.

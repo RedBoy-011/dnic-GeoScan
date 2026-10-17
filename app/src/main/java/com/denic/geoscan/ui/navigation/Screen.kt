@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Bluetooth
 import androidx.compose.material.icons.outlined.Dashboard
 import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(
@@ -29,12 +30,18 @@ sealed class Screen(
         icon = Icons.Outlined.Bluetooth
     )
 
+    data object Settings : Screen(
+        route = "settings",
+        title = "Settings",
+        icon = Icons.Outlined.Settings
+    )
+
     companion object {
         /**
          * Dynamic getter ensures subclasses are evaluated after class loading,
          * completely avoiding JVM circular dependency and null references.
          */
         val items: List<Screen>
-            get() = listOfNotNull(Hub, LocalAnalysis, RemoteScan)
+            get() = listOfNotNull(Hub, LocalAnalysis, RemoteScan, Settings)
     }
 }

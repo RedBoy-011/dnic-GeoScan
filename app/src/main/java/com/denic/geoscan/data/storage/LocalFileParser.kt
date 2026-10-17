@@ -53,10 +53,14 @@ class LocalFileParser {
             .map { sanitize(it).trim() }
             .filter { line -> !isCommentOrMetadata(line) }
 
+        com.denic.geoscan.util.GeoLogger.i("LocalFileParser", "Parsing ${rawLines.size} raw lines (${cleanLines.size} clean lines, explicitWidth=$explicitWidth, isMatrix=$isExplicitMatrix)")
+
         if (cleanLines.isEmpty()) return emptyList()
 
         if (isExplicitMatrix) {
-            return parseMatrixLines(cleanLines)
+            val points = parseMatrixLines(cleanLines)
+            com.denic.geoscan.util.GeoLogger.i("LocalFileParser", "Parsed explicit matrix: ${points.size} points")
+            return points
         }
 
         val hasProtocolEnvelope = cleanLines.any { it.startsWith("$") && it.contains("#") }
@@ -84,7 +88,10 @@ class LocalFileParser {
 
         if (isTriplet) {
             val points = parseTripletLines(cleanLines)
-            if (points.isNotEmpty()) return points
+            if (points.isNotEmpty()) {
+                com.denic.geoscan.util.GeoLogger.i("LocalFileParser", "Parsed triplet coordinates: ${points.size} points")
+                return points
+            }
         }
 
         // Check if file is a 1D sequential stream of values (1 value per line)
@@ -107,11 +114,14 @@ class LocalFileParser {
                     points.add(ScanPoint(x = x, y = y, zValue = z))
                 }
             }
+            com.denic.geoscan.util.GeoLogger.i("LocalFileParser", "Parsed 1D stream: ${points.size} points (width=$width)")
             return points
         }
 
         // Standard 2D Gridded Matrix format (space, comma, or tab separated values across rows)
-        return parseMatrixLines(cleanLines)
+        val points = parseMatrixLines(cleanLines)
+        com.denic.geoscan.util.GeoLogger.i("LocalFileParser", "Parsed standard matrix format: ${points.size} points")
+        return points
     }
 
     private fun isCommentOrMetadata(line: String): Boolean {

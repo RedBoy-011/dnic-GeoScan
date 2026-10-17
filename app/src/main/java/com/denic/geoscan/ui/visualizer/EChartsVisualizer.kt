@@ -1,12 +1,20 @@
 package com.denic.geoscan.ui.visualizer
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.Color
 import android.view.View
+import android.webkit.ConsoleMessage
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +32,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Grid3x3
-import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.ViewInAr
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -50,13 +57,12 @@ import com.denic.geoscan.ui.theme.NeonGreen
 import com.denic.geoscan.ui.theme.TextMuted
 import com.denic.geoscan.ui.theme.TextPrimary
 import com.denic.geoscan.ui.theme.Typography
+import com.denic.geoscan.util.GeoLogger
 
 /**
- * Hardware-accelerated Apache ECharts 3D / 2D rendering canvas embedded via WebView.
- *
- * @param points Raw or normalized spatial scan coordinates to plot.
- * @param initialMode Whether to start in 3D Surface View or 2D Heatmap View.
- * @param baseline Ground Zero baseline value (median) for color spectrum mapping.
+ * 2026 Commercial-Grade Geophysical Visualizer.
+ * Integrates dual-engine WebGL (Apache ECharts-GL) + hardware-accelerated Canvas fallback,
+ * persistent console diagnostics via GeoLogger, and dynamic Compose lifecycle synchronization.
  */
 @SuppressLint("SetJavaScriptEnabled", "ClickableViewAccessibility")
 @Composable
@@ -72,34 +78,56 @@ fun EChartsVisualizer(
     var isEngineMounted by remember { mutableStateOf(false) }
     var engineError by remember { mutableStateOf<String?>(null) }
 
-    // Deferred mounting: Let Compose draw its first frame instantly to dismiss Android OS splash screen
+    // Deferred mounting: Ensures Compose performs first layout frame smoothly
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(100)
+        kotlinx.coroutines.delay(80)
         isEngineMounted = true
+        GeoLogger.d("EChartsVisualizer", "Visualizer engine mounted in Compose tree")
     }
 
     fun sendScanData(webView: WebView?) {
-        if (webView != null && isChartReady && isEngineMounted) {
-            try {
-                val jsonBuilder = StringBuilder("[")
+        if (webView == null) {
+            GeoLogger.d("EChartsVisualizer", "sendScanData skipped: webView is null")
+            return
+        }
+        if (!isChartReady) {
+            GeoLogger.d("EChartsVisualizer", "sendScanData queued: visualizer chart not ready yet")
+            return
+        }
+
+        try {
+            val is3D = viewMode == VisualizerViewMode.SURFACE_3D
+            val safeBaseline = if (baseline.isNaN() || baseline.isInfinite()) 0.0f else baseline
+
+            val script = if (points.isEmpty()) {
+                GeoLogger.d("EChartsVisualizer", "Dispatching empty scan array (Awaiting data)")
+                "if (typeof renderScanData === 'function') { renderScanData([], $is3D, $safeBaseline); }"
+            } else {
+                val jsonBuilder = StringBuilder(points.size * 22 + 10)
+                jsonBuilder.append("[")
                 points.forEachIndexed { index, p ->
-                    jsonBuilder.append("[${p.x},${p.y},${p.zValue}]")
+                    val safeZ = if (p.zValue.isNaN() || p.zValue.isInfinite()) 0.0f else p.zValue
+                    jsonBuilder.append("[${p.x},${p.y},$safeZ]")
                     if (index < points.size - 1) jsonBuilder.append(",")
                 }
                 jsonBuilder.append("]")
-
-                val is3D = viewMode == VisualizerViewMode.SURFACE_3D
-                val script = "if (typeof renderScanData === 'function') { renderScanData($jsonBuilder, $is3D, $baseline); }"
-                webView.evaluateJavascript(script, null)
-            } catch (e: Throwable) {
-                android.util.Log.w("EChartsVisualizer", "evaluateJavascript error", e)
+                "if (typeof renderScanData === 'function') { renderScanData($jsonBuilder, $is3D, $safeBaseline); }"
             }
+
+            GeoLogger.d("EChartsVisualizer", "Evaluating JS renderScanData (${points.size} points, is3D=$is3D, baseline=$safeBaseline)")
+            webView.evaluateJavascript(script) { result ->
+                GeoLogger.d("EChartsVisualizer", "JS evaluation completed: $result")
+            }
+        } catch (e: Throwable) {
+            GeoLogger.e("EChartsVisualizer", "evaluateJavascript execution error", e)
         }
     }
 
-    // Update WebView whenever points or projection view mode changes
+    // Reactive bridge: Automatically dispatches new scan data whenever points or viewMode change
     LaunchedEffect(points, viewMode, isChartReady, isEngineMounted) {
-        sendScanData(webViewInstance)
+        if (isChartReady && isEngineMounted) {
+            sendScanData(webViewInstance)
+        }
     }
 
     Column(
@@ -145,18 +173,24 @@ fun EChartsVisualizer(
                     text = "3D Surface",
                     isSelected = viewMode == VisualizerViewMode.SURFACE_3D,
                     activeColor = NeonGreen,
-                    onClick = { viewMode = VisualizerViewMode.SURFACE_3D }
+                    onClick = {
+                        viewMode = VisualizerViewMode.SURFACE_3D
+                        GeoLogger.d("EChartsVisualizer", "User switched mode to 3D Surface")
+                    }
                 )
                 ToggleOption(
                     text = "2D Heatmap",
                     isSelected = viewMode == VisualizerViewMode.HEATMAP_2D,
                     activeColor = NeonCyan,
-                    onClick = { viewMode = VisualizerViewMode.HEATMAP_2D }
+                    onClick = {
+                        viewMode = VisualizerViewMode.HEATMAP_2D
+                        GeoLogger.d("EChartsVisualizer", "User switched mode to 2D Heatmap")
+                    }
                 )
             }
         }
 
-        // WebView ECharts Canvas with Deferred Non-Blocking Engine Mount
+        // WebView ECharts / WebGL Canvas Viewport
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -171,7 +205,7 @@ fun EChartsVisualizer(
                         modifier = Modifier.padding(16.dp)
                     ) {
                         Text(
-                            text = "Visualizer Engine Safe Mode",
+                            text = "Visualizer Diagnostics Mode",
                             style = Typography.titleMedium,
                             color = NeonCyan
                         )
@@ -190,14 +224,14 @@ fun EChartsVisualizer(
                         verticalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(16.dp)
                     ) {
-                        androidx.compose.material3.CircularProgressIndicator(
+                        CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = NeonCyan,
                             strokeWidth = 2.dp
                         )
                         Spacer(modifier = Modifier.height(10.dp))
                         Text(
-                            text = "INITIALIZING 3D ENGINE...",
+                            text = "INITIALIZING 3D WEBGL ENGINE...",
                             style = Typography.labelSmall,
                             color = TextMuted,
                             letterSpacing = 1.sp
@@ -209,42 +243,47 @@ fun EChartsVisualizer(
                         modifier = Modifier.fillMaxSize(),
                         factory = { context ->
                             try {
+                                GeoLogger.d("EChartsVisualizer", "Creating Android WebView instance")
                                 WebView(context).apply {
+                                    // 1. Enable Hardware Acceleration
                                     try {
                                         setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                                    } catch (_: Throwable) {
-                                        try {
-                                            setLayerType(View.LAYER_TYPE_NONE, null)
-                                        } catch (_: Throwable) {}
+                                    } catch (e: Throwable) {
+                                        GeoLogger.w("EChartsVisualizer", "Hardware layer failed, fallback to none", e)
+                                        try { setLayerType(View.LAYER_TYPE_NONE, null) } catch (_: Throwable) {}
                                     }
-                                    setBackgroundColor(android.graphics.Color.parseColor("#070A12"))
 
+                                    setBackgroundColor(Color.parseColor("#070A12"))
+
+                                    // Intercept touch to prevent parent scroll conflict during 3D rotation
                                     setOnTouchListener { v, _ ->
                                         v.parent?.requestDisallowInterceptTouchEvent(true)
                                         false
                                     }
 
-                                    try { settings.javaScriptEnabled = true } catch (_: Throwable) {}
-                                    try { settings.domStorageEnabled = true } catch (_: Throwable) {}
-                                    try { settings.allowFileAccess = true } catch (_: Throwable) {}
-                                    try {
+                                    // 2. Configure Modern WebSettings
+                                    settings.apply {
+                                        javaScriptEnabled = true
+                                        domStorageEnabled = true
+                                        databaseEnabled = true
+                                        allowFileAccess = true
+                                        allowContentAccess = true
                                         @Suppress("DEPRECATION")
-                                        settings.allowFileAccessFromFileURLs = true
-                                    } catch (_: Throwable) {}
-                                    try {
+                                        allowFileAccessFromFileURLs = true
                                         @Suppress("DEPRECATION")
-                                        settings.allowUniversalAccessFromFileURLs = true
-                                    } catch (_: Throwable) {}
-                                    try { settings.cacheMode = WebSettings.LOAD_NO_CACHE } catch (_: Throwable) {}
+                                        allowUniversalAccessFromFileURLs = true
+                                        cacheMode = WebSettings.LOAD_NO_CACHE
+                                        useWideViewPort = true
+                                        loadWithOverviewMode = true
+                                    }
 
-                                    try { settings.useWideViewPort = true } catch (_: Throwable) {}
-                                    try { settings.loadWithOverviewMode = true } catch (_: Throwable) {}
-
+                                    // 3. Register JavaScript Bridge
                                     addJavascriptInterface(
                                         object {
                                             @JavascriptInterface
                                             fun onChartReady() {
                                                 post {
+                                                    GeoLogger.i("EChartsVisualizer", "Received onChartReady callback from JS bridge")
                                                     isChartReady = true
                                                     sendScanData(this@apply)
                                                 }
@@ -253,22 +292,45 @@ fun EChartsVisualizer(
                                         "AndroidBridge"
                                     )
 
-                                    webChromeClient = WebChromeClient()
+                                    // 4. Capture all JavaScript console messages to GeoLogger
+                                    webChromeClient = object : WebChromeClient() {
+                                        override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                                            consoleMessage?.let { msg ->
+                                                val level = when (msg.messageLevel()) {
+                                                    ConsoleMessage.MessageLevel.ERROR -> "ERROR"
+                                                    ConsoleMessage.MessageLevel.WARNING -> "WARN"
+                                                    ConsoleMessage.MessageLevel.DEBUG -> "DEBUG"
+                                                    else -> "INFO"
+                                                }
+                                                GeoLogger.logJsConsole(
+                                                    level = level,
+                                                    sourceId = msg.sourceId() ?: "index.html",
+                                                    lineNumber = msg.lineNumber(),
+                                                    message = msg.message() ?: ""
+                                                )
+                                            }
+                                            return true
+                                        }
+                                    }
+
+                                    // 5. WebView Lifecycle Client
                                     webViewClient = object : WebViewClient() {
                                         override fun onPageFinished(view: WebView?, url: String?) {
                                             super.onPageFinished(view, url)
+                                            GeoLogger.i("EChartsVisualizer", "WebView onPageFinished: $url")
                                             isChartReady = true
                                             sendScanData(this@apply)
                                         }
 
                                         override fun onReceivedError(
                                             view: WebView?,
-                                            errorCode: Int,
-                                            description: String?,
-                                            failingUrl: String?
+                                            request: WebResourceRequest?,
+                                            error: WebResourceError?
                                         ) {
-                                            super.onReceivedError(view, errorCode, description, failingUrl)
-                                            android.util.Log.w("EChartsVisualizer", "WebView error: $description")
+                                            super.onReceivedError(view, request, error)
+                                            val desc = error?.description?.toString() ?: "Unknown web error"
+                                            val failingUrl = request?.url?.toString() ?: "unknown"
+                                            GeoLogger.w("EChartsVisualizer", "WebView error at $failingUrl: $desc")
                                         }
                                     }
 
@@ -276,15 +338,18 @@ fun EChartsVisualizer(
                                     webViewInstance = this
                                 }
                             } catch (e: Throwable) {
-                                android.util.Log.e("EChartsVisualizer", "Failed to create WebView", e)
+                                GeoLogger.e("EChartsVisualizer", "Failed to create WebView", e)
                                 engineError = e.localizedMessage ?: "WebView initialization error"
                                 View(context).apply {
-                                    setBackgroundColor(android.graphics.Color.parseColor("#070A12"))
+                                    setBackgroundColor(Color.parseColor("#070A12"))
                                 }
                             }
                         },
-                        update = { view ->
-                            webViewInstance = view as? WebView
+                        update = { webView ->
+                            // Guaranteed Compose update callback on live WebView
+                            if (isChartReady) {
+                                sendScanData(webView)
+                            }
                         }
                     )
                 }
@@ -297,18 +362,13 @@ fun EChartsVisualizer(
 private fun ToggleOption(
     text: String,
     isSelected: Boolean,
-    activeColor: Color,
+    activeColor: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(if (isSelected) activeColor.copy(alpha = 0.2f) else Color.Transparent)
-            .border(
-                1.dp,
-                if (isSelected) activeColor.copy(alpha = 0.6f) else Color.Transparent,
-                RoundedCornerShape(6.dp)
-            )
+            .background(if (isSelected) activeColor.copy(alpha = 0.22f) else androidx.compose.ui.graphics.Color.Transparent)
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 4.dp),
         contentAlignment = Alignment.Center
@@ -316,8 +376,8 @@ private fun ToggleOption(
         Text(
             text = text,
             style = Typography.labelSmall,
-            color = if (isSelected) TextPrimary else TextMuted,
-            fontSize = 10.sp
+            color = if (isSelected) activeColor else TextMuted,
+            fontSize = 11.sp
         )
     }
 }

@@ -12,8 +12,8 @@ android {
         applicationId = "com.denic.geoscan"
         minSdk = 26
         targetSdk = 34
-        versionCode = 37
-        versionName = "1.8.3"
+        versionCode = 40
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>denic GeoScan 3D Visualizer</title>
+    <!-- Apache ECharts & ECharts-GL WebGL Libraries -->
+    <script src="echarts.min.js"></script>
+    <script src="echarts-gl.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -20,17 +23,31 @@
             background-color: #070A12;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
         }
-        #viewport {
+        #master-container {
             position: relative;
             width: 100%;
             height: 100%;
             background: radial-gradient(circle at 50% 45%, #0F172A 0%, #070A12 100%);
             overflow: hidden;
         }
-        #geoCanvas {
+        #echarts-container {
             position: absolute;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            z-index: 2;
+        }
+        #geoCanvas {
             width: 100%;
             height: 100%;
             display: block;
@@ -45,7 +62,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #64748B;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 1px;
             text-align: center;
             pointer-events: none;
@@ -56,8 +73,8 @@
             z-index: 10;
         }
         .pulse-ring {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             border: 2px solid #00E5FF;
             animation: pulse 2s infinite ease-out;
@@ -76,13 +93,14 @@
             color: #00FF9D;
             letter-spacing: 0.5px;
             font-family: monospace;
-            opacity: 0.85;
+            opacity: 0.9;
             pointer-events: none;
-            z-index: 5;
-            background: rgba(7, 10, 18, 0.7);
-            padding: 2px 6px;
+            z-index: 15;
+            background: rgba(7, 10, 18, 0.75);
+            padding: 3px 8px;
             border-radius: 4px;
-            border: 1px solid rgba(0, 255, 157, 0.2);
+            border: 1px solid rgba(0, 255, 157, 0.25);
+            backdrop-filter: blur(4px);
         }
         .hud-controls {
             position: absolute;
@@ -90,14 +108,14 @@
             right: 8px;
             display: flex;
             gap: 6px;
-            z-index: 5;
+            z-index: 15;
         }
         .hud-btn {
-            background: rgba(15, 23, 42, 0.75);
+            background: rgba(15, 23, 42, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: #94A3B8;
             font-size: 10px;
-            padding: 3px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             cursor: pointer;
             backdrop-filter: blur(4px);
@@ -113,7 +131,7 @@
             position: absolute;
             top: 8px;
             left: 8px;
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             border: 1px solid rgba(0, 229, 255, 0.4);
             border-radius: 6px;
             padding: 4px 8px;
@@ -122,8 +140,8 @@
             color: #F8FAFC;
             pointer-events: none;
             display: none;
-            z-index: 5;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            z-index: 15;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
         }
         .hud-legend {
             position: absolute;
@@ -135,12 +153,12 @@
             font-size: 8px;
             font-family: monospace;
             color: #94A3B8;
-            background: rgba(7, 10, 18, 0.7);
+            background: rgba(7, 10, 18, 0.75);
             padding: 3px 6px;
             border-radius: 4px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             pointer-events: none;
-            z-index: 5;
+            z-index: 15;
         }
         .legend-gradient {
             width: 60px;
@@ -151,9 +169,15 @@
     </style>
 </head>
 <body>
-    <div id="viewport">
-        <canvas id="geoCanvas"></canvas>
-        
+    <div id="master-container">
+        <!-- ECharts WebGL Viewport -->
+        <div id="echarts-container"></div>
+
+        <!-- Canvas Fail-Safe Fallback Viewport -->
+        <div id="canvas-container">
+            <canvas id="geoCanvas"></canvas>
+        </div>
+
         <div id="empty-overlay">
             <div class="pulse-ring"></div>
             <span style="font-weight: 600; color: #94A3B8;">AWAITING SPATIAL SCAN DATA...</span>
@@ -161,12 +185,13 @@
         </div>
 
         <div class="hud-controls">
+            <button class="hud-btn" id="btn-engine" onclick="toggleEngine()">ENGINE</button>
             <button class="hud-btn" id="btn-reset" onclick="resetCamera()">↺ RESET</button>
             <button class="hud-btn" id="btn-wire" onclick="toggleWireframe()">MESH</button>
         </div>
 
         <div class="hud-tooltip" id="hud-tooltip"></div>
-        <div class="hud-status" id="hud-status">ENGINE: GEOSCAN HYBRID 3D/2D • READY</div>
+        <div class="hud-status" id="hud-status">ENGINE: INITIALIZING...</div>
 
         <div class="hud-legend" id="hud-legend">
             <span>CAVITY</span>
@@ -176,14 +201,21 @@
     </div>
 
     <script>
+        // DOM Elements
+        const echartsDom = document.getElementById('echarts-container');
+        const canvasContainer = document.getElementById('canvas-container');
         const canvas = document.getElementById('geoCanvas');
         const ctx = canvas.getContext('2d');
         const overlay = document.getElementById('empty-overlay');
         const hudStatus = document.getElementById('hud-status');
         const hudTooltip = document.getElementById('hud-tooltip');
 
+        let myChart = null;
+        let useWebGL = true;
         let currentModeIs3D = true;
         let showWireframe = true;
+
+        // Dataset state
         let rawPoints = [];
         let gridMatrix = [];
         let gridWidth = 0;
@@ -191,12 +223,10 @@
         let minX = 0, maxX = 0, minY = 0, maxY = 0;
         let minZ = 0, maxZ = 0;
         let currentBaseline = 0;
-        let peakPoint = null;
-        let cavityPoint = null;
 
-        // Camera & Projection State
-        let angleX = 0.55;  // Pitch (elevation)
-        let angleY = -0.75; // Yaw (azimuth)
+        // Canvas Camera & Touch State
+        let angleX = 0.55;  // Elevation
+        let angleY = -0.75; // Azimuth
         let zoomScale = 1.0;
         let panX = 0;
         let panY = 0;
@@ -206,29 +236,89 @@
         let initialPinchDist = null;
         let hoveredCell = null;
 
+        function checkWebGLSupport() {
+            try {
+                const c = document.createElement('canvas');
+                return !!(window.WebGLRenderingContext && (c.getContext('webgl') || c.getContext('experimental-webgl')));
+            } catch (e) {
+                return false;
+            }
+        }
+
         function init() {
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            console.log("[ECharts] Initializing Visualizer Hub...");
+            const hasGL = checkWebGLSupport();
+            console.log("[ECharts] WebGL Support Detected: " + hasGL);
+
+            if (hasGL && typeof echarts !== 'undefined') {
+                try {
+                    myChart = echarts.init(echartsDom, null, { renderer: 'canvas' });
+                    useWebGL = true;
+                    echartsDom.style.display = 'block';
+                    canvasContainer.style.display = 'none';
+                    if (hudStatus) hudStatus.innerText = "ENGINE: ECHARTS GL (WEBGL) • READY";
+                    console.log("[ECharts] ECharts WebGL instance initialized successfully");
+                } catch (err) {
+                    console.warn("[ECharts] Failed to init ECharts GL, falling back to Canvas engine:", err);
+                    initCanvasFallback();
+                }
+            } else {
+                console.warn("[ECharts] WebGL not available or echarts undefined, activating Canvas engine");
+                initCanvasFallback();
+            }
+
+            window.addEventListener('resize', handleResize);
             if (window.ResizeObserver) {
                 try {
-                    const ro = new ResizeObserver(() => resizeCanvas());
+                    const ro = new ResizeObserver(() => handleResize());
                     ro.observe(document.body);
-                    ro.observe(canvas);
                 } catch (e) {}
             }
-            setupGestures();
 
-            if (rawPoints.length > 0) {
-                render();
-            }
+            setupCanvasGestures();
 
-            // Notify Android Bridge that visualizer is initialized and ready
+            // Notify Android Kotlin bridge
             if (window.AndroidBridge && window.AndroidBridge.onChartReady) {
                 try {
+                    console.log("[ECharts] Notifying AndroidBridge.onChartReady");
                     window.AndroidBridge.onChartReady();
                 } catch (e) {
-                    console.log("Bridge notification error", e);
+                    console.error("[ECharts] AndroidBridge call failed", e);
                 }
+            }
+        }
+
+        function initCanvasFallback() {
+            useWebGL = false;
+            echartsDom.style.display = 'none';
+            canvasContainer.style.display = 'block';
+            ensureCanvasDimensions();
+            if (hudStatus) hudStatus.innerText = "ENGINE: GEOSCAN HYBRID CANVAS • READY";
+        }
+
+        function toggleEngine() {
+            useWebGL = !useWebGL;
+            if (useWebGL && myChart) {
+                echartsDom.style.display = 'block';
+                canvasContainer.style.display = 'none';
+                if (hudStatus) hudStatus.innerText = "ENGINE: ECHARTS GL (WEBGL)";
+                if (rawPoints.length > 0) renderECharts();
+            } else {
+                useWebGL = false;
+                echartsDom.style.display = 'none';
+                canvasContainer.style.display = 'block';
+                ensureCanvasDimensions();
+                if (hudStatus) hudStatus.innerText = "ENGINE: GEOSCAN HYBRID CANVAS";
+                if (rawPoints.length > 0) renderCanvas();
+            }
+        }
+
+        function handleResize() {
+            if (useWebGL && myChart) {
+                try { myChart.resize(); } catch (e) {}
+            } else {
+                ensureCanvasDimensions();
+                if (rawPoints.length > 0) renderCanvas();
             }
         }
 
@@ -243,32 +333,36 @@
             }
         }
 
-        function resizeCanvas() {
-            ensureCanvasDimensions();
-            render();
-        }
-
         function resetCamera() {
-            angleX = 0.55;
-            angleY = -0.75;
-            zoomScale = 1.0;
-            panX = 0;
-            panY = 0;
-            hoveredCell = null;
-            if (hudTooltip) hudTooltip.style.display = 'none';
-            render();
+            if (useWebGL && myChart) {
+                if (rawPoints.length > 0) renderECharts();
+            } else {
+                angleX = 0.55;
+                angleY = -0.75;
+                zoomScale = 1.0;
+                panX = 0;
+                panY = 0;
+                hoveredCell = null;
+                if (hudTooltip) hudTooltip.style.display = 'none';
+                renderCanvas();
+            }
         }
 
         function toggleWireframe() {
             showWireframe = !showWireframe;
-            render();
+            if (useWebGL && myChart) {
+                if (rawPoints.length > 0) renderECharts();
+            } else {
+                renderCanvas();
+            }
         }
 
         /**
-         * Core ingestion interface called from Android Kotlin WebView
+         * Core data ingestion interface called from Kotlin via evaluateJavascript
          */
         function renderScanData(pointsJson, is3D, baseline = 0) {
-            currentModeIs3D = is3D;
+            console.log("[ECharts] Ingesting scan data: is3D=" + is3D + ", baseline=" + baseline);
+            currentModeIs3D = !!is3D;
             currentBaseline = (typeof baseline === 'number' && !isNaN(baseline)) ? baseline : 0;
 
             let points = [];
@@ -276,25 +370,39 @@
                 try {
                     points = JSON.parse(pointsJson);
                 } catch (e) {
-                    console.error("Failed to parse points JSON", e);
+                    console.error("[ECharts] Failed to parse points JSON string", e);
                     return;
                 }
-            } else {
+            } else if (Array.isArray(pointsJson)) {
                 points = pointsJson;
             }
 
             if (!points || points.length === 0) {
+                console.log("[ECharts] Ingested empty points list");
                 rawPoints = [];
                 if (overlay) overlay.style.display = 'flex';
+                if (myChart) {
+                    try { myChart.clear(); } catch (_) {}
+                }
                 clearCanvas();
-                if (hudStatus) hudStatus.innerText = "NO DATA LOADED";
+                if (hudStatus) hudStatus.innerText = "NO DATA LOADED • AWAITING SCAN";
                 return;
             }
 
             if (overlay) overlay.style.display = 'none';
             processPoints(points);
-            resizeCanvas();
-            render();
+
+            if (useWebGL && myChart) {
+                try {
+                    renderECharts();
+                } catch (err) {
+                    console.warn("[ECharts] Error during WebGL render, switching to Canvas engine:", err);
+                    initCanvasFallback();
+                    renderCanvas();
+                }
+            } else {
+                renderCanvas();
+            }
         }
 
         function processPoints(points) {
@@ -312,6 +420,8 @@
                     x = p.x; y = p.y;
                     z = (p.normalizedZ !== undefined) ? p.normalizedZ : (p.zValue !== undefined ? p.zValue : (p.z !== undefined ? p.z : 0));
                 }
+
+                if (typeof z !== 'number' || isNaN(z)) z = 0;
 
                 if (x < minX) minX = x;
                 if (x > maxX) maxX = x;
@@ -331,15 +441,12 @@
             gridWidth = maxX - minX + 1;
             gridHeight = maxY - minY + 1;
 
-            // Build dense 2D grid matrix
+            // Dense grid matrix for 2D lookups
             gridMatrix = [];
             for (let r = 0; r < gridHeight; r++) {
                 gridMatrix[r] = new Float32Array(gridWidth);
                 gridMatrix[r].fill(currentBaseline);
             }
-
-            peakPoint = null;
-            cavityPoint = null;
 
             for (let i = 0; i < rawPoints.length; i++) {
                 const p = rawPoints[i];
@@ -348,14 +455,156 @@
                 if (col >= 0 && col < gridWidth && row >= 0 && row < gridHeight) {
                     gridMatrix[row][col] = p.z;
                 }
-                if (!peakPoint || p.z > peakPoint.z) peakPoint = p;
-                if (!cavityPoint || p.z < cavityPoint.z) cavityPoint = p;
             }
 
             if (hudStatus) {
-                const modeStr = currentModeIs3D ? "3D SURFACE PLOT" : "2D CONTOUR HEATMAP";
-                hudStatus.innerText = `PTS: ${rawPoints.size || rawPoints.length} • GRID: ${gridWidth}×${gridHeight} • Z: [${minZ.toFixed(1)}, ${maxZ.toFixed(1)}] µT • ${modeStr}`;
+                const engineTag = useWebGL ? "WEBGL" : "CANVAS";
+                const modeStr = currentModeIs3D ? "3D SURFACE" : "2D HEATMAP";
+                hudStatus.innerText = `PTS: ${rawPoints.length} • GRID: ${gridWidth}×${gridHeight} • Z: [${minZ.toFixed(1)}, ${maxZ.toFixed(1)}] µT • ${engineTag} (${modeStr})`;
             }
+        }
+
+        // ==========================================
+        // Engine 1: Apache ECharts & ECharts-GL (WebGL)
+        // ==========================================
+        function renderECharts() {
+            if (!myChart) return;
+
+            const chartData = rawPoints.map(p => [p.x, p.y, p.z]);
+
+            if (currentModeIs3D) {
+                // 3D Surface / Bar3D Plot with WebGL Lighting
+                const option = {
+                    backgroundColor: 'transparent',
+                    tooltip: {
+                        formatter: function (params) {
+                            return `<b>X:</b> ${params.value[0]} | <b>Y:</b> ${params.value[1]}<br/><b>Z:</b> ${params.value[2].toFixed(2)} µT`;
+                        }
+                    },
+                    visualMap: {
+                        show: false,
+                        min: minZ,
+                        max: maxZ,
+                        dimension: 2,
+                        inRange: {
+                            color: ['#00E5FF', '#0077FF', '#00FF9D', '#FFD600', '#FF2A55']
+                        }
+                    },
+                    xAxis3D: {
+                        type: 'value',
+                        name: 'X',
+                        min: minX,
+                        max: maxX,
+                        axisLabel: { textStyle: { color: '#64748B', fontSize: 9 } },
+                        axisLine: { lineStyle: { color: '#334155' } },
+                        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                    },
+                    yAxis3D: {
+                        type: 'value',
+                        name: 'Y',
+                        min: minY,
+                        max: maxY,
+                        axisLabel: { textStyle: { color: '#64748B', fontSize: 9 } },
+                        axisLine: { lineStyle: { color: '#334155' } },
+                        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                    },
+                    zAxis3D: {
+                        type: 'value',
+                        name: 'Z (µT)',
+                        axisLabel: { textStyle: { color: '#00FF9D', fontSize: 9 } },
+                        axisLine: { lineStyle: { color: '#334155' } },
+                        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } }
+                    },
+                    grid3D: {
+                        boxWidth: 100,
+                        boxDepth: (gridHeight / Math.max(1, gridWidth)) * 100,
+                        boxHeight: 45,
+                        axisPointer: { lineStyle: { color: '#00E5FF' } },
+                        viewControl: {
+                            projection: 'perspective',
+                            autoRotate: false,
+                            beta: 40,
+                            alpha: 30,
+                            distance: 200,
+                            minDistance: 70,
+                            maxDistance: 450
+                        },
+                        light: {
+                            main: { intensity: 1.4, shadow: false },
+                            ambient: { intensity: 0.6 }
+                        }
+                    },
+                    series: [{
+                        type: 'surface',
+                        wireframe: {
+                            show: showWireframe,
+                            lineStyle: { color: 'rgba(0, 229, 255, 0.3)', width: 0.8 }
+                        },
+                        shading: 'lambert',
+                        data: chartData
+                    }]
+                };
+
+                myChart.setOption(option, true);
+            } else {
+                // 2D Contour Heatmap
+                const option = {
+                    backgroundColor: 'transparent',
+                    tooltip: {
+                        position: 'top',
+                        formatter: function (params) {
+                            return `<b>X:</b> ${params.value[0]} | <b>Y:</b> ${params.value[1]}<br/><b>Z:</b> ${params.value[2].toFixed(2)} µT`;
+                        }
+                    },
+                    grid: { top: 20, bottom: 35, left: 35, right: 35 },
+                    xAxis: {
+                        type: 'value',
+                        min: minX,
+                        max: maxX,
+                        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+                        axisLine: { lineStyle: { color: '#334155' } },
+                        axisLabel: { color: '#94A3B8', fontSize: 9 }
+                    },
+                    yAxis: {
+                        type: 'value',
+                        min: minY,
+                        max: maxY,
+                        inverse: false,
+                        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.06)' } },
+                        axisLine: { lineStyle: { color: '#334155' } },
+                        axisLabel: { color: '#94A3B8', fontSize: 9 }
+                    },
+                    visualMap: {
+                        show: false,
+                        min: minZ,
+                        max: maxZ,
+                        inRange: {
+                            color: ['#00E5FF', '#0077FF', '#00FF9D', '#FFD600', '#FF2A55']
+                        }
+                    },
+                    series: [{
+                        name: 'Magnetic Heatmap',
+                        type: 'heatmap',
+                        data: chartData,
+                        progressive: 1000,
+                        animation: false
+                    }]
+                };
+
+                myChart.setOption(option, true);
+            }
+        }
+
+        // ==========================================
+        // Engine 2: Hardware-Accelerated 2D Canvas Fallback
+        // ==========================================
+        function clearCanvas() {
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#070A12";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
         }
 
         function getColor(z, minVal, maxVal, baseVal) {
@@ -364,13 +613,11 @@
                 const t = Math.min(1.0, Math.max(0.0, (z - baseVal) / range));
                 let r, g, b;
                 if (t < 0.45) {
-                    // Green (#00FF9D) -> Amber Gold (#FFD600)
                     const k = t / 0.45;
                     r = Math.round(0 + k * 255);
                     g = Math.round(255 - k * 41);
                     b = Math.round(157 - k * 157);
                 } else {
-                    // Amber Gold (#FFD600) -> Carmine Red (#FF2A55)
                     const k = (t - 0.45) / 0.55;
                     r = 255;
                     g = Math.round(214 - k * 172);
@@ -382,13 +629,11 @@
                 const t = Math.min(1.0, Math.max(0.0, (baseVal - z) / range));
                 let r, g, b;
                 if (t < 0.45) {
-                    // Green (#00FF9D) -> Cobalt Blue (#0077FF)
                     const k = t / 0.45;
                     r = 0;
                     g = Math.round(255 - k * 136);
                     b = Math.round(157 + k * 98);
                 } else {
-                    // Cobalt Blue (#0077FF) -> Electric Cyan (#00E5FF)
                     const k = (t - 0.45) / 0.55;
                     r = 0;
                     g = Math.round(119 + k * 110);
@@ -398,472 +643,205 @@
             }
         }
 
-        function clearCanvas() {
-            ctx.save();
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "#070A12";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.restore();
+        function render3DSurface() {
+            if (useWebGL) renderECharts(); else renderCanvas3DSurface();
         }
 
-        function render() {
+        function render2DHeatmap() {
+            if (useWebGL) renderECharts(); else renderCanvas2DHeatmap();
+        }
+
+        function renderCanvas() {
             ensureCanvasDimensions();
             clearCanvas();
             if (rawPoints.length === 0 || gridWidth < 2 || gridHeight < 2) return;
 
             if (currentModeIs3D) {
-                render3DSurface();
+                renderCanvas3DSurface();
             } else {
-                render2DHeatmap();
+                renderCanvas2DHeatmap();
             }
         }
 
-        /**
-         * 3D Isometric / Perspective Surface Renderer with Shading & Wireframe
-         */
-        function render3DSurface() {
+        function renderCanvas3DSurface() {
             const dpr = window.devicePixelRatio || 1;
             const w = canvas.width / dpr;
             const h = canvas.height / dpr;
             const cx = w / 2 + panX;
             const cy = h / 2 + 10 + panY;
 
-            const maxDim = Math.max(gridWidth, gridHeight, 2);
-            const scale = (Math.min(w, h) * 0.52 / maxDim) * zoomScale;
-            const zRange = Math.max(1.0, maxZ - minZ);
-            const heightScale = ((Math.min(w, h) * 0.35) / zRange) * zoomScale;
+            ctx.save();
+            ctx.scale(dpr, dpr);
 
-            const cosY = Math.cos(angleY), sinY = Math.sin(angleY);
-            const cosX = Math.cos(angleX), sinX = Math.sin(angleX);
+            const gridSpan = Math.max(gridWidth, gridHeight);
+            const scale = Math.min(w, h) * 0.42 * zoomScale / (gridSpan * 0.55);
+            const zSpan = Math.max(0.1, maxZ - minZ);
+            const zScale = scale * 0.65;
 
-            // Project all grid vertices into 3D view space
-            const projected = [];
-            const halfW = (gridWidth - 1) / 2.0;
-            const halfH = (gridHeight - 1) / 2.0;
+            const cosA = Math.cos(angleY);
+            const sinA = Math.sin(angleY);
+            const cosB = Math.cos(angleX);
+            const sinB = Math.sin(angleX);
 
-            for (let r = 0; r < gridHeight; r++) {
-                projected[r] = [];
-                for (let c = 0; c < gridWidth; c++) {
-                    const zVal = gridMatrix[r][c];
-                    const normZ = zVal - currentBaseline;
+            function project(gx, gy, gz) {
+                const nx = (gx - (gridWidth - 1) / 2);
+                const ny = (gy - (gridHeight - 1) / 2);
+                const nz = ((gz - currentBaseline) / zSpan) * 2.0;
 
-                    // Centered grid space
-                    const gx = (c - halfW) * scale;
-                    const gy = (r - halfH) * scale;
-                    const gz = normZ * heightScale;
+                const x1 = nx * cosA - ny * sinA;
+                const y1 = nx * sinA + ny * cosA;
+                const z1 = nz;
 
-                    // Rotate Y (Azimuth)
-                    const x1 = gx * cosY - gy * sinY;
-                    const y1 = gx * sinY + gy * cosY;
+                const x2 = x1;
+                const y2 = y1 * cosB - z1 * sinB;
+                const z2 = y1 * sinB + z1 * cosB;
 
-                    // Rotate X (Pitch)
-                    const y2 = y1 * cosX - gz * sinX;
-                    const z2 = y1 * sinX + gz * cosX;
-
-                    projected[r][c] = {
-                        px: cx + x1,
-                        py: cy + y2,
-                        depth: z2,
-                        zVal: zVal,
-                        col: c + minX,
-                        row: r + minY
-                    };
-                }
+                return {
+                    x: cx + x2 * scale,
+                    y: cy - y2 * zScale,
+                    depth: z2
+                };
             }
 
-            // Draw Ground Zero Translucent Reference Grid Plane
-            drawGroundZeroPlane(cx, cy, halfW, halfH, scale, cosY, sinY, cosX, sinX);
-
-            // Assemble quads and sort by depth (Painter's Algorithm)
             const quads = [];
-            const lightVec = { x: 0.35, y: -0.4, z: 0.84 }; // Top-directional sun light
-
             for (let r = 0; r < gridHeight - 1; r++) {
                 for (let c = 0; c < gridWidth - 1; c++) {
-                    const p1 = projected[r][c];
-                    const p2 = projected[r][c + 1];
-                    const p3 = projected[r + 1][c + 1];
-                    const p4 = projected[r + 1][c];
+                    const z00 = gridMatrix[r][c];
+                    const z10 = gridMatrix[r][c + 1];
+                    const z11 = gridMatrix[r + 1][c + 1];
+                    const z01 = gridMatrix[r + 1][c];
 
-                    const avgDepth = (p1.depth + p2.depth + p3.depth + p4.depth) * 0.25;
-                    const avgZ = (p1.zVal + p2.zVal + p3.zVal + p4.zVal) * 0.25;
+                    const p00 = project(c, r, z00);
+                    const p10 = project(c + 1, r, z10);
+                    const p11 = project(c + 1, r + 1, z11);
+                    const p01 = project(c, r + 1, z01);
 
-                    // Simple face normal vector approximation for hillshading
-                    const v1x = p2.px - p1.px, v1y = p2.py - p1.py;
-                    const v2x = p4.px - p1.px, v2y = p4.py - p1.py;
-                    const crossZ = v1x * v2y - v1y * v2x;
-                    const shade = crossZ < 0 ? 0.8 : 1.1;
+                    const avgZ = (z00 + z10 + z11 + z01) * 0.25;
+                    const avgDepth = (p00.depth + p10.depth + p11.depth + p01.depth) * 0.25;
 
-                    quads.push({ p1, p2, p3, p4, avgDepth, avgZ, shade });
+                    quads.push({
+                        pts: [p00, p10, p11, p01],
+                        avgZ: avgZ,
+                        avgDepth: avgDepth,
+                        col: c,
+                        row: r
+                    });
                 }
             }
 
             quads.sort((a, b) => b.avgDepth - a.avgDepth);
 
-            // Draw shaded 3D surface quads
-            ctx.save();
-            ctx.scale(dpr, dpr);
-
             for (let i = 0; i < quads.length; i++) {
                 const q = quads[i];
+                const color = getColor(q.avgZ, minZ, maxZ, currentBaseline);
+
                 ctx.beginPath();
-                ctx.moveTo(q.p1.px, q.p1.py);
-                ctx.lineTo(q.p2.px, q.p2.py);
-                ctx.lineTo(q.p3.px, q.p3.py);
-                ctx.lineTo(q.p4.px, q.p4.py);
+                ctx.moveTo(q.pts[0].x, q.pts[0].y);
+                ctx.lineTo(q.pts[1].x, q.pts[1].y);
+                ctx.lineTo(q.pts[2].x, q.pts[2].y);
+                ctx.lineTo(q.pts[3].x, q.pts[3].y);
                 ctx.closePath();
 
-                const c = getColor(q.avgZ, minZ, maxZ, currentBaseline);
-                const litR = Math.min(255, Math.floor(c.r * q.shade));
-                const litG = Math.min(255, Math.floor(c.g * q.shade));
-                const litB = Math.min(255, Math.floor(c.b * q.shade));
-
-                ctx.fillStyle = `rgba(${litR}, ${litG}, ${litB}, 0.88)`;
+                ctx.fillStyle = `rgba(${color.r},${color.g},${color.b},0.82)`;
                 ctx.fill();
 
                 if (showWireframe) {
-                    ctx.strokeStyle = "rgba(7, 10, 18, 0.4)";
+                    ctx.strokeStyle = `rgba(${color.r},${color.g},${color.b},0.35)`;
                     ctx.lineWidth = 0.8;
                     ctx.stroke();
                 }
             }
 
-            // Draw Anomaly Target Callout Pins
-            drawAnomalyCalloutPins(projected);
-
             ctx.restore();
         }
 
-        function drawGroundZeroPlane(cx, cy, halfW, halfH, scale, cosY, sinY, cosX, sinX) {
-            const corners = [
-                { x: -halfW * scale, y: -halfH * scale },
-                { x: halfW * scale, y: -halfH * scale },
-                { x: halfW * scale, y: halfH * scale },
-                { x: -halfW * scale, y: halfH * scale }
-            ].map(pt => {
-                const x1 = pt.x * cosY - pt.y * sinY;
-                const y1 = pt.x * sinY + pt.y * cosY;
-                const y2 = y1 * cosX;
-                return { px: cx + x1, py: cy + y2 };
-            });
-
-            ctx.save();
-            const dpr = window.devicePixelRatio || 1;
-            ctx.scale(dpr, dpr);
-            ctx.beginPath();
-            ctx.moveTo(corners[0].px, corners[0].py);
-            for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].px, corners[i].py);
-            ctx.closePath();
-            ctx.fillStyle = "rgba(0, 229, 255, 0.03)";
-            ctx.fill();
-            ctx.strokeStyle = "rgba(0, 229, 255, 0.25)";
-            ctx.lineWidth = 1;
-            ctx.setLineDash([3, 3]);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.restore();
-        }
-
-        function drawAnomalyCalloutPins(projected) {
-            if (peakPoint && peakPoint.z > currentBaseline + 0.1) {
-                const r = peakPoint.y - minY;
-                const c = peakPoint.x - minX;
-                if (projected[r] && projected[r][c]) {
-                    const pt = projected[r][c];
-                    drawCalloutFlag(pt.px, pt.py, `🔴 PEAK: +${(peakPoint.z - currentBaseline).toFixed(1)} µT`, "#FF2A55");
-                }
-            }
-
-            if (cavityPoint && cavityPoint.z < currentBaseline - 0.1) {
-                const r = cavityPoint.y - minY;
-                const c = cavityPoint.x - minX;
-                if (projected[r] && projected[r][c]) {
-                    const pt = projected[r][c];
-                    drawCalloutFlag(pt.px, pt.py, `🔵 VOID: ${(cavityPoint.z - currentBaseline).toFixed(1)} µT`, "#00E5FF", true);
-                }
-            }
-        }
-
-        function drawCalloutFlag(x, y, text, color, isDown = false) {
-            const flagY = isDown ? y + 26 : y - 26;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x, flagY);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            // Pin marker dot
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-
-            // Badge
-            ctx.font = "bold 9px monospace";
-            const textW = ctx.measureText(text).width;
-            ctx.fillStyle = "rgba(7, 10, 18, 0.85)";
-            ctx.fillRect(x - textW / 2 - 4, flagY - (isDown ? 0 : 12), textW + 8, 14);
-            ctx.strokeStyle = color;
-            ctx.strokeRect(x - textW / 2 - 4, flagY - (isDown ? 0 : 12), textW + 8, 14);
-
-            ctx.fillStyle = color;
-            ctx.fillText(text, x - textW / 2, flagY - (isDown ? -10 : 2));
-        }
-
-        /**
-         * 2D Contour & Grid Heatmap Renderer with Coordinates & Inspection
-         */
-        function render2DHeatmap() {
+        function renderCanvas2DHeatmap() {
             const dpr = window.devicePixelRatio || 1;
             const w = canvas.width / dpr;
             const h = canvas.height / dpr;
 
-            const marginX = 40;
+            ctx.save();
+            ctx.scale(dpr, dpr);
+
+            const marginX = 36;
             const marginY = 32;
             const availW = w - marginX * 2;
             const availH = h - marginY * 2;
 
-            const cellSize = Math.max(4, Math.min(availW / gridWidth, availH / gridHeight) * zoomScale);
+            const cellSize = Math.max(3, Math.min(availW / gridWidth, availH / gridHeight) * zoomScale);
             const gridPixelW = gridWidth * cellSize;
             const gridPixelH = gridHeight * cellSize;
 
             const startX = (w - gridPixelW) / 2 + panX;
             const startY = (h - gridPixelH) / 2 + panY;
 
-            ctx.save();
-            ctx.scale(dpr, dpr);
-
-            // Draw Cells
             for (let r = 0; r < gridHeight; r++) {
                 for (let c = 0; c < gridWidth; c++) {
                     const z = gridMatrix[r][c];
-                    const cx = startX + c * cellSize;
-                    const cy = startY + r * cellSize;
-
                     const color = getColor(z, minZ, maxZ, currentBaseline);
+
+                    const x = startX + c * cellSize;
+                    const y = startY + r * cellSize;
+
                     ctx.fillStyle = color.str;
-                    ctx.fillRect(cx, cy, cellSize, cellSize);
+                    ctx.fillRect(x, y, cellSize, cellSize);
 
-                    if (cellSize > 18) {
-                        ctx.strokeStyle = "rgba(7, 10, 18, 0.35)";
+                    if (showWireframe && cellSize > 8) {
+                        ctx.strokeStyle = "rgba(0, 0, 0, 0.25)";
                         ctx.lineWidth = 0.5;
-                        ctx.strokeRect(cx, cy, cellSize, cellSize);
+                        ctx.strokeRect(x, y, cellSize, cellSize);
                     }
-
-                    // Value label for small grids
-                    if (cellSize >= 32) {
-                        ctx.fillStyle = "#FFFFFF";
-                        ctx.font = "8px monospace";
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "middle";
-                        ctx.fillText(z.toFixed(0), cx + cellSize / 2, cy + cellSize / 2);
-                    }
-                }
-            }
-
-            // Outer Border
-            ctx.strokeStyle = "#00E5FF";
-            ctx.lineWidth = 1.5;
-            ctx.strokeRect(startX, startY, gridPixelW, gridPixelH);
-
-            // Coordinate Axis Labels
-            ctx.font = "9px monospace";
-            ctx.fillStyle = "#94A3B8";
-            ctx.textAlign = "center";
-
-            // X Axis Labels (Columns)
-            const stepX = Math.max(1, Math.floor(gridWidth / 8));
-            for (let c = 0; c < gridWidth; c += stepX) {
-                const xVal = c + minX;
-                ctx.fillText(xVal, startX + c * cellSize + cellSize / 2, startY - 8);
-            }
-
-            // Y Axis Labels (Rows)
-            ctx.textAlign = "right";
-            const stepY = Math.max(1, Math.floor(gridHeight / 8));
-            for (let r = 0; r < gridHeight; r += stepY) {
-                const yVal = r + minY;
-                ctx.fillText(yVal, startX - 8, startY + r * cellSize + cellSize / 2 + 3);
-            }
-
-            // Highlight Target Peak & Cavity
-            if (peakPoint) {
-                const c = peakPoint.x - minX;
-                const r = peakPoint.y - minY;
-                drawTargetMarker(startX + c * cellSize + cellSize / 2, startY + r * cellSize + cellSize / 2, "#FF2A55");
-            }
-            if (cavityPoint) {
-                const c = cavityPoint.x - minX;
-                const r = cavityPoint.y - minY;
-                drawTargetMarker(startX + c * cellSize + cellSize / 2, startY + r * cellSize + cellSize / 2, "#00E5FF");
-            }
-
-            // Highlight Hovered / Inspected Cell
-            if (hoveredCell) {
-                const c = hoveredCell.col - minX;
-                const r = hoveredCell.row - minY;
-                if (c >= 0 && c < gridWidth && r >= 0 && r < gridHeight) {
-                    ctx.strokeStyle = "#FFFFFF";
-                    ctx.lineWidth = 2;
-                    ctx.strokeRect(startX + c * cellSize, startY + r * cellSize, cellSize, cellSize);
                 }
             }
 
             ctx.restore();
         }
 
-        function drawTargetMarker(x, y, color) {
-            ctx.beginPath();
-            ctx.arc(x, y, 6, 0, Math.PI * 2);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-
-            ctx.beginPath();
-            ctx.arc(x, y, 2, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-        }
-
-        /**
-         * Touch & Mouse Gestures Handling
-         */
-        function setupGestures() {
-            // Touch Events
+        function setupCanvasGestures() {
             canvas.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1) {
                     isDragging = true;
                     startTouchX = e.touches[0].clientX;
                     startTouchY = e.touches[0].clientY;
-                    handleTap(e.touches[0].clientX, e.touches[0].clientY);
                 } else if (e.touches.length === 2) {
                     isDragging = false;
-                    initialPinchDist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    initialPinchDist = Math.sqrt(dx * dx + dy * dy);
                 }
-            }, { passive: false });
+            }, { passive: true });
 
             canvas.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (isDragging && e.touches.length === 1) {
+                if (e.touches.length === 1 && isDragging) {
                     const dx = e.touches[0].clientX - startTouchX;
                     const dy = e.touches[0].clientY - startTouchY;
                     startTouchX = e.touches[0].clientX;
                     startTouchY = e.touches[0].clientY;
 
                     if (currentModeIs3D) {
-                        angleY += dx * 0.012;
-                        angleX = Math.max(-1.4, Math.min(1.4, angleX + dy * 0.012));
+                        angleY += dx * 0.01;
+                        angleX = Math.max(-0.2, Math.min(1.4, angleX + dy * 0.01));
                     } else {
                         panX += dx;
                         panY += dy;
                     }
-                    render();
+                    renderCanvas();
                 } else if (e.touches.length === 2 && initialPinchDist) {
-                    const dist = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
+                    const dx = e.touches[0].clientX - e.touches[1].clientX;
+                    const dy = e.touches[0].clientY - e.touches[1].clientY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
                     const factor = dist / initialPinchDist;
-                    zoomScale = Math.max(0.4, Math.min(3.5, zoomScale * factor));
                     initialPinchDist = dist;
-                    render();
+
+                    zoomScale = Math.max(0.4, Math.min(4.0, zoomScale * factor));
+                    renderCanvas();
                 }
-            }, { passive: false });
+            }, { passive: true });
 
-            canvas.addEventListener('touchend', (e) => {
-                if (e.touches.length === 0) {
-                    isDragging = false;
-                    initialPinchDist = null;
-                }
-            });
-
-            // Mouse Events for Simulator / Desktop
-            canvas.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                startTouchX = e.clientX;
-                startTouchY = e.clientY;
-                handleTap(e.clientX, e.clientY);
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                const dx = e.clientX - startTouchX;
-                const dy = e.clientY - startTouchY;
-                startTouchX = e.clientX;
-                startTouchY = e.clientY;
-
-                if (currentModeIs3D) {
-                    angleY += dx * 0.01;
-                    angleX = Math.max(-1.4, Math.min(1.4, angleX + dy * 0.01));
-                } else {
-                    panX += dx;
-                    panY += dy;
-                }
-                render();
-            });
-
-            window.addEventListener('mouseup', () => {
+            canvas.addEventListener('touchend', () => {
                 isDragging = false;
-            });
-
-            canvas.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                const factor = e.deltaY < 0 ? 1.1 : 0.9;
-                zoomScale = Math.max(0.4, Math.min(3.5, zoomScale * factor));
-                render();
-            }, { passive: false });
-
-            canvas.addEventListener('dblclick', resetCamera);
-        }
-
-        function handleTap(clientX, clientY) {
-            if (rawPoints.length === 0 || currentModeIs3D) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const clickX = clientX - rect.left;
-            const clickY = clientY - rect.top;
-
-            const marginX = 40;
-            const marginY = 32;
-            const availW = rect.width - marginX * 2;
-            const availH = rect.height - marginY * 2;
-
-            const cellSize = Math.max(4, Math.min(availW / gridWidth, availH / gridHeight) * zoomScale);
-            const gridPixelW = gridWidth * cellSize;
-            const gridPixelH = gridHeight * cellSize;
-
-            const startX = (rect.width - gridPixelW) / 2 + panX;
-            const startY = (rect.height - gridPixelH) / 2 + panY;
-
-            const c = Math.floor((clickX - startX) / cellSize);
-            const r = Math.floor((clickY - startY) / cellSize);
-
-            if (c >= 0 && c < gridWidth && r >= 0 && r < gridHeight) {
-                const zVal = gridMatrix[r][c];
-                const col = c + minX;
-                const row = r + minY;
-                hoveredCell = { col, row, zVal };
-
-                const deltaZ = zVal - currentBaseline;
-                let classification = "GROUND BASELINE";
-                if (deltaZ > 0.1) classification = "FERROUS METAL ANOMALY";
-                else if (deltaZ < -0.1) classification = "CAVITY / VOID ANOMALY";
-
-                if (hudTooltip) {
-                    hudTooltip.innerHTML = `<b>X:</b> ${col} | <b>Y:</b> ${row}<br/><b>Z:</b> ${zVal.toFixed(2)} µT (ΔZ: ${deltaZ >= 0 ? '+' : ''}${deltaZ.toFixed(2)})<br/><span style="color:#00FF9D;">${classification}</span>`;
-                    hudTooltip.style.display = 'block';
-                }
-                render();
-            } else {
-                hoveredCell = null;
-                if (hudTooltip) hudTooltip.style.display = 'none';
-                render();
-            }
+                initialPinchDist = null;
+            }, { passive: true });
         }
 
         window.onload = init;

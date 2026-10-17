@@ -18,9 +18,13 @@ class DenicApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Initialize persistent file logger immediately upon process startup
+        com.denic.geoscan.util.GeoLogger.init(this)
+
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             Log.e("DnicGeoScan", "FATAL UNCAUGHT CRASH INTERCEPTED", throwable)
+            com.denic.geoscan.util.GeoLogger.recordException("CRASH", throwable)
             try {
                 val sw = StringWriter()
                 throwable.printStackTrace(PrintWriter(sw))

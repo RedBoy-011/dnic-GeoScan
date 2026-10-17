@@ -132,6 +132,8 @@ class BluetoothService(
             deviceAddress
         }
 
+        com.denic.geoscan.util.GeoLogger.logBluetooth("CONNECTING", "Connecting to $deviceName ($deviceAddress)")
+
         _connectionState.value = BluetoothConnectionState.Connecting(
             deviceName = deviceName,
             deviceAddress = deviceAddress
@@ -153,6 +155,8 @@ class BluetoothService(
             outputStream = socket.outputStream
             dataParser.reset()
 
+            com.denic.geoscan.util.GeoLogger.logBluetooth("CONNECTED", "RFCOMM SPP connected to $deviceName")
+
             _connectionState.value = BluetoothConnectionState.Connected(
                 deviceName = deviceName,
                 deviceAddress = deviceAddress
@@ -164,6 +168,7 @@ class BluetoothService(
         } catch (e: Exception) {
             disconnect()
             val errorMsg = e.localizedMessage ?: "Failed to connect to $deviceName"
+            com.denic.geoscan.util.GeoLogger.logBluetooth("ERROR", "Connection failed for $deviceName: $errorMsg")
             _connectionState.value = BluetoothConnectionState.Error(errorMsg)
             Result.failure(e)
         }
@@ -243,6 +248,7 @@ class BluetoothService(
         activeSocket = null
 
         dataParser.reset()
+        com.denic.geoscan.util.GeoLogger.logBluetooth("DISCONNECTED", "Bluetooth socket closed safely")
         _connectionState.value = BluetoothConnectionState.Disconnected
     }
 }

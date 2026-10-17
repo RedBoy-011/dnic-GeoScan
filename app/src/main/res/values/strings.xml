@@ -2,9 +2,12 @@
 <resources>
     <string name="app_name">Dnic-GeoScan</string>
     <string name="brand_subtitle">Digital Electronic 3D Visualizer</string>
-    <string name="nav_remote_scan">Remote Scan</string>
+    <string name="nav_hub">Hub</string>
     <string name="nav_local_analysis">Local Analysis</string>
+    <string name="nav_remote_scan">Remote Scan</string>
+    <string name="nav_settings">Settings</string>
     <string name="bluetooth_status_disconnected">Disconnected</string>
     <string name="bluetooth_status_connected">Connected</string>
     <string name="bluetooth_status_scanning">Scanning...</string>
+    <string name="share_log_title">Share Dnic-GeoScan Diagnostic Log</string>
 </resources>

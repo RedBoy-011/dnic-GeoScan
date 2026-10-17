@@ -59,6 +59,7 @@ import com.denic.geoscan.R
 import com.denic.geoscan.ui.screens.hub.HubScreen
 import com.denic.geoscan.ui.screens.local.LocalAnalysisScreen
 import com.denic.geoscan.ui.screens.remote.RemoteScanScreen
+import com.denic.geoscan.ui.screens.settings.SettingsScreen
 import com.denic.geoscan.ui.theme.DarkBase
 import com.denic.geoscan.ui.theme.DarkSurface
 import com.denic.geoscan.ui.theme.GlassBackground
@@ -66,6 +67,7 @@ import com.denic.geoscan.ui.theme.GlassBorder
 import com.denic.geoscan.ui.theme.NeonCyan
 import com.denic.geoscan.ui.theme.NeonGreen
 import com.denic.geoscan.ui.theme.NeonRed
+import com.denic.geoscan.ui.theme.NeonYellow
 import com.denic.geoscan.ui.theme.TextMuted
 import com.denic.geoscan.ui.theme.TextPrimary
 import com.denic.geoscan.ui.theme.TextSecondary
@@ -273,6 +275,17 @@ fun AppNavigation(
                     }
                 )
             }
+            composable(Screen.Settings.route) {
+                SettingsScreen(
+                    onSelectLanguage = { lang ->
+                        currentLanguage = lang
+                        prefs.edit()
+                            .putString("app_language", lang.code)
+                            .putBoolean("language_selected", true)
+                            .apply()
+                    }
+                )
+            }
         }
     }
 }
@@ -396,6 +409,28 @@ private fun TopBrandingBar(
                             fontSize = 11.sp
                         )
                     }
+
+                    val isSettingsActive = currentRoute.startsWith(Screen.Settings.route)
+                    // Settings Switch Pill
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(if (isSettingsActive) NeonYellow.copy(alpha = 0.2f) else DarkSurface)
+                            .border(
+                                1.dp,
+                                if (isSettingsActive) NeonYellow else GlassBorder,
+                                RoundedCornerShape(8.dp)
+                            )
+                            .clickable { onNavigate(Screen.Settings) }
+                            .padding(horizontal = 8.dp, vertical = 5.dp)
+                    ) {
+                        Text(
+                            text = strings.pillSettings,
+                            style = Typography.labelSmall,
+                            color = if (isSettingsActive) NeonYellow else TextSecondary,
+                            fontSize = 11.sp
+                        )
+                    }
                 }
             }
         }
@@ -447,10 +482,10 @@ private fun GlassmorphicBottomNavBar(
         ) {
             val navScreens = try {
                 Screen.items.filterNotNull().ifEmpty {
-                    listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan)
+                    listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan, Screen.Settings)
                 }
             } catch (_: Throwable) {
-                listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan)
+                listOf(Screen.Hub, Screen.LocalAnalysis, Screen.RemoteScan, Screen.Settings)
             }
 
             navScreens.forEach { screen ->
@@ -460,14 +495,14 @@ private fun GlassmorphicBottomNavBar(
                     Screen.Hub -> NeonCyan
                     Screen.LocalAnalysis -> NeonGreen
                     Screen.RemoteScan -> NeonCyan
-                    else -> NeonCyan
+                    Screen.Settings -> NeonYellow
                 }
 
                 val title = when (screen) {
                     Screen.Hub -> strings.navHub
                     Screen.LocalAnalysis -> strings.navLocalAnalysis
                     Screen.RemoteScan -> strings.navRemoteScan
-                    else -> screen.title
+                    Screen.Settings -> strings.navSettings
                 }
 
                 Box(

@@ -39,13 +39,13 @@ jobs:
       - name: Prepare Release APK
         run: |
           mkdir -p release
-          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v1.8.3.apk
+          cp app/build/outputs/apk/release/app-release.apk release/Dnic-GeoScan-v2.0.0.apk
 
       - name: Verify Signed APK Integrity
         run: |
           echo "Verifying APK binary..."
-          ls -lh release/Dnic-GeoScan-v1.8.3.apk
-          test -f release/Dnic-GeoScan-v1.8.3.apk
+          ls -lh release/Dnic-GeoScan-v2.0.0.apk
+          test -f release/Dnic-GeoScan-v2.0.0.apk
 
       - name: Android Emulator Automated Installation & Launch Test
         uses: reactivecircus/android-emulator-runner@v2
@@ -59,7 +59,7 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           script: |
             echo "=== Step 1: Installing Signed Release APK on Android 12 Emulator ==="
-            adb install -r release/Dnic-GeoScan-v1.8.3.apk
+            adb install -r release/Dnic-GeoScan-v2.0.0.apk
             
             echo "=== Step 2: Launching MainActivity in Smartphone Mode ==="
             adb shell am start -W -n com.denic.geoscan/.MainActivity
@@ -96,8 +96,8 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Dnic-GeoScan-v1.8.3-apk
-          path: release/Dnic-GeoScan-v1.8.3.apk
+          name: Dnic-GeoScan-v2.0.0-apk
+          path: release/Dnic-GeoScan-v2.0.0.apk
           retention-days: 60
 
       - name: Create GitHub Release
@@ -105,34 +105,44 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v1.8.3
-          name: "Dnic-GeoScan v1.8.3 - Top-Priority 3D Surface Display, Bulletproof File Parser & One-Click Demo Suite"
+          tag_name: v2.0.0
+          name: "Dnic-GeoScan v2.0.0 - Architectural Overhaul, WebGL 3D Engine & Persistent Debug Logger"
           body: |
-            ## 📊 Dnic-GeoScan v1.8.2 - Fail-Safe 3D/2D Visualizer Engine & Multi-Depth Mine Simulation
+            ## 📊 Dnic-GeoScan v2.0.0 - Master Architectural Overhaul & WebGL 3D Engine
 
-            نسخه رسمی ۱.۸.۲ اپلیکیشن تخصصی اسکنر ژئوفیزیک و گرادیومتر مغناطیسی **Dnic-GeoScan**.
+            نسخه بزرگ و رسمی ۲.۰.۰ اپلیکیشن تخصصی اسکنر ژئوفیزیک و گرادیومتر مغناطیسی **Dnic-GeoScan**.
             
-            ### ✨ تغییرات و بهبودهای اساسی این نسخه:
-            - **رفع اساسی باگ صفحه سیاه در تصویرساز ۳بعدی و ۲بعدی (3D/2D Visualizer):**
-              - جایگزینی و تقویت کامل موتور رندر با یک موتور دوگانه فوق‌سریع Canvas/GL ژئوفیزیکی.
-              - رندر بدون افت فریم (60 FPS) روی تمامی گوشی‌های اندروید (از جمله Samsung S24 Ultra و اندروید ۱۴) بدون وابستگی به باگ‌های WebGL یا درایور گرافیکی.
-              - قابلیت چرخش ۳۶۰ درجه ۳بعدی با کشیدن انگشت (Touch Drag) و زوم دوانگشتی (Pinch to Zoom).
-              - نمایش پلات حرارتی ۲بعدی (2D Heatmap) با مختصات محورها و قابلیت لمس سلول‌ها جهت بازرسی مقادیر میدان و ناهنجاری.
-              - افزوده شدن صفحه مرجع میانه زمین (Ground Zero Plane) به صورت شفاف و خطوط ۳بعدی مشبک با سایه‌پردازی ارتفاعی (Hillshading).
-            - **شبیه‌سازی چندعمقی معدن و فلز زیرزمینی (Multi-Depth Mine & Metal Simulation):**
-              - اضافه شدن کلید تک‌لمسی شبیه‌سازی معدن چندلایه (۱۵×۱۵) با رگه مگنتیت عمیق (~۴.۵ متر)، هدف فلزی پرعیار کم‌عمق (~۱.۲ متر) و تونل/حفره زیرزمینی (~۳.۰ متر).
-              - اضافه شدن فایل‌های دمو `demo_mine_multidepth.csv` و `demo_mine_multidepth.v3d`.
-            - **جلوگیری از قطع لمس در هنگام اسکرول صفحه:**
-              - پیاده‌سازی `requestDisallowInterceptTouchEvent` برای تضمین کنترل نرم و بدون لکنت ۳بعدی در موبایل.
+            ### ✨ تغییرات و ویژگی‌های اساسی این نسخه (v2.0.0):
+            1. **رفع اساسی باگ صفحه ۳بعدی (WebGL 3D Surface & 2D Heatmap Engine):**
+               - پشتیبانی کامل از موتور ECharts-GL با شتاب سخت‌افزاری (`LAYER_TYPE_HARDWARE`) و `domStorageEnabled`.
+               - بارگذاری پایدار اسکریپت‌های کتابخانه `echarts.min.js` و `echarts-gl.min.js` به صورت آفلاین محلی.
+               - پیاده‌سازی مکانیزم پشتیبان دوگانه خودکار (Fail-safe Fallback Canvas) جهت اطمینان از نمایش بی‌نقص گرافیک در تمامی پردازنده‌ها و گوشی‌ها.
+               - همگام‌سازی کامل چرخه حیات Jetpack Compose و WebView از طریق متد `update` جهت تزریق آنی داده‌ها.
+               - اعتبارسنجی و ایمن‌سازی دیتای JSON در برابر مقادیر `NaN` و `Infinity`.
+            2. **سیستم ثبت لاگ پیشرفته و خطاناپذیر (Persistent GeoLogger):**
+               - ثبت خودکار کلیه وقایع، خطاهای سیستمی و کرش‌ها در حافظه عمومی دستگاه (`Downloads/denic_debug_log.txt`).
+               - رهگیری لاگ‌های کنسول جاوااسکریپت و وب‌ویو از طریق `WebChromeClient`.
+               - ثبت دقیق وضعیت‌ها و خطاهای اتصال بلوتوث SPP.
+               - اضافه شدن دکمه‌های «اشتراک‌گذاری لاگ» و «ذخیره لاگ در دانلودها» و نمایش زنده خطوط لاگ در منوی تنظیمات.
+            3. **ارتقای ناوبری و هاب اصلی برنامه (Dashboard Hub Navigation):**
+               - منوی اصلی با سه گزینه شفاف:
+                 - گزینه الف (Option A): آنالیز محلی فایل‌ها (Local Analysis) با پشتیبانی از فرمت‌های CSV، TXT و V3D.
+                 - گزینه ب (Option B): اسکن بی‌سیم زنده با بلوتوث SPP (Remote Scan).
+                 - گزینه ج (Option C): تنظیمات و عیب‌یابی (Settings).
+               - پشتیبانی کامل دو زبانه (فارسی و انگلیسی) با چیدمان راست به چپ (RTL) و چپ به راست (LTR) بومی اندروید.
+            4. **طراحی مدرن Glassmorphism و تجربه کاربری ۲۰۲۶:**
+               - پالت رنگی تیره با افکت‌های شیشه‌ای و رنگ‌های نئونی اختصاصی (Emerald Green مبنا، Cyan حفرات، Crimson اهداف فلزی).
+               - تنظیمات بازخورد صوتی تله‌متری (صدای متناسب با مقدار Z، بیپ ساده یا بی‌صدا).
+               - نمایش مشخصات سخت‌افزاری و وضعیت بلادرنگ سیستم.
 
             ### 📥 فایل نصبی و فایل‌های دمو:
-            - **[دانلود مستقیم Dnic-GeoScan-v1.8.3.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/Dnic-GeoScan-v1.8.3.apk)**
-            - **[دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.csv)**
-            - **[دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_mine_multidepth.v3d)**
-            - **[دانلود دمو CSV ۱۰×۱۰ (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.csv)**
-            - **[دانلود دمو V3D ۱۰×۱۰ (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v1.8.3/demo_10x10_anomaly.v3d)**
+            - **[دانلود مستقیم Dnic-GeoScan-v2.0.0.apk](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/Dnic-GeoScan-v2.0.0.apk)**
+            - **[دانلود دمو معدن چندعمقی CSV (demo_mine_multidepth.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.csv)**
+            - **[دانلود دمو معدن چندعمقی V3D (demo_mine_multidepth.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_mine_multidepth.v3d)**
+            - **[دانلود دمو CSV ۱۰×۱۰ (demo_10x10_anomaly.csv)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.csv)**
+            - **[دانلود دمو V3D ۱۰×۱۰ (demo_10x10_anomaly.v3d)](https://github.com/RedBoy-011/dnic-GeoScan/releases/download/v2.0.0/demo_10x10_anomaly.v3d)**
           files: |
-            release/Dnic-GeoScan-v1.8.3.apk
+            release/Dnic-GeoScan-v2.0.0.apk
             demo_scans/demo_mine_multidepth.csv
             demo_scans/demo_mine_multidepth.v3d
             demo_scans/demo_10x10_anomaly.csv

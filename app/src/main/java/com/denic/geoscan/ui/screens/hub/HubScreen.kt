@@ -34,6 +34,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Hub
 import androidx.compose.material.icons.outlined.Sensors
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material.icons.outlined.ViewInAr
 import androidx.compose.material3.ButtonDefaults
@@ -151,6 +152,9 @@ fun HubScreen(
                         )
                     }
                 }
+                SettingsHeroCard(
+                    onClick = { onNavigateTo(Screen.Settings) }
+                )
             } else {
                 // Single Column Stack for Smartphones
                 LocalAnalysisHeroCard(
@@ -160,6 +164,10 @@ fun HubScreen(
 
                 RemoteScanHeroCard(
                     onClick = { onNavigateTo(Screen.RemoteScan) }
+                )
+
+                SettingsHeroCard(
+                    onClick = { onNavigateTo(Screen.Settings) }
                 )
             }
 
@@ -722,6 +730,133 @@ private fun RemoteScanHeroCard(onClick: () -> Unit) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = strings.hubConnectHardwareBtn,
+                    style = Typography.labelLarge,
+                    fontSize = 14.sp
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    imageVector = Icons.Outlined.ArrowForward,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun SettingsHeroCard(
+    onClick: () -> Unit
+) {
+    val strings = LocalAppStrings.current
+    GlassmorphicCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        borderColor = NeonYellow.copy(alpha = 0.5f)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(42.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(NeonYellow.copy(alpha = 0.15f))
+                            .border(1.dp, NeonYellow.copy(alpha = 0.6f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Settings,
+                            contentDescription = "Settings",
+                            tint = NeonYellow,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "OPTION C • ",
+                                style = Typography.labelSmall,
+                                color = NeonYellow,
+                                fontSize = 10.sp,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                            )
+                            Text(
+                                text = strings.settingsTitle,
+                                style = Typography.titleLarge,
+                                color = TextPrimary
+                            )
+                        }
+                        Text(
+                            text = strings.settingsSubtitle,
+                            style = Typography.labelSmall,
+                            color = TextMuted
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(NeonYellow.copy(alpha = 0.12f))
+                        .border(1.dp, NeonYellow.copy(alpha = 0.5f), RoundedCornerShape(6.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "DIAGNOSTICS",
+                        style = Typography.labelSmall,
+                        color = NeonYellow,
+                        fontSize = 10.sp
+                    )
+                }
+            }
+
+            Text(
+                text = strings.settingsDebugLogDesc,
+                style = Typography.bodyMedium,
+                color = TextSecondary,
+                lineHeight = 20.sp
+            )
+
+            // Feature Highlights Pills
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                FeaturePill(text = "denic_debug_log.txt", color = NeonYellow)
+                FeaturePill(text = "Bilingual i18n", color = NeonCyan)
+                FeaturePill(text = "Live Log Stream", color = NeonGreen)
+            }
+
+            // Launch Action Button
+            OutlinedButton(
+                onClick = onClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = NeonYellow
+                ),
+                border = androidx.compose.foundation.BorderStroke(1.dp, NeonYellow.copy(alpha = 0.6f))
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Settings,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = strings.settingsTitle,
                     style = Typography.labelLarge,
                     fontSize = 14.sp
                 )

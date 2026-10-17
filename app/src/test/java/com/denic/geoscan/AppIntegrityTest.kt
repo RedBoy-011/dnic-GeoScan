@@ -108,7 +108,7 @@ class AppIntegrityTest {
     fun testNavigationScreensNonNullAndValid() {
         val screens = com.denic.geoscan.ui.navigation.Screen.items
         assertNotNull("Screen.items must not be null", screens)
-        assertEquals("Screen.items must contain exactly 3 items", 3, screens.size)
+        assertEquals("Screen.items must contain exactly 4 items", 4, screens.size)
         for (screen in screens) {
             assertNotNull("Screen item must not be null", screen)
             assertNotNull("Screen route must not be null", screen.route)
@@ -351,6 +351,22 @@ class AppIntegrityTest {
         assertTrue("Must contain AndroidBridge.onChartReady", content.contains("AndroidBridge.onChartReady"))
         assertTrue("Must support 3D surface projection", content.contains("render3DSurface"))
         assertTrue("Must support 2D heatmap", content.contains("render2DHeatmap"))
+        assertTrue("Must include echarts.min.js script tag", content.contains("echarts.min.js"))
+        assertTrue("Must include echarts-gl.min.js script tag", content.contains("echarts-gl.min.js"))
+    }
+
+    @Test
+    fun testGeoLoggerSubsystem() {
+        assertNotNull(com.denic.geoscan.util.GeoLogger)
+        com.denic.geoscan.util.GeoLogger.d("UnitTest", "Test debug message")
+        com.denic.geoscan.util.GeoLogger.i("UnitTest", "Test info message")
+        com.denic.geoscan.util.GeoLogger.logJsConsole("ERROR", "index.html", 42, "Simulated WebGL error")
+        com.denic.geoscan.util.GeoLogger.logBluetooth("CONNECTED", "HC-05 paired")
+
+        val recent = com.denic.geoscan.util.GeoLogger.recentLogs.value
+        assertTrue("recentLogs should contain logged events", recent.isNotEmpty())
+        assertTrue("recentLogs should contain JS message", recent.any { it.contains("Simulated WebGL error") })
+        assertTrue("recentLogs should contain Bluetooth message", recent.any { it.contains("HC-05 paired") })
     }
 }
 
